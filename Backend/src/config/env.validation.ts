@@ -28,9 +28,10 @@ export const EnvSchema = z.object({
   EMAIL_VERIFICATION_TTL_MIN: z.coerce.number().int().positive().default(15),
   PASSWORD_RESET_TTL_MIN: z.coerce.number().int().positive().default(30),
 
-  // FastF1 data service (private Railway URL). Optional so the API still boots
-  // before the data service is wired up; calls fail loudly if it's unset.
-  DATA_SERVICE_URL: z.string().url().optional(),
+  // FastF1 data service (private Railway URL). Kept loose (not .url()) so a
+  // misconfigured value can't crash API startup — the F1 client validates and
+  // fails loudly per request instead.
+  DATA_SERVICE_URL: z.string().optional(),
   DATA_SERVICE_INTERNAL_KEY: z.string().optional(),
   DATA_SERVICE_TIMEOUT_MS: z.coerce.number().int().positive().default(30000),
 
