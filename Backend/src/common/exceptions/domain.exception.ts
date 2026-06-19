@@ -67,3 +67,9 @@ export class InvalidRefreshTokenException extends DomainException {
     super('Refresh token is invalid or has expired.', 'INVALID_REFRESH_TOKEN', 401);
   }
 }
+
+export class DataServiceUnavailableException extends DomainException {
+  constructor(message = 'The F1 data service is unavailable.') {
+    super(message, 'DATA_SERVICE_UNAVAILABLE', 502);
+  }
+}

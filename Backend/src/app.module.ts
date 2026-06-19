@@ -14,6 +14,7 @@ import { MailModule } from './mail/mail.module';
 import { HealthModule } from './health/health.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
+import { F1Module } from './modules/f1/f1.module';
 
 const THROTTLE_TTL_MS = 60_000;
 const THROTTLE_LIMIT = 100;
@@ -36,6 +37,7 @@ const THROTTLE_LIMIT = 100;
     HealthModule,
     UsersModule,
     AuthModule,
+    F1Module,
   ],
   providers: [
     { provide: APP_FILTER, useClass: GlobalExceptionFilter },

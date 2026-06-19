@@ -28,6 +28,12 @@ export const EnvSchema = z.object({
   EMAIL_VERIFICATION_TTL_MIN: z.coerce.number().int().positive().default(15),
   PASSWORD_RESET_TTL_MIN: z.coerce.number().int().positive().default(30),
 
+  // FastF1 data service (private Railway URL). Optional so the API still boots
+  // before the data service is wired up; calls fail loudly if it's unset.
+  DATA_SERVICE_URL: z.string().url().optional(),
+  DATA_SERVICE_INTERNAL_KEY: z.string().optional(),
+  DATA_SERVICE_TIMEOUT_MS: z.coerce.number().int().positive().default(30000),
+
   // Optional cookie domain for the refresh-token cookie (e.g. .formula-stats.app).
   COOKIE_DOMAIN: z.string().optional(),
 });
