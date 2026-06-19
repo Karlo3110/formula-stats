@@ -1,5 +1,7 @@
 import { Controller, Get, Param, ParseIntPipe } from '@nestjs/common';
 
+import { Public } from '@/common/decorators/public.decorator';
+
 import { F1Service } from './f1.service';
 import type {
   SeasonScheduleDto,
@@ -7,9 +9,11 @@ import type {
 } from './dto/f1-response.dto';
 
 /**
- * F1 read endpoints. Protected by the global JwtAuthGuard (authenticated users
- * only). Data is fetched from the FastF1 data service and cached.
+ * F1 read endpoints. Public — F1 data is not user-specific, so the anonymous
+ * dashboard can read it. The upstream data service stays protected by the
+ * internal key. Results are fetched from the FastF1 data service and cached.
  */
+@Public()
 @Controller('f1')
 export class F1Controller {
   constructor(private readonly f1Service: F1Service) {}

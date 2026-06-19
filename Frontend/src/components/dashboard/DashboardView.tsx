@@ -3,12 +3,16 @@ import type { JSX } from 'react';
 import { MOCK_TELEMETRY } from '@/lib/mock/telemetry';
 
 import { DriverCard } from './DriverCard';
-import { LeaderboardPanel } from './LeaderboardPanel';
 import { PowerUnitPanel } from './PowerUnitPanel';
 import { RaceStatusPanel } from './RaceStatusPanel';
+import { SessionResultsPanel } from './SessionResultsPanel';
 import { TirePanel } from './TirePanel';
 import { TrackView } from './TrackView';
 import { WeatherPanel } from './WeatherPanel';
+
+const LATEST_SEASON = 2024;
+const FEATURED_ROUND = 1;
+const FEATURED_SESSION = 'R';
 
 export function DashboardView(): JSX.Element {
   const data = MOCK_TELEMETRY;
@@ -35,7 +39,11 @@ export function DashboardView(): JSX.Element {
 
         <div className="flex flex-col gap-4">
           <TirePanel tires={data.tires} />
-          <LeaderboardPanel cars={data.cars} />
+          <SessionResultsPanel
+            season={LATEST_SEASON}
+            round={FEATURED_ROUND}
+            session={FEATURED_SESSION}
+          />
         </div>
       </div>
     </div>
