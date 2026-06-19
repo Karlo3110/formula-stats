@@ -1,31 +1,43 @@
-'use client';
-
 import type { JSX } from 'react';
 
-import { Card } from '@/components/ui/Card';
-import { Heading, Text } from '@/components/ui/Typography';
-import { useAuthStore } from '@/stores/use-auth-store';
+import { MOCK_TELEMETRY } from '@/lib/mock/telemetry';
+
+import { DriverCard } from './DriverCard';
+import { LeaderboardPanel } from './LeaderboardPanel';
+import { PowerUnitPanel } from './PowerUnitPanel';
+import { RaceStatusPanel } from './RaceStatusPanel';
+import { TirePanel } from './TirePanel';
+import { TrackView } from './TrackView';
+import { WeatherPanel } from './WeatherPanel';
 
 export function DashboardView(): JSX.Element {
-  const user = useAuthStore((state) => state.user);
+  const data = MOCK_TELEMETRY;
 
   return (
-    <div className="mx-auto flex max-w-4xl flex-col gap-6">
-      <div className="flex flex-col gap-1">
-        <Heading level={1} display>
-          Dashboard
-        </Heading>
-        <Text variant="muted">
-          Welcome back{user ? `, ${user.displayName}` : ''}.
-        </Text>
+    <div className="mx-auto flex max-w-[100rem] flex-col gap-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <p className="rounded-full border border-warning/40 bg-warning/10 px-3 py-1 text-xs uppercase tracking-wider text-warning">
+          Demo data — live telemetry coming soon
+        </p>
+        <DriverCard driver={data.driver} />
       </div>
 
-      <Card>
-        <Heading level={4}>Formula 1 data</Heading>
-        <Text variant="muted" className="mt-2">
-          Session, lap, and telemetry stats from FastF1 will appear here.
-        </Text>
-      </Card>
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-4">
+        <div className="flex flex-col gap-4">
+          <RaceStatusPanel race={data.race} />
+          <WeatherPanel weather={data.weather} />
+        </div>
+
+        <div className="flex flex-col gap-4 lg:col-span-2">
+          <TrackView circuit={data.race.circuit} cars={data.cars} />
+          <PowerUnitPanel powerUnit={data.powerUnit} />
+        </div>
+
+        <div className="flex flex-col gap-4">
+          <TirePanel tires={data.tires} />
+          <LeaderboardPanel cars={data.cars} />
+        </div>
+      </div>
     </div>
   );
 }

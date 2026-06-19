@@ -2,29 +2,31 @@
 
 /*
  * Design tokens — single source of truth for color, type, radius.
- * Dark esports aesthetic with a blue accent (.claude/CLAUDE.md, design-system.md).
- * Components reference semantic tokens (bg-background, text-muted), never literals.
+ * Dark telemetry aesthetic with a Petronas-style teal accent
+ * (.claude/CLAUDE.md, design-system.md). Components reference semantic tokens
+ * (bg-background, text-muted, text-primary), never literals.
  */
 @theme {
   --font-sans: var(--font-inter), system-ui, sans-serif;
   --font-display: var(--font-bebas), var(--font-inter), sans-serif;
 
-  --color-background: oklch(0.16 0.02 260);
-  --color-surface: oklch(0.21 0.025 260);
-  --color-elevated: oklch(0.25 0.03 260);
-  --color-border: oklch(0.32 0.02 260);
-  --color-input: oklch(0.3 0.02 260);
+  --color-background: oklch(0.16 0.012 185);
+  --color-surface: oklch(0.2 0.016 185);
+  --color-elevated: oklch(0.24 0.02 185);
+  --color-border: oklch(0.3 0.02 185);
+  --color-input: oklch(0.28 0.02 185);
 
-  --color-foreground: oklch(0.97 0.01 260);
-  --color-muted: oklch(0.72 0.02 260);
-  --color-heading: oklch(0.99 0.005 260);
+  --color-foreground: oklch(0.97 0.01 185);
+  --color-muted: oklch(0.72 0.02 185);
+  --color-heading: oklch(0.99 0.005 185);
 
-  --color-primary: oklch(0.623 0.214 259);
-  --color-primary-foreground: oklch(0.16 0.02 260);
-  --color-destructive: oklch(0.58 0.22 25);
+  --color-primary: oklch(0.78 0.12 184);
+  --color-primary-foreground: oklch(0.16 0.012 185);
+  --color-destructive: oklch(0.62 0.21 25);
   --color-destructive-foreground: oklch(0.98 0 0);
-  --color-success: oklch(0.72 0.17 150);
-  --color-ring: oklch(0.623 0.214 259);
+  --color-success: oklch(0.78 0.15 160);
+  --color-warning: oklch(0.82 0.15 80);
+  --color-ring: oklch(0.78 0.12 184);
 
   --radius-sm: 0.375rem;
   --radius-md: 0.5rem;

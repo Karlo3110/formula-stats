@@ -26,7 +26,7 @@ export function LoginForm(): JSX.Element {
 
   const onSubmit = handleSubmit((values) => {
     login.mutate(values, {
-      onSuccess: () => router.push('/dashboard'),
+      onSuccess: () => router.push('/'),
       onError: (error) => {
         if (getApiErrorCode(error) === ACCOUNT_NOT_ACTIVE) {
           const email = encodeURIComponent(getValues('email'));
