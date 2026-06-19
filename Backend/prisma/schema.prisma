@@ -1,0 +1,47 @@
+// Prisma schema — Formula Stats backend.
+// Conventions follow .claude/rules/database/database-standards.md:
+// snake_case tables/columns, UUID v7 primary keys, timestamptz, soft delete.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// Account lifecycle. Transitions are enforced in the service layer, never by clients.
+/// PENDING_VERIFICATION -> ACTIVE -> (SUSPENDED | LOCKED | DEACTIVATED)
+model User {
+  id              String    @id @default(uuid(7)) @db.Uuid
+  email           String    @unique
+  passwordHash    String    @map("password_hash")
+  displayName     String    @map("display_name")
+  role            String    @default("MEMBER")
+  status          String    @default("PENDING_VERIFICATION")
+  emailVerifiedAt DateTime? @map("email_verified_at") @db.Timestamptz
+  lastLoginAt     DateTime? @map("last_login_at") @db.Timestamptz
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt       DateTime? @map("deleted_at") @db.Timestamptz
+
+  refreshTokens RefreshToken[]
+
+  @@map("users")
+}
+
+model RefreshToken {
+  id        String    @id @default(uuid(7)) @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  tokenHash String    @map("token_hash")
+  expiresAt DateTime  @map("expires_at") @db.Timestamptz
+  revokedAt DateTime? @map("revoked_at") @db.Timestamptz
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("refresh_tokens")
+}

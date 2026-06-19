@@ -1,0 +1,36 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Builds
+dist/
+.next/
+out/
+build/
+
+# Env files (only .env.example is committed) — match at any depth
+**/env/.env
+**/env/.env.*
+!**/env/.env.example
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.fastf1-cache/
+
+# Logs / OS
+*.log
+.DS_Store
+Thumbs.db
+
+# Prisma
+Backend/prisma/*.db
+
+# IDE
+.idea/
+*.swp
