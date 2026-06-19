@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-const MIN_PASSWORD_LENGTH = 12;
+const MIN_PASSWORD_LENGTH = 8;
 const MAX_PASSWORD_LENGTH = 128;
 
 export const passwordSchema = z
