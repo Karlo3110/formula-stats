@@ -29,20 +29,25 @@ function withDenseArcLengths(
   return curve;
 }
 
-const APEX_SAMPLES = 400;
-const APEX_MIN_GAP = 0.045;
+const CORNER_SAMPLES = 400;
+const CORNER_MIN_GAP = 0.05;
 
-/** Detects corner apexes as local maxima of the track's turn angle. */
-export function findApexes(curve: THREE.CatmullRomCurve3): THREE.Vector3[] {
+export interface TrackCorner {
+  position: THREE.Vector3;
+  tangent: THREE.Vector3;
+}
+
+/** Detects corners (local maxima of turn angle) with the heading at each. */
+export function findCorners(curve: THREE.CatmullRomCurve3): TrackCorner[] {
   const points: THREE.Vector3[] = [];
-  for (let i = 0; i < APEX_SAMPLES; i += 1) {
-    points.push(curve.getPointAt(i / APEX_SAMPLES));
+  for (let i = 0; i < CORNER_SAMPLES; i += 1) {
+    points.push(curve.getPointAt(i / CORNER_SAMPLES));
   }
 
   const angles = points.map((_, i) => {
-    const a = points[(i - 1 + APEX_SAMPLES) % APEX_SAMPLES];
+    const a = points[(i - 1 + CORNER_SAMPLES) % CORNER_SAMPLES];
     const b = points[i];
-    const c = points[(i + 1) % APEX_SAMPLES];
+    const c = points[(i + 1) % CORNER_SAMPLES];
     if (!a || !b || !c) return 0;
     const v1x = b.x - a.x;
     const v1z = b.z - a.z;
@@ -52,24 +57,29 @@ export function findApexes(curve: THREE.CatmullRomCurve3): THREE.Vector3[] {
   });
 
   const mean = angles.reduce((sum, v) => sum + v, 0) / angles.length;
-  const threshold = mean * 1.8;
+  const threshold = mean * 1.6;
 
-  const apexes: THREE.Vector3[] = [];
+  const corners: TrackCorner[] = [];
   let lastT = -1;
-  for (let i = 0; i < APEX_SAMPLES; i += 1) {
-    const t = i / APEX_SAMPLES;
-    const prev = angles[(i - 1 + APEX_SAMPLES) % APEX_SAMPLES] ?? 0;
-    const next = angles[(i + 1) % APEX_SAMPLES] ?? 0;
+  for (let i = 0; i < CORNER_SAMPLES; i += 1) {
+    const t = i / CORNER_SAMPLES;
+    const prev = angles[(i - 1 + CORNER_SAMPLES) % CORNER_SAMPLES] ?? 0;
+    const next = angles[(i + 1) % CORNER_SAMPLES] ?? 0;
     const here = angles[i] ?? 0;
-    if (here > threshold && here >= prev && here > next && t - lastT > APEX_MIN_GAP) {
+    if (here > threshold && here >= prev && here > next && t - lastT > CORNER_MIN_GAP) {
       const point = points[i];
-      if (point) {
-        apexes.push(point.clone());
+      const ahead = points[(i + 1) % CORNER_SAMPLES];
+      const behind = points[(i - 1 + CORNER_SAMPLES) % CORNER_SAMPLES];
+      if (point && ahead && behind) {
+        const tangent = ahead.clone().sub(behind);
+        tangent.y = 0;
+        tangent.normalize();
+        corners.push({ position: point.clone(), tangent });
         lastT = t;
       }
     }
   }
-  return apexes;
+  return corners;
 }
 
 export function createTrackCurve(): THREE.CatmullRomCurve3 {

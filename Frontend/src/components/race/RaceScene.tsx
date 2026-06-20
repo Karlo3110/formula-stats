@@ -12,7 +12,6 @@ import type { RaceSource } from '@/lib/race/types';
 import type { ReplayDriver } from '@/lib/validation/f1-schemas';
 import { useRaceStore } from '@/stores/use-race-store';
 
-import { ApexMarkers } from './scene/ApexMarkers';
 import { CarsLayer } from './scene/CarsLayer';
 import { RigCamera } from './scene/RigCamera';
 import { Ticker } from './scene/Ticker';
@@ -68,7 +67,6 @@ export function RaceScene({
 
       <Ticker source={source} />
       <TrackMesh curve={curve} />
-      <ApexMarkers curve={curve} />
       <CarsLayer source={source} />
 
       {cameraMode === 'orbit' ? (

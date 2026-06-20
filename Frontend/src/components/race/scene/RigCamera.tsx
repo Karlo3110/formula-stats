@@ -2,6 +2,7 @@ import { useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 
+import { findCorners, type TrackCorner } from '@/lib/race/track';
 import type { RaceSource } from '@/lib/race/types';
 import { useRaceStore } from '@/stores/use-race-store';
 
@@ -10,11 +11,12 @@ interface RigCameraProps {
   curve: THREE.CatmullRomCurve3;
 }
 
-const CAM_COUNT = 16;
-const CAM_OFFSET = 28;
-const CAM_HEIGHT = 9;
-const CINEMATIC_FOV = 26;
-const CUT_INTERVAL = 4;
+const MIN_CAMS = 5;
+const FALLBACK_CAM_COUNT = 12;
+const CAM_OFFSET = 22;
+const CAM_HEIGHT = 5;
+const CINEMATIC_FOV = 20;
+const CUT_INTERVAL = 5;
 
 const OVERVIEW_RADIUS = 235;
 const OVERVIEW_HEIGHT = 155;
@@ -33,26 +35,35 @@ function setFov(camera: THREE.Camera, fov: number): void {
   }
 }
 
-function buildCams(curve: THREE.CatmullRomCurve3): TracksideCam[] {
-  const cams: TracksideCam[] = [];
+function evenCorners(curve: THREE.CatmullRomCurve3): TrackCorner[] {
+  const corners: TrackCorner[] = [];
   const point = new THREE.Vector3();
   const tangent = new THREE.Vector3();
-  const normal = new THREE.Vector3();
-  for (let i = 0; i < CAM_COUNT; i += 1) {
-    const t = i / CAM_COUNT;
-    curve.getPointAt(t, point);
-    curve.getTangentAt(t, tangent);
-    tangent.y = 0;
-    tangent.normalize();
-    normal.copy(tangent).cross(WORLD_UP).normalize();
-    const outward = normal.x * point.x + normal.z * point.z >= 0 ? 1 : -1;
-    const position = new THREE.Vector3()
-      .copy(point)
-      .addScaledVector(normal, CAM_OFFSET * outward);
-    position.y = CAM_HEIGHT;
-    cams.push({ position });
+  for (let i = 0; i < FALLBACK_CAM_COUNT; i += 1) {
+    const t = i / FALLBACK_CAM_COUNT;
+    corners.push({
+      position: curve.getPointAt(t, point).clone(),
+      tangent: curve.getTangentAt(t, tangent).clone().setY(0).normalize(),
+    });
   }
-  return cams;
+  return corners;
+}
+
+/** A trackside TV camera at each corner: outside the bend, low and telephoto. */
+function buildCams(curve: THREE.CatmullRomCurve3): TracksideCam[] {
+  const detected = findCorners(curve);
+  const corners = detected.length >= MIN_CAMS ? detected : evenCorners(curve);
+  const normal = new THREE.Vector3();
+
+  return corners.map(({ position, tangent }) => {
+    normal.copy(tangent).cross(WORLD_UP).normalize();
+    const outward = normal.x * position.x + normal.z * position.z >= 0 ? 1 : -1;
+    const camera = new THREE.Vector3()
+      .copy(position)
+      .addScaledVector(normal, CAM_OFFSET * outward);
+    camera.y = CAM_HEIGHT;
+    return { position: camera };
+  });
 }
 
 export function RigCamera({ source, curve }: RigCameraProps): null {
