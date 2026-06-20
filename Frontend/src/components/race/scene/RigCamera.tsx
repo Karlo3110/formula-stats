@@ -9,11 +9,23 @@ interface RigCameraProps {
   curve: THREE.CatmullRomCurve3;
 }
 
-const FOLLOW_BACK = 9;
-const FOLLOW_HEIGHT = 4;
+// Top-down "broadcast comparison" follow: camera straight above the car,
+// looking down, oriented so the car's heading points up on screen. High
+// altitude + narrow FOV approximates an orthographic map view.
+const FOLLOW_HEIGHT = 32;
+const FOLLOW_FOV = 26;
 const OVERVIEW_RADIUS = 115;
 const OVERVIEW_HEIGHT = 72;
-const UP = new THREE.Vector3(0, 1, 0);
+const OVERVIEW_FOV = 38;
+
+const WORLD_UP = new THREE.Vector3(0, 1, 0);
+
+function setFov(camera: THREE.Camera, fov: number): void {
+  if (camera instanceof THREE.PerspectiveCamera && camera.fov !== fov) {
+    camera.fov = fov;
+    camera.updateProjectionMatrix();
+  }
+}
 
 export function RigCamera({ curve }: RigCameraProps): null {
   const selectedDriverId = useRaceStore((state) => state.selectedDriverId);
@@ -24,6 +36,7 @@ export function RigCamera({ curve }: RigCameraProps): null {
       tangent: new THREE.Vector3(),
       desired: new THREE.Vector3(),
       look: new THREE.Vector3(),
+      up: new THREE.Vector3(0, 0, -1),
     }),
     [],
   );
@@ -35,12 +48,16 @@ export function RigCamera({ curve }: RigCameraProps): null {
       const t = raceEngine.trackT(selectedDriverId);
       curve.getPointAt(t, scratch.car);
       curve.getTangentAt(t, scratch.tangent);
-      scratch.desired
-        .copy(scratch.car)
-        .addScaledVector(scratch.tangent, -FOLLOW_BACK)
-        .addScaledVector(UP, FOLLOW_HEIGHT);
-      camera.position.lerp(scratch.desired, 0.08);
-      scratch.look.lerp(scratch.car, 0.12);
+
+      scratch.desired.copy(scratch.car).addScaledVector(WORLD_UP, FOLLOW_HEIGHT);
+      camera.position.lerp(scratch.desired, 0.1);
+
+      // Orient screen-up to the car's horizontal heading (heading-up map).
+      scratch.up.set(scratch.tangent.x, 0, scratch.tangent.z).normalize();
+      camera.up.lerp(scratch.up, 0.12).normalize();
+
+      scratch.look.lerp(scratch.car, 0.18);
+      setFov(camera, FOLLOW_FOV);
     } else {
       const angle = clock.elapsedTime * 0.04;
       scratch.desired.set(
@@ -49,7 +66,9 @@ export function RigCamera({ curve }: RigCameraProps): null {
         Math.cos(angle) * OVERVIEW_RADIUS,
       );
       camera.position.lerp(scratch.desired, 0.04);
+      camera.up.lerp(WORLD_UP, 0.1).normalize();
       scratch.look.lerp(scratch.car.set(0, 0, 0), 0.1);
+      setFov(camera, OVERVIEW_FOV);
     }
 
     camera.lookAt(scratch.look);
