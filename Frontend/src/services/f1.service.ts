@@ -2,11 +2,13 @@ import { httpClient } from '@/lib/http-client';
 import {
   ReplaySessionSchema,
   SeasonScheduleSchema,
+  SeasonStandingsSchema,
   SessionResultsSchema,
   TrackMapSchema,
   WeekendScheduleSchema,
   type ReplaySession,
   type SeasonSchedule,
+  type SeasonStandings,
   type SessionResults,
   type TrackMap,
   type WeekendSchedule,
@@ -43,6 +45,11 @@ export const f1Service = {
   async getSchedule(season: number): Promise<WeekendSchedule> {
     const data = await httpClient.get<unknown>(`/f1/seasons/${season}/schedule`);
     return WeekendScheduleSchema.parse(data);
+  },
+
+  async getStandings(season: number): Promise<SeasonStandings> {
+    const data = await httpClient.get<unknown>(`/f1/seasons/${season}/standings`);
+    return SeasonStandingsSchema.parse(data);
   },
 
   async getReplay(

@@ -9,11 +9,13 @@ import {
   resultsToSessionResultsDto,
   toReplaySessionDto,
   toSeasonScheduleDto,
+  toSeasonStandingsDto,
   toSessionResultsDto,
   toTrackMapDto,
   toWeekendScheduleDto,
   type ReplaySessionDto,
   type SeasonScheduleDto,
+  type SeasonStandingsDto,
   type SessionResultsDto,
   type TrackMapDto,
   type WeekendScheduleDto,
@@ -22,6 +24,8 @@ import {
 const SCHEDULE_TTL_SECONDS = 3600;
 const WEEKEND_TTL_SECONDS = 3600;
 const WEEKEND_VERSION = 'v1';
+const STANDINGS_TTL_SECONDS = 3600;
+const STANDINGS_VERSION = 'v1';
 const RESULTS_TTL_SECONDS = 86_400;
 const TRACK_MAP_TTL_SECONDS = 604_800;
 const REPLAY_TTL_SECONDS = 604_800;
@@ -122,6 +126,16 @@ export class F1Service {
     }
     const dto = toWeekendScheduleDto(await this.dataService.getSchedule(season));
     return this.cacheAndReturn(key, dto, WEEKEND_TTL_SECONDS);
+  }
+
+  async getStandings(season: number): Promise<SeasonStandingsDto> {
+    const key = `f1:standings:${STANDINGS_VERSION}:${season}`;
+    const cached = await this.cache.get<SeasonStandingsDto>(key);
+    if (cached) {
+      return cached;
+    }
+    const dto = toSeasonStandingsDto(await this.dataService.getStandings(season));
+    return this.cacheAndReturn(key, dto, STANDINGS_TTL_SECONDS);
   }
 
   async getReplay(

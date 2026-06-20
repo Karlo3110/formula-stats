@@ -80,3 +80,26 @@ class WeekendEvent(BaseModel):
 class WeekendSchedule(BaseModel):
     season: int
     events: list[WeekendEvent]
+
+
+class DriverStandingRow(BaseModel):
+    position: int
+    code: str
+    given_name: str
+    family_name: str
+    team: str
+    points: float
+    wins: int
+
+
+class ConstructorStandingRow(BaseModel):
+    position: int
+    name: str
+    points: float
+    wins: int
+
+
+class SeasonStandings(BaseModel):
+    season: int
+    drivers: list[DriverStandingRow]
+    constructors: list[ConstructorStandingRow]

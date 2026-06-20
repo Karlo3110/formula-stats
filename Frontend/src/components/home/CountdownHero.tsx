@@ -38,7 +38,13 @@ export function CountdownHero({ event, next }: CountdownHeroProps): JSX.Element 
     <section className="relative overflow-hidden pb-12 pt-6">
       <span
         aria-hidden
-        className="pointer-events-none absolute -left-2 top-1/2 -z-10 -translate-y-1/2 select-none font-display text-[26vw] uppercase leading-none text-foreground/[0.035]"
+        className="pointer-events-none absolute left-1/2 top-1/2 -z-10 w-[130%] -translate-x-1/2 -translate-y-1/2 select-none text-center font-display text-[20vw] uppercase leading-none text-foreground/[0.04]"
+        style={{
+          maskImage:
+            'linear-gradient(90deg, transparent, #000 22%, #000 78%, transparent)',
+          WebkitMaskImage:
+            'linear-gradient(90deg, transparent, #000 22%, #000 78%, transparent)',
+        }}
       >
         {watermark}
       </span>

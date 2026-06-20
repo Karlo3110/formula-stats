@@ -7,6 +7,7 @@ import { f1Service } from '@/services/f1.service';
 import type {
   ReplaySession,
   SeasonSchedule,
+  SeasonStandings,
   SessionResults,
   TrackMap,
   WeekendSchedule,
@@ -39,6 +40,16 @@ export function useSchedule(season: number): UseQueryResult<WeekendSchedule> {
   return useQuery({
     queryKey: f1Keys.schedule(season),
     queryFn: () => f1Service.getSchedule(season),
+    staleTime: ONE_HOUR_MS,
+  });
+}
+
+export function useSeasonStandings(
+  season: number,
+): UseQueryResult<SeasonStandings> {
+  return useQuery({
+    queryKey: f1Keys.standings(season),
+    queryFn: () => f1Service.getStandings(season),
     staleTime: ONE_HOUR_MS,
   });
 }

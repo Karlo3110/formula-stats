@@ -1,29 +1,98 @@
 'use client';
 
-import Link from 'next/link';
 import { useState, type JSX } from 'react';
 
 import { Spinner } from '@/components/ui/Spinner';
-import { Heading, Text } from '@/components/ui/Typography';
+import { Text } from '@/components/ui/Typography';
 import { cn } from '@/lib/utils/cn';
-import { useSchedule } from '@/hooks/use-f1';
+import { useSeasonStandings } from '@/hooks/use-f1';
+import type {
+  ConstructorStandingRow,
+  DriverStandingRow,
+} from '@/lib/validation/f1-schemas';
 
 const SEASONS = [2025, 2024, 2023, 2022, 2021] as const;
 
+function DriverRow({
+  row,
+  leader,
+}: {
+  row: DriverStandingRow;
+  leader: number;
+}): JSX.Element {
+  const isLeader = row.position === 1;
+  return (
+    <li className="grid grid-cols-[2.5rem_1fr_auto] items-center gap-4 border-b border-white/10 py-4 sm:grid-cols-[3rem_1fr_8rem_5rem_5rem]">
+      <span
+        className={cn(
+          'font-display text-2xl tabular-nums',
+          isLeader ? 'text-primary' : 'text-muted',
+        )}
+      >
+        {row.position}
+      </span>
+      <span>
+        <span className="text-base font-semibold text-foreground sm:text-lg">
+          {row.givenName} {row.familyName}
+        </span>
+        <span className="block text-xs uppercase tracking-wider text-muted">
+          {row.team}
+        </span>
+      </span>
+      <span className="hidden text-sm tabular-nums text-muted sm:block">
+        {row.wins} {row.wins === 1 ? 'win' : 'wins'}
+      </span>
+      <span className="hidden text-right text-xs uppercase tracking-wider text-muted sm:block">
+        {leader > 0 ? `-${Math.round(leader - row.points)}` : ''}
+      </span>
+      <span className="text-right font-display text-2xl tabular-nums text-foreground">
+        {row.points}
+      </span>
+    </li>
+  );
+}
+
+function ConstructorRow({ row }: { row: ConstructorStandingRow }): JSX.Element {
+  return (
+    <li className="flex items-center gap-4 border-b border-white/10 py-3.5">
+      <span
+        className={cn(
+          'w-8 font-display text-xl tabular-nums',
+          row.position === 1 ? 'text-primary' : 'text-muted',
+        )}
+      >
+        {row.position}
+      </span>
+      <span className="flex-1 text-base font-medium text-foreground">
+        {row.name}
+      </span>
+      <span className="font-display text-xl tabular-nums text-foreground">
+        {row.points}
+      </span>
+    </li>
+  );
+}
+
 export function HistoryView(): JSX.Element {
   const [season, setSeason] = useState<number>(2024);
-  const { data, isLoading, isError } = useSchedule(season);
+  const { data, isLoading, isError } = useSeasonStandings(season);
+  const leaderPoints = data?.drivers[0]?.points ?? 0;
 
   return (
-    <div className="mx-auto flex max-w-[80rem] flex-col gap-8">
-      <header className="flex flex-col gap-2">
-        <Heading level={1} display>
-          Race History
-        </Heading>
-        <Text variant="muted">Pick a season and replay any Grand Prix in 3D.</Text>
+    <div className="mx-auto max-w-[80rem] px-2 sm:px-6">
+      <header className="pb-6 pt-6">
+        <p className="text-[0.7rem] font-semibold uppercase tracking-[0.45em] text-primary">
+          Season Statistics
+        </p>
+        <h1 className="mt-4 font-display text-6xl uppercase leading-[0.9] tracking-tight text-heading sm:text-8xl">
+          Championship
+        </h1>
+        <p className="mt-4 max-w-xl text-lg text-foreground/65">
+          Final drivers’ and constructors’ standings, season by season.
+        </p>
       </header>
 
-      <div className="flex flex-wrap gap-2">
+      <div className="mt-4 flex flex-wrap gap-2">
         {SEASONS.map((year) => (
           <button
             key={year}
@@ -45,28 +114,32 @@ export function HistoryView(): JSX.Element {
         <div className="flex min-h-[30vh] items-center justify-center">
           <Spinner size="lg" />
         </div>
-      ) : isError || !data ? (
-        <Text variant="muted">Could not load the {season} calendar.</Text>
+      ) : isError || !data || data.drivers.length === 0 ? (
+        <Text variant="muted" className="mt-10">
+          Standings for {season} aren’t available right now.
+        </Text>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {data.events.map((event) => (
-            <Link
-              key={event.roundNumber}
-              href={`/race?season=${season}&round=${event.roundNumber}&session=R`}
-              className="glass-panel group flex flex-col gap-1 rounded-2xl p-5 transition hover:border-primary/40"
-            >
-              <span className="text-[0.6rem] uppercase tracking-[0.3em] text-primary">
-                Round {event.roundNumber} · {event.country}
-              </span>
-              <span className="font-display text-2xl uppercase leading-tight text-heading">
-                {event.eventName}
-              </span>
-              <span className="text-xs text-muted">{event.location}</span>
-              <span className="mt-3 text-xs uppercase tracking-[0.2em] text-foreground/70">
-                Replay race →
-              </span>
-            </Link>
-          ))}
+        <div className="mt-12 grid gap-x-16 gap-y-12 lg:grid-cols-[1.6fr_1fr]">
+          <div>
+            <p className="text-[0.7rem] font-semibold uppercase tracking-[0.4em] text-primary">
+              Drivers
+            </p>
+            <ul className="mt-5 border-t border-white/10">
+              {data.drivers.map((row) => (
+                <DriverRow key={row.position} row={row} leader={leaderPoints} />
+              ))}
+            </ul>
+          </div>
+          <div>
+            <p className="text-[0.7rem] font-semibold uppercase tracking-[0.4em] text-primary">
+              Constructors
+            </p>
+            <ul className="mt-5 border-t border-white/10">
+              {data.constructors.map((row) => (
+                <ConstructorRow key={row.position} row={row} />
+              ))}
+            </ul>
+          </div>
         </div>
       )}
     </div>

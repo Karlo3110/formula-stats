@@ -81,6 +81,33 @@ export type WeekendSession = z.infer<typeof WeekendSessionSchema>;
 export type WeekendEvent = z.infer<typeof WeekendEventSchema>;
 export type WeekendSchedule = z.infer<typeof WeekendScheduleSchema>;
 
+export const DriverStandingRowSchema = z.object({
+  position: z.number().int(),
+  code: z.string(),
+  givenName: z.string(),
+  familyName: z.string(),
+  team: z.string(),
+  points: z.number(),
+  wins: z.number().int(),
+});
+
+export const ConstructorStandingRowSchema = z.object({
+  position: z.number().int(),
+  name: z.string(),
+  points: z.number(),
+  wins: z.number().int(),
+});
+
+export const SeasonStandingsSchema = z.object({
+  season: z.number().int(),
+  drivers: z.array(DriverStandingRowSchema),
+  constructors: z.array(ConstructorStandingRowSchema),
+});
+
+export type DriverStandingRow = z.infer<typeof DriverStandingRowSchema>;
+export type ConstructorStandingRow = z.infer<typeof ConstructorStandingRowSchema>;
+export type SeasonStandings = z.infer<typeof SeasonStandingsSchema>;
+
 export type EventSummary = z.infer<typeof EventSummarySchema>;
 export type SeasonSchedule = z.infer<typeof SeasonScheduleSchema>;
 export type DriverResult = z.infer<typeof DriverResultSchema>;

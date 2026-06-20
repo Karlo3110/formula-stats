@@ -63,6 +63,7 @@ export function RaceView({
   const setCameraMode = useRaceStore((state) => state.setCameraMode);
 
   const replayQuery = useReplay(season, round, session);
+  const isLoadingReplay = replayQuery.isLoading;
   const trackPoints = replayQuery.data?.track ?? null;
   const replayDrivers = replayQuery.data?.drivers ?? null;
   const replayDuration = replayQuery.data?.durationSeconds ?? null;
@@ -87,6 +88,19 @@ export function RaceView({
       </div>
 
       <StartLights />
+
+      {isLoadingReplay ? (
+        <div className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-4 bg-background/80 backdrop-blur-md">
+          <Spinner size="lg" />
+          <p className="text-sm uppercase tracking-[0.35em] text-foreground/80">
+            Loading race telemetry
+          </p>
+          <p className="max-w-xs text-center text-xs text-foreground/45">
+            Fetching official timing from the grid — the first load can take a
+            moment.
+          </p>
+        </div>
+      ) : null}
 
       <div
         className="pointer-events-none absolute inset-0"

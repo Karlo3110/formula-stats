@@ -5,11 +5,13 @@ from app.fastf1_client import (
     get_replay,
     get_schedule,
     get_session_results,
+    get_standings,
     get_track_map,
 )
 from app.models import (
     ReplaySession,
     SeasonSchedule,
+    SeasonStandings,
     SessionResults,
     TrackMap,
     WeekendSchedule,
@@ -31,6 +33,11 @@ def list_events(season: int) -> SeasonSchedule:
 @router.get("/seasons/{season}/schedule", response_model=WeekendSchedule)
 def schedule(season: int) -> WeekendSchedule:
     return get_schedule(season)
+
+
+@router.get("/seasons/{season}/standings", response_model=SeasonStandings)
+def standings(season: int) -> SeasonStandings:
+    return get_standings(season)
 
 
 @router.get(

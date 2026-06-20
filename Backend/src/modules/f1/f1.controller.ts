@@ -6,6 +6,7 @@ import { F1Service } from './f1.service';
 import type {
   ReplaySessionDto,
   SeasonScheduleDto,
+  SeasonStandingsDto,
   SessionResultsDto,
   TrackMapDto,
   WeekendScheduleDto,
@@ -33,6 +34,13 @@ export class F1Controller {
     @Param('season', ParseIntPipe) season: number,
   ): Promise<WeekendScheduleDto> {
     return this.f1Service.getSchedule(season);
+  }
+
+  @Get('seasons/:season/standings')
+  getStandings(
+    @Param('season', ParseIntPipe) season: number,
+  ): Promise<SeasonStandingsDto> {
+    return this.f1Service.getStandings(season);
   }
 
   @Get('seasons/:season/rounds/:round/sessions/:session/results')

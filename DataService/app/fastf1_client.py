@@ -13,10 +13,13 @@ from typing import TYPE_CHECKING
 
 from app.config import get_settings
 from app.models import (
+    ConstructorStandingRow,
     DriverResult,
+    DriverStandingRow,
     EventSummary,
     ReplayDriver,
     ReplaySession,
+    SeasonStandings,
     SessionResults,
     TrackMap,
     WeekendEvent,
@@ -102,6 +105,46 @@ def get_schedule(season: int) -> WeekendSchedule:
             )
         )
     return WeekendSchedule(season=season, events=events)
+
+
+def get_standings(season: int) -> SeasonStandings:
+    """Driver and constructor championship standings (via the Ergast/Jolpica API)."""
+    from fastf1.ergast import Ergast
+
+    ergast = Ergast()
+    drivers: list[DriverStandingRow] = []
+    constructors: list[ConstructorStandingRow] = []
+
+    driver_resp = ergast.get_driver_standings(season=season)
+    if driver_resp.content:
+        for _, row in driver_resp.content[0].iterrows():
+            teams = row.get("constructorNames")
+            team = ", ".join(teams) if isinstance(teams, (list, tuple)) else str(teams or "")
+            drivers.append(
+                DriverStandingRow(
+                    position=int(row["position"]),
+                    code=str(row.get("driverCode") or ""),
+                    given_name=str(row.get("givenName") or ""),
+                    family_name=str(row.get("familyName") or ""),
+                    team=team,
+                    points=float(row.get("points") or 0),
+                    wins=int(row.get("wins") or 0),
+                )
+            )
+
+    constructor_resp = ergast.get_constructor_standings(season=season)
+    if constructor_resp.content:
+        for _, row in constructor_resp.content[0].iterrows():
+            constructors.append(
+                ConstructorStandingRow(
+                    position=int(row["position"]),
+                    name=str(row.get("constructorName") or ""),
+                    points=float(row.get("points") or 0),
+                    wins=int(row.get("wins") or 0),
+                )
+            )
+
+    return SeasonStandings(season=season, drivers=drivers, constructors=constructors)
 
 
 def get_session_results(season: int, round_number: int, session: str) -> SessionResults:

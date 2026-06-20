@@ -3,6 +3,7 @@ import type { F1Event, F1SessionResult, F1TrackMap } from '@prisma/client';
 import type {
   ReplaySessionPayload,
   SeasonSchedulePayload,
+  SeasonStandingsPayload,
   SessionResultsPayload,
   TrackMapPayload,
   WeekendSchedulePayload,
@@ -104,6 +105,52 @@ export interface WeekendEventDto {
 export interface WeekendScheduleDto {
   season: number;
   events: WeekendEventDto[];
+}
+
+export interface DriverStandingRowDto {
+  position: number;
+  code: string;
+  givenName: string;
+  familyName: string;
+  team: string;
+  points: number;
+  wins: number;
+}
+
+export interface ConstructorStandingRowDto {
+  position: number;
+  name: string;
+  points: number;
+  wins: number;
+}
+
+export interface SeasonStandingsDto {
+  season: number;
+  drivers: DriverStandingRowDto[];
+  constructors: ConstructorStandingRowDto[];
+}
+
+export function toSeasonStandingsDto(
+  payload: SeasonStandingsPayload,
+): SeasonStandingsDto {
+  return {
+    season: payload.season,
+    drivers: payload.drivers.map((d) => ({
+      position: d.position,
+      code: d.code,
+      givenName: d.given_name,
+      familyName: d.family_name,
+      team: d.team,
+      points: d.points,
+      wins: d.wins,
+    })),
+    constructors: payload.constructors.map((c) => ({
+      position: c.position,
+      name: c.name,
+      points: c.points,
+      wins: c.wins,
+    })),
+  };
 }
 
 export function toWeekendScheduleDto(

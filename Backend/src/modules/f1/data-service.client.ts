@@ -7,11 +7,13 @@ import { DataServiceUnavailableException } from '@/common/exceptions/domain.exce
 import {
   ReplaySessionSchema,
   SeasonScheduleSchema,
+  SeasonStandingsSchema,
   SessionResultsSchema,
   TrackMapSchema,
   WeekendScheduleSchema,
   type ReplaySessionPayload,
   type SeasonSchedulePayload,
+  type SeasonStandingsPayload,
   type SessionResultsPayload,
   type TrackMapPayload,
   type WeekendSchedulePayload,
@@ -38,6 +40,10 @@ export class DataServiceClient {
 
   getSchedule(season: number): Promise<WeekendSchedulePayload> {
     return this.get(`/api/v1/seasons/${season}/schedule`, WeekendScheduleSchema);
+  }
+
+  getStandings(season: number): Promise<SeasonStandingsPayload> {
+    return this.get(`/api/v1/seasons/${season}/standings`, SeasonStandingsSchema);
   }
 
   getSessionResults(
