@@ -5,9 +5,11 @@ import type { ZodType } from 'zod';
 import { DataServiceUnavailableException } from '@/common/exceptions/domain.exception';
 
 import {
+  ReplaySessionSchema,
   SeasonScheduleSchema,
   SessionResultsSchema,
   TrackMapSchema,
+  type ReplaySessionPayload,
   type SeasonSchedulePayload,
   type SessionResultsPayload,
   type TrackMapPayload,
@@ -51,6 +53,17 @@ export class DataServiceClient {
     return this.get(
       `/api/v1/seasons/${season}/rounds/${round}/sessions/${encodeURIComponent(session)}/track-map`,
       TrackMapSchema,
+    );
+  }
+
+  getReplay(
+    season: number,
+    round: number,
+    session: string,
+  ): Promise<ReplaySessionPayload> {
+    return this.get(
+      `/api/v1/seasons/${season}/rounds/${round}/sessions/${encodeURIComponent(session)}/replay`,
+      ReplaySessionSchema,
     );
   }
 

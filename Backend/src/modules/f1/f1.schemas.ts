@@ -42,6 +42,23 @@ export const TrackMapSchema = z.object({
   track: z.array(z.array(z.number())),
 });
 
+export const ReplayDriverSchema = z.object({
+  code: z.string(),
+  team: z.string(),
+  color: z.string().nullable(),
+  lapTimeSeconds: z.number(),
+  samples: z.array(z.array(z.number())),
+});
+
+export const ReplaySessionSchema = z.object({
+  season: z.number().int(),
+  round_number: z.number().int(),
+  session: z.string(),
+  track: z.array(z.array(z.number())),
+  drivers: z.array(ReplayDriverSchema),
+});
+
 export type SeasonSchedulePayload = z.infer<typeof SeasonScheduleSchema>;
 export type SessionResultsPayload = z.infer<typeof SessionResultsSchema>;
 export type TrackMapPayload = z.infer<typeof TrackMapSchema>;
+export type ReplaySessionPayload = z.infer<typeof ReplaySessionSchema>;

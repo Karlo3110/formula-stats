@@ -2,10 +2,11 @@ from fastapi import APIRouter, Depends
 
 from app.fastf1_client import (
     get_event_schedule,
+    get_replay,
     get_session_results,
     get_track_map,
 )
-from app.models import SeasonSchedule, SessionResults, TrackMap
+from app.models import ReplaySession, SeasonSchedule, SessionResults, TrackMap
 from app.security import require_internal_key
 
 router = APIRouter(
@@ -34,3 +35,11 @@ def session_results(season: int, round_number: int, session: str) -> SessionResu
 )
 def track_map(season: int, round_number: int, session: str) -> TrackMap:
     return get_track_map(season, round_number, session)
+
+
+@router.get(
+    "/seasons/{season}/rounds/{round_number}/sessions/{session}/replay",
+    response_model=ReplaySession,
+)
+def replay(season: int, round_number: int, session: str) -> ReplaySession:
+    return get_replay(season, round_number, session)

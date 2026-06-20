@@ -1,9 +1,14 @@
 'use client';
 
-import { useMemo, type JSX } from 'react';
+import { useEffect, useMemo, type JSX } from 'react';
 import { Canvas } from '@react-three/fiber';
 
+import { setActiveSource } from '@/lib/race/active-source';
+import { MockSource } from '@/lib/race/mock-source';
+import { ReplaySource } from '@/lib/race/replay-source';
 import { createTrackCurve, curveFromPoints } from '@/lib/race/track';
+import type { RaceSource } from '@/lib/race/types';
+import type { ReplayDriver } from '@/lib/validation/f1-schemas';
 import { useRaceStore } from '@/stores/use-race-store';
 
 import { CarsLayer } from './scene/CarsLayer';
@@ -13,13 +18,31 @@ import { TrackMesh } from './scene/TrackMesh';
 
 interface RaceSceneProps {
   trackPoints: ReadonlyArray<readonly [number, number]> | null;
+  replayDrivers: ReplayDriver[] | null;
 }
 
-export function RaceScene({ trackPoints }: RaceSceneProps): JSX.Element {
+export function RaceScene({
+  trackPoints,
+  replayDrivers,
+}: RaceSceneProps): JSX.Element {
   const curve = useMemo(
     () => (trackPoints ? curveFromPoints(trackPoints) : createTrackCurve()),
     [trackPoints],
   );
+
+  const source = useMemo<RaceSource>(
+    () =>
+      replayDrivers && replayDrivers.length > 0
+        ? new ReplaySource(replayDrivers)
+        : new MockSource(curve),
+    [replayDrivers, curve],
+  );
+
+  useEffect(() => {
+    setActiveSource(source);
+    return () => setActiveSource(null);
+  }, [source]);
+
   const clearSelection = useRaceStore((state) => state.clearSelection);
 
   return (
@@ -41,10 +64,10 @@ export function RaceScene({ trackPoints }: RaceSceneProps): JSX.Element {
         <meshStandardMaterial color="#05070a" roughness={1} />
       </mesh>
 
-      <Ticker />
+      <Ticker source={source} />
       <TrackMesh curve={curve} />
-      <CarsLayer curve={curve} />
-      <RigCamera curve={curve} />
+      <CarsLayer source={source} />
+      <RigCamera source={source} />
     </Canvas>
   );
 }

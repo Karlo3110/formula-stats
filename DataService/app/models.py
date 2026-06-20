@@ -41,3 +41,20 @@ class TrackMap(BaseModel):
     session: str
     # Normalized circuit outline as [x, y] pairs (centered, scaled to world units).
     track: list[list[float]]
+
+
+class ReplayDriver(BaseModel):
+    code: str
+    team: str
+    color: str | None
+    lapTimeSeconds: float
+    # [t, x, y] where t is 0..1 over the lap; x, y are normalized world coords.
+    samples: list[list[float]]
+
+
+class ReplaySession(BaseModel):
+    season: int
+    round_number: int
+    session: str
+    track: list[list[float]]
+    drivers: list[ReplayDriver]

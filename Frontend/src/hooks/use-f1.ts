@@ -5,6 +5,7 @@ import { useQuery, type UseQueryResult } from '@tanstack/react-query';
 import { f1Keys } from '@/lib/api/f1-keys';
 import { f1Service } from '@/services/f1.service';
 import type {
+  ReplaySession,
   SeasonSchedule,
   SessionResults,
   TrackMap,
@@ -41,6 +42,19 @@ export function useTrackMap(
   return useQuery({
     queryKey: f1Keys.trackMap(season, round, session),
     queryFn: () => f1Service.getTrackMap(season, round, session),
+    staleTime: ONE_DAY_MS,
+    retry: 1,
+  });
+}
+
+export function useReplay(
+  season: number,
+  round: number,
+  session: string,
+): UseQueryResult<ReplaySession> {
+  return useQuery({
+    queryKey: f1Keys.replay(season, round, session),
+    queryFn: () => f1Service.getReplay(season, round, session),
     staleTime: ONE_DAY_MS,
     retry: 1,
   });

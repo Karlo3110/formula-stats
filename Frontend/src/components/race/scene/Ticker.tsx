@@ -1,13 +1,13 @@
 import { useFrame } from '@react-three/fiber';
 
-import { raceEngine } from '@/lib/race/race-engine';
+import type { RaceSource } from '@/lib/race/types';
 
 const MAX_DELTA = 0.1;
 
-/** Advances the race simulation once per frame, before cars/camera read it. */
-export function Ticker(): null {
+/** Advances the active race source once per frame, before cars/camera read it. */
+export function Ticker({ source }: { source: RaceSource }): null {
   useFrame((_, delta) => {
-    raceEngine.tick(Math.min(delta, MAX_DELTA));
+    source.tick(Math.min(delta, MAX_DELTA));
   });
   return null;
 }

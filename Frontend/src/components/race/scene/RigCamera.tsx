@@ -2,15 +2,15 @@ import { useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 
-import { raceEngine } from '@/lib/race/race-engine';
+import type { RaceSource } from '@/lib/race/types';
 import { useRaceStore } from '@/stores/use-race-store';
 
 interface RigCameraProps {
-  curve: THREE.CatmullRomCurve3;
+  source: RaceSource;
 }
 
 // Helicopter / TV-broadcast follow: elevated and trailing the car with a slight
-// 3/4 side offset, angled down — the classic on-track tracking shot.
+// 3/4 side offset, angled down.
 const FOLLOW_BACK = 12;
 const FOLLOW_HEIGHT = 7;
 const FOLLOW_SIDE = 4;
@@ -30,17 +30,16 @@ function setFov(camera: THREE.Camera, fov: number): void {
   }
 }
 
-export function RigCamera({ curve }: RigCameraProps): null {
+export function RigCamera({ source }: RigCameraProps): null {
   const selectedDriverId = useRaceStore((state) => state.selectedDriverId);
 
   const scratch = useMemo(
     () => ({
-      car: new THREE.Vector3(),
-      tangent: new THREE.Vector3(),
-      heading: new THREE.Vector3(),
+      forward: new THREE.Vector3(),
       side: new THREE.Vector3(),
       desired: new THREE.Vector3(),
       look: new THREE.Vector3(),
+      car: new THREE.Vector3(),
     }),
     [],
   );
@@ -49,22 +48,21 @@ export function RigCamera({ curve }: RigCameraProps): null {
     const { camera, clock } = state;
     camera.up.lerp(WORLD_UP, 0.1).normalize();
 
-    if (selectedDriverId) {
-      const t = raceEngine.trackT(selectedDriverId);
-      curve.getPointAt(t, scratch.car);
-      curve.getTangentAt(t, scratch.tangent);
-      scratch.heading.set(scratch.tangent.x, 0, scratch.tangent.z).normalize();
-      scratch.side.copy(scratch.heading).cross(WORLD_UP).normalize();
+    const pose = selectedDriverId ? source.pose(selectedDriverId) : null;
+    if (pose) {
+      scratch.car.set(pose.x, 0, pose.z);
+      scratch.forward.set(Math.sin(pose.headingY), 0, Math.cos(pose.headingY)).normalize();
+      scratch.side.copy(scratch.forward).cross(WORLD_UP).normalize();
 
       scratch.desired
         .copy(scratch.car)
-        .addScaledVector(scratch.heading, -FOLLOW_BACK)
+        .addScaledVector(scratch.forward, -FOLLOW_BACK)
         .addScaledVector(WORLD_UP, FOLLOW_HEIGHT)
         .addScaledVector(scratch.side, FOLLOW_SIDE);
-      camera.position.lerp(scratch.desired, 0.07);
+      camera.position.lerp(scratch.desired, 0.08);
 
       scratch.car.y += FOLLOW_LOOK_LIFT;
-      scratch.look.lerp(scratch.car, 0.15);
+      scratch.look.lerp(scratch.car, 0.16);
       setFov(camera, FOLLOW_FOV);
     } else {
       const angle = clock.elapsedTime * 0.04;

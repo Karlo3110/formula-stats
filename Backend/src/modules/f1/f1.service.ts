@@ -7,9 +7,11 @@ import { F1Repository } from './f1.repository';
 import {
   eventsToSeasonScheduleDto,
   resultsToSessionResultsDto,
+  toReplaySessionDto,
   toSeasonScheduleDto,
   toSessionResultsDto,
   toTrackMapDto,
+  type ReplaySessionDto,
   type SeasonScheduleDto,
   type SessionResultsDto,
   type TrackMapDto,
@@ -18,8 +20,10 @@ import {
 const SCHEDULE_TTL_SECONDS = 3600;
 const RESULTS_TTL_SECONDS = 86_400;
 const TRACK_MAP_TTL_SECONDS = 604_800;
-// Bump when the track-outline geometry algorithm changes, to invalidate caches.
+const REPLAY_TTL_SECONDS = 604_800;
+// Bump when the derived geometry algorithms change, to invalidate caches.
 const TRACK_MAP_VERSION = 'v2';
+const REPLAY_VERSION = 'v1';
 
 /**
  * Serves F1 data through three tiers so clients never hit FastF1 directly:
@@ -104,6 +108,23 @@ export class F1Service {
       await this.dataService.getTrackMap(season, round, session),
     );
     return this.cacheAndReturn(key, dto, TRACK_MAP_TTL_SECONDS);
+  }
+
+  async getReplay(
+    season: number,
+    round: number,
+    session: string,
+  ): Promise<ReplaySessionDto> {
+    const key = `f1:replay:${REPLAY_VERSION}:${season}:${round}:${session}`;
+    const cached = await this.cache.get<ReplaySessionDto>(key);
+    if (cached) {
+      return cached;
+    }
+
+    const dto = toReplaySessionDto(
+      await this.dataService.getReplay(season, round, session),
+    );
+    return this.cacheAndReturn(key, dto, REPLAY_TTL_SECONDS);
   }
 
   private async cacheAndReturn<T>(

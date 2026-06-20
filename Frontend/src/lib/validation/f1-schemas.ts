@@ -37,6 +37,25 @@ export const TrackMapSchema = z.object({
   track: z.array(z.tuple([z.number(), z.number()])),
 });
 
+export const ReplayDriverSchema = z.object({
+  code: z.string(),
+  team: z.string(),
+  color: z.string().nullable(),
+  lapTimeSeconds: z.number(),
+  samples: z.array(z.array(z.number())),
+});
+
+export const ReplaySessionSchema = z.object({
+  season: z.number().int(),
+  roundNumber: z.number().int(),
+  session: z.string(),
+  track: z.array(z.tuple([z.number(), z.number()])),
+  drivers: z.array(ReplayDriverSchema),
+});
+
+export type ReplayDriver = z.infer<typeof ReplayDriverSchema>;
+export type ReplaySession = z.infer<typeof ReplaySessionSchema>;
+
 export type EventSummary = z.infer<typeof EventSummarySchema>;
 export type SeasonSchedule = z.infer<typeof SeasonScheduleSchema>;
 export type DriverResult = z.infer<typeof DriverResultSchema>;

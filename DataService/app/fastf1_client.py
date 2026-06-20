@@ -12,7 +12,14 @@ import os
 from typing import TYPE_CHECKING
 
 from app.config import get_settings
-from app.models import DriverResult, EventSummary, SessionResults, TrackMap
+from app.models import (
+    DriverResult,
+    EventSummary,
+    ReplayDriver,
+    ReplaySession,
+    SessionResults,
+    TrackMap,
+)
 
 if TYPE_CHECKING:
     import numpy as np
@@ -23,6 +30,7 @@ _cache_enabled = False
 TRACK_WORLD_SPAN = 240.0
 TRACK_POINTS = 180
 TRACK_SMOOTH_WINDOW = 9
+REPLAY_SAMPLES = 160
 
 
 def _ensure_cache() -> None:
@@ -128,34 +136,107 @@ def _circular_smooth(values: "np.ndarray", window: int) -> "np.ndarray":
     return smoothed[window:-window]
 
 
-def _build_outline(xs: "np.ndarray", ys: "np.ndarray") -> list[list[float]]:
-    """Clean a noisy GPS lap into an evenly-spaced, smoothed, normalized loop."""
+def _clean_resample_smooth(
+    xs: "np.ndarray", ys: "np.ndarray"
+) -> tuple["np.ndarray", "np.ndarray"]:
+    """Clean a noisy GPS lap into an evenly-spaced, smoothed (un-normalized) loop."""
     import numpy as np
 
-    # Drop consecutive duplicate samples.
     keep = np.concatenate([[True], (np.diff(xs) != 0) | (np.diff(ys) != 0)])
     xs, ys = xs[keep], ys[keep]
 
-    # Resample evenly by arc length so the curve has no clustered points.
     seg = np.sqrt(np.diff(xs) ** 2 + np.diff(ys) ** 2)
     cumulative = np.concatenate([[0.0], np.cumsum(seg)])
     total = float(cumulative[-1])
     if total <= 0:
-        return []
+        return xs, ys
+
     samples = np.linspace(0, total, TRACK_POINTS, endpoint=False)
     xr = np.interp(samples, cumulative, xs)
     yr = np.interp(samples, cumulative, ys)
+    return (
+        _circular_smooth(xr, TRACK_SMOOTH_WINDOW),
+        _circular_smooth(yr, TRACK_SMOOTH_WINDOW),
+    )
 
-    # Smooth out telemetry jitter (circular, since the lap is a loop).
-    xr = _circular_smooth(xr, TRACK_SMOOTH_WINDOW)
-    yr = _circular_smooth(yr, TRACK_SMOOTH_WINDOW)
 
-    center_x = (float(xr.min()) + float(xr.max())) / 2
-    center_y = (float(yr.min()) + float(yr.max())) / 2
-    span = max(float(xr.max() - xr.min()), float(yr.max() - yr.min())) or 1.0
-    scale = TRACK_WORLD_SPAN / span
+def _normalization(xs: "np.ndarray", ys: "np.ndarray") -> tuple[float, float, float]:
+    center_x = (float(xs.min()) + float(xs.max())) / 2
+    center_y = (float(ys.min()) + float(ys.max())) / 2
+    span = max(float(xs.max() - xs.min()), float(ys.max() - ys.min())) or 1.0
+    return center_x, center_y, TRACK_WORLD_SPAN / span
 
+
+def _build_outline(xs: "np.ndarray", ys: "np.ndarray") -> list[list[float]]:
+    xr, yr = _clean_resample_smooth(xs, ys)
+    cx, cy, scale = _normalization(xr, yr)
     return [
-        [round((float(x) - center_x) * scale, 2), round((float(y) - center_y) * scale, 2)]
+        [round((float(x) - cx) * scale, 2), round((float(y) - cy) * scale, 2)]
         for x, y in zip(xr, yr)
     ]
+
+
+def get_replay(season: int, round_number: int, session: str) -> ReplaySession:
+    """Official per-driver fastest-lap position traces, replayed on the real track."""
+    _ensure_cache()
+    import fastf1
+    import numpy as np
+
+    loaded = fastf1.get_session(season, round_number, session)
+    loaded.load(laps=True, telemetry=True, weather=False, messages=False)
+
+    fastest = loaded.laps.pick_fastest()
+    fx = fastest.get_pos_data()["X"].to_numpy(dtype=float)
+    fy = fastest.get_pos_data()["Y"].to_numpy(dtype=float)
+
+    outline_x, outline_y = _clean_resample_smooth(fx, fy)
+    cx, cy, scale = _normalization(outline_x, outline_y)
+    track = [
+        [round((float(x) - cx) * scale, 2), round((float(y) - cy) * scale, 2)]
+        for x, y in zip(outline_x, outline_y)
+    ]
+
+    drivers: list[ReplayDriver] = []
+    for number in loaded.drivers:
+        lap = loaded.laps.pick_drivers(number).pick_fastest()
+        if lap is None:
+            continue
+        pos = lap.get_pos_data()
+        if pos.empty:
+            continue
+
+        times = pos["Time"].dt.total_seconds().to_numpy(dtype=float)
+        times = times - times[0]
+        duration = float(times[-1])
+        if duration <= 0:
+            continue
+
+        grid = np.linspace(0, duration, REPLAY_SAMPLES)
+        xi = (np.interp(grid, times, pos["X"].to_numpy(dtype=float)) - cx) * scale
+        yi = (np.interp(grid, times, pos["Y"].to_numpy(dtype=float)) - cy) * scale
+
+        info = loaded.get_driver(number)
+        team_color = info.get("TeamColor")
+        samples = [
+            [round(float(grid[i] / duration), 4), round(float(xi[i]), 2), round(float(yi[i]), 2)]
+            for i in range(REPLAY_SAMPLES)
+        ]
+        drivers.append(
+            ReplayDriver(
+                code=str(info.get("Abbreviation") or number),
+                team=str(info.get("TeamName") or ""),
+                color=f"#{team_color}" if team_color else None,
+                lapTimeSeconds=round(duration, 3),
+                samples=samples,
+            )
+        )
+
+    drivers.sort(key=lambda d: d.lapTimeSeconds)
+
+    return ReplaySession(
+        season=season,
+        round_number=round_number,
+        session=session,
+        track=track,
+        drivers=drivers,
+    )

@@ -8,8 +8,16 @@ export interface RaceDriver {
   baseLapSeconds: number;
 }
 
+export interface StandingDriver {
+  id: string;
+  code: string;
+  name: string;
+  team: string;
+  color: string;
+}
+
 export interface DriverStanding {
-  driver: RaceDriver;
+  driver: StandingDriver;
   position: number;
   lap: number;
   /** Gap to the leader in seconds. */
@@ -17,4 +25,18 @@ export interface DriverStanding {
   speedKmh: number;
   /** Fractional position around the lap, 0..1. */
   trackT: number;
+}
+
+export interface DriverPose {
+  x: number;
+  z: number;
+  headingY: number;
+}
+
+/** Drives the 3D scene; implemented by the official-replay and mock sources. */
+export interface RaceSource {
+  readonly drivers: StandingDriver[];
+  tick(dt: number): void;
+  pose(driverId: string): DriverPose | null;
+  standings(): DriverStanding[];
 }

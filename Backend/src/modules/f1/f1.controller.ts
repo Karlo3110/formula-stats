@@ -4,6 +4,7 @@ import { Public } from '@/common/decorators/public.decorator';
 
 import { F1Service } from './f1.service';
 import type {
+  ReplaySessionDto,
   SeasonScheduleDto,
   SessionResultsDto,
   TrackMapDto,
@@ -42,5 +43,14 @@ export class F1Controller {
     @Param('session') session: string,
   ): Promise<TrackMapDto> {
     return this.f1Service.getTrackMap(season, round, session);
+  }
+
+  @Get('seasons/:season/rounds/:round/sessions/:session/replay')
+  getReplay(
+    @Param('season', ParseIntPipe) season: number,
+    @Param('round', ParseIntPipe) round: number,
+    @Param('session') session: string,
+  ): Promise<ReplaySessionDto> {
+    return this.f1Service.getReplay(season, round, session);
   }
 }

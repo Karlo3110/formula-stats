@@ -5,7 +5,7 @@ import { useRef, type JSX } from 'react';
 
 import { Spinner } from '@/components/ui/Spinner';
 import { useFullscreen } from '@/hooks/use-fullscreen';
-import { useTrackMap } from '@/hooks/use-f1';
+import { useReplay } from '@/hooks/use-f1';
 import { useRaceStore } from '@/stores/use-race-store';
 
 import { DriverList } from './DriverList';
@@ -47,8 +47,9 @@ export function RaceView(): JSX.Element {
   const { isFullscreen, toggle } = useFullscreen(containerRef);
   const selectedDriverId = useRaceStore((state) => state.selectedDriverId);
 
-  const trackQuery = useTrackMap(RACE_SEASON, RACE_ROUND, RACE_SESSION);
-  const trackPoints = trackQuery.data?.track ?? null;
+  const replayQuery = useReplay(RACE_SEASON, RACE_ROUND, RACE_SESSION);
+  const trackPoints = replayQuery.data?.track ?? null;
+  const replayDrivers = replayQuery.data?.drivers ?? null;
 
   return (
     <div
@@ -56,7 +57,7 @@ export function RaceView(): JSX.Element {
       className="relative h-[calc(100dvh-7rem)] min-h-[30rem] overflow-hidden rounded-2xl border border-white/10 bg-[#070a0b]"
     >
       <div className="absolute inset-0">
-        <RaceScene trackPoints={trackPoints} />
+        <RaceScene trackPoints={trackPoints} replayDrivers={replayDrivers} />
       </div>
 
       <div
@@ -87,7 +88,7 @@ export function RaceView(): JSX.Element {
       ) : (
         <div className="pointer-events-none absolute inset-x-0 bottom-5 flex justify-center">
           <span className="glass-pill rounded-full px-4 py-1.5 text-[0.65rem] uppercase tracking-[0.25em] text-muted">
-            {trackPoints ? 'Real circuit · select a car' : 'Select a car to follow'}
+            {replayDrivers ? 'Official lap replay · tap a car' : 'Loading official data…'}
           </span>
         </div>
       )}

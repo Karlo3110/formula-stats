@@ -7,4 +7,6 @@ export const f1Keys = {
     [...f1Keys.all, 'session-results', season, round, session] as const,
   trackMap: (season: number, round: number, session: string) =>
     [...f1Keys.all, 'track-map', season, round, session] as const,
+  replay: (season: number, round: number, session: string) =>
+    [...f1Keys.all, 'replay', season, round, session] as const,
 };
