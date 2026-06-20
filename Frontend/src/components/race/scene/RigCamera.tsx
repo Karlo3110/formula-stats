@@ -11,11 +11,11 @@ interface RigCameraProps {
 
 // Helicopter / TV-broadcast follow: elevated and trailing the car with a slight
 // 3/4 side offset, angled down — the classic on-track tracking shot.
-const FOLLOW_BACK = 24;
-const FOLLOW_HEIGHT = 15;
-const FOLLOW_SIDE = 9;
+const FOLLOW_BACK = 12;
+const FOLLOW_HEIGHT = 7;
+const FOLLOW_SIDE = 4;
 const FOLLOW_FOV = 40;
-const FOLLOW_LOOK_LIFT = 1;
+const FOLLOW_LOOK_LIFT = 0.6;
 
 const OVERVIEW_RADIUS = 235;
 const OVERVIEW_HEIGHT = 155;
