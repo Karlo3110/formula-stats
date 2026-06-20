@@ -295,6 +295,12 @@ def get_replay(season: int, round_number: int, session: str) -> ReplaySession:
         for x, y in zip(outline_x, outline_y)
     ]
 
+    # Scale ribbon + cars to the circuit's real size for consistent proportions
+    # on every track (X/Y are 1/10 m, so metres->world = scale * 10).
+    world_per_metre = scale * 10
+    track_width = max(1.8, min(9.0, 14.0 * world_per_metre))
+    car_scale = round(track_width / 2.6, 3)
+
     car_data = getattr(loaded, "car_data", None)
     streams: dict[str, tuple] = {}
     first_times: list[float] = []
@@ -315,7 +321,8 @@ def get_replay(season: int, round_number: int, session: str) -> ReplaySession:
     if not streams:
         return ReplaySession(
             season=season, round_number=round_number, session=session,
-            durationSeconds=0.0, lightsOutSeconds=0.0, track=track, drivers=[],
+            durationSeconds=0.0, lightsOutSeconds=0.0,
+            trackWidth=track_width, carScale=car_scale, track=track, drivers=[],
         )
 
     lights_out = _race_start_time(loaded)
@@ -393,6 +400,8 @@ def get_replay(season: int, round_number: int, session: str) -> ReplaySession:
         session=session,
         durationSeconds=float(window),
         lightsOutSeconds=float(lights_out_rel),
+        trackWidth=round(track_width, 2),
+        carScale=car_scale,
         track=track,
         drivers=drivers,
     )

@@ -67,6 +67,8 @@ export function RaceView({
   const replayDrivers = replayQuery.data?.drivers ?? null;
   const replayDuration = replayQuery.data?.durationSeconds ?? null;
   const replayLightsOut = replayQuery.data?.lightsOutSeconds ?? null;
+  const trackWidth = replayQuery.data?.trackWidth ?? 4;
+  const carScale = replayQuery.data?.carScale ?? 1.5;
 
   return (
     <div
@@ -79,6 +81,8 @@ export function RaceView({
           replayDrivers={replayDrivers}
           replayDuration={replayDuration}
           replayLightsOut={replayLightsOut}
+          trackWidth={trackWidth}
+          carScale={carScale}
         />
       </div>
 

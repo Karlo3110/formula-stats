@@ -9,13 +9,16 @@ import { useRaceStore } from '@/stores/use-race-store';
 interface RigCameraProps {
   source: RaceSource;
   curve: THREE.CatmullRomCurve3;
+  trackWidth: number;
 }
 
 const MIN_CAMS = 5;
 const FALLBACK_CAM_COUNT = 12;
-const CAM_OFFSET = 22;
-const CAM_HEIGHT = 5;
-const CINEMATIC_FOV = 20;
+// Camera distances scale with the circuit's track width so framing is
+// consistent whatever the car size is.
+const CAM_OFFSET_RATIO = 6;
+const CAM_HEIGHT_RATIO = 1.6;
+const CINEMATIC_FOV = 22;
 const CUT_INTERVAL = 5;
 
 const OVERVIEW_RADIUS = 235;
@@ -50,9 +53,14 @@ function evenCorners(curve: THREE.CatmullRomCurve3): TrackCorner[] {
 }
 
 /** A trackside TV camera at each corner: outside the bend, low and telephoto. */
-function buildCams(curve: THREE.CatmullRomCurve3): TracksideCam[] {
+function buildCams(
+  curve: THREE.CatmullRomCurve3,
+  trackWidth: number,
+): TracksideCam[] {
   const detected = findCorners(curve);
   const corners = detected.length >= MIN_CAMS ? detected : evenCorners(curve);
+  const offset = trackWidth * CAM_OFFSET_RATIO;
+  const height = trackWidth * CAM_HEIGHT_RATIO;
   const normal = new THREE.Vector3();
 
   return corners.map(({ position, tangent }) => {
@@ -60,15 +68,15 @@ function buildCams(curve: THREE.CatmullRomCurve3): TracksideCam[] {
     const outward = normal.x * position.x + normal.z * position.z >= 0 ? 1 : -1;
     const camera = new THREE.Vector3()
       .copy(position)
-      .addScaledVector(normal, CAM_OFFSET * outward);
-    camera.y = CAM_HEIGHT;
+      .addScaledVector(normal, offset * outward);
+    camera.y = height;
     return { position: camera };
   });
 }
 
-export function RigCamera({ source, curve }: RigCameraProps): null {
+export function RigCamera({ source, curve, trackWidth }: RigCameraProps): null {
   const selectedDriverId = useRaceStore((state) => state.selectedDriverId);
-  const cams = useMemo(() => buildCams(curve), [curve]);
+  const cams = useMemo(() => buildCams(curve, trackWidth), [curve, trackWidth]);
 
   const state = useRef({
     camIndex: -1,

@@ -6,6 +6,7 @@ import { buildTrackGeometry } from '@/lib/race/track';
 
 interface TrackMeshProps {
   curve: THREE.CatmullRomCurve3;
+  width: number;
 }
 
 const TEXTURE_SIZE = 128;
@@ -36,8 +37,8 @@ function makeAsphaltTexture(): THREE.Texture | null {
   return texture;
 }
 
-export function TrackMesh({ curve }: TrackMeshProps): JSX.Element {
-  const track = useMemo(() => buildTrackGeometry(curve), [curve]);
+export function TrackMesh({ curve, width }: TrackMeshProps): JSX.Element {
+  const track = useMemo(() => buildTrackGeometry(curve, width), [curve, width]);
   const asphalt = useMemo(() => makeAsphaltTexture(), []);
 
   return (

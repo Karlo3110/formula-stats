@@ -3,54 +3,76 @@ import type { JSX } from 'react';
 interface CarModelProps {
   color: string;
   selected: boolean;
+  scale: number;
 }
 
-/** Low-poly F1 silhouette, forward = +Z. Kept to a handful of meshes for mobile. */
-export function CarModel({ color, selected }: CarModelProps): JSX.Element {
-  const emissiveIntensity = selected ? 0.9 : 0.25;
+const WHEEL = [
+  [0.56, 0.95] as const,
+  [-0.56, 0.95] as const,
+  [0.58, -0.95] as const,
+  [-0.58, -0.95] as const,
+];
+
+/** Low-poly F1 car (forward = +Z): body, nose + front wing, rear wing, round wheels. */
+export function CarModel({ color, selected, scale }: CarModelProps): JSX.Element {
+  const finalScale = selected ? scale * 1.3 : scale;
+  const emissive = selected ? 0.8 : 0.2;
 
   return (
-    <group scale={selected ? 1.05 : 0.85}>
-      <mesh position={[0, 0.32, 0]}>
-        <boxGeometry args={[0.9, 0.32, 2.8]} />
+    <group scale={finalScale}>
+      {/* monocoque */}
+      <mesh position={[0, 0.3, -0.1]}>
+        <boxGeometry args={[0.66, 0.26, 2.4]} />
         <meshStandardMaterial
           color={color}
           emissive={color}
-          emissiveIntensity={emissiveIntensity}
-          metalness={0.4}
+          emissiveIntensity={emissive}
+          metalness={0.45}
           roughness={0.4}
         />
       </mesh>
 
-      <mesh position={[0, 0.34, 1.55]}>
-        <boxGeometry args={[0.42, 0.2, 1.1]} />
+      {/* nose */}
+      <mesh position={[0, 0.27, 1.35]}>
+        <boxGeometry args={[0.28, 0.16, 1.0]} />
+        <meshStandardMaterial color={color} metalness={0.45} roughness={0.45} />
+      </mesh>
+
+      {/* front wing + endplates */}
+      <mesh position={[0, 0.14, 1.95]}>
+        <boxGeometry args={[1.5, 0.05, 0.42]} />
         <meshStandardMaterial color={color} metalness={0.4} roughness={0.5} />
       </mesh>
+      {[-0.74, 0.74].map((x) => (
+        <mesh key={x} position={[x, 0.2, 1.95]}>
+          <boxGeometry args={[0.05, 0.2, 0.42]} />
+          <meshStandardMaterial color="#0b0e12" roughness={0.6} />
+        </mesh>
+      ))}
 
-      <mesh position={[0, 0.55, 0.1]}>
-        <boxGeometry args={[0.5, 0.34, 0.7]} />
-        <meshStandardMaterial color="#0b0f10" metalness={0.2} roughness={0.6} />
+      {/* halo / cockpit */}
+      <mesh position={[0, 0.5, 0.05]}>
+        <boxGeometry args={[0.4, 0.26, 0.6]} />
+        <meshStandardMaterial color="#0b0e12" metalness={0.2} roughness={0.6} />
       </mesh>
 
-      <mesh position={[0, 0.18, 1.95]}>
-        <boxGeometry args={[1.7, 0.08, 0.34]} />
-        <meshStandardMaterial color="#0b0f10" metalness={0.3} roughness={0.5} />
+      {/* rear wing + endplates */}
+      <mesh position={[0, 0.56, -1.35]}>
+        <boxGeometry args={[1.18, 0.34, 0.09]} />
+        <meshStandardMaterial color={color} metalness={0.4} roughness={0.5} />
       </mesh>
+      {[-0.58, 0.58].map((x) => (
+        <mesh key={x} position={[x, 0.5, -1.32]}>
+          <boxGeometry args={[0.06, 0.36, 0.34]} />
+          <meshStandardMaterial color="#0b0e12" roughness={0.6} />
+        </mesh>
+      ))}
 
-      <mesh position={[0, 0.62, -1.45]}>
-        <boxGeometry args={[1.4, 0.44, 0.18]} />
-        <meshStandardMaterial color="#0b0f10" metalness={0.3} roughness={0.5} />
-      </mesh>
-
-      {[
-        [0.6, 1.05] as const,
-        [-0.6, 1.05] as const,
-        [0.62, -1.05] as const,
-        [-0.62, -1.05] as const,
-      ].map(([x, z]) => (
-        <mesh key={`${x}:${z}`} position={[x, 0.28, z]}>
-          <boxGeometry args={[0.28, 0.5, 0.62]} />
-          <meshStandardMaterial color="#070a0b" roughness={0.9} />
+      {/* wheels */}
+      {WHEEL.map(([x, z]) => (
+        <mesh key={`${x}:${z}`} position={[x, 0.3, z]} rotation-z={Math.PI / 2}>
+          <cylinderGeometry args={[0.3, 0.3, 0.26, 18]} />
+          <meshStandardMaterial color="#08090b" roughness={0.85} />
         </mesh>
       ))}
     </group>

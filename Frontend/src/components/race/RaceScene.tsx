@@ -22,6 +22,8 @@ interface RaceSceneProps {
   replayDrivers: ReplayDriver[] | null;
   replayDuration: number | null;
   replayLightsOut: number | null;
+  trackWidth: number;
+  carScale: number;
 }
 
 export function RaceScene({
@@ -29,6 +31,8 @@ export function RaceScene({
   replayDrivers,
   replayDuration,
   replayLightsOut,
+  trackWidth,
+  carScale,
 }: RaceSceneProps): JSX.Element {
   const curve = useMemo(
     () => (trackPoints ? curveFromPoints(trackPoints) : createTrackCurve()),
@@ -66,8 +70,8 @@ export function RaceScene({
       <hemisphereLight args={['#3a3f42', '#000000', 0.5]} />
 
       <Ticker source={source} />
-      <TrackMesh curve={curve} />
-      <CarsLayer source={source} />
+      <TrackMesh curve={curve} width={trackWidth} />
+      <CarsLayer source={source} carScale={carScale} />
 
       {cameraMode === 'orbit' ? (
         <OrbitControls
@@ -80,7 +84,7 @@ export function RaceScene({
           target={[0, 0, 0]}
         />
       ) : (
-        <RigCamera source={source} curve={curve} />
+        <RigCamera source={source} curve={curve} trackWidth={trackWidth} />
       )}
     </Canvas>
   );

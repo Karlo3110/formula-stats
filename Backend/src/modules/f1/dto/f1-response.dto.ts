@@ -82,6 +82,8 @@ export interface ReplaySessionDto {
   session: string;
   durationSeconds: number;
   lightsOutSeconds: number;
+  trackWidth: number;
+  carScale: number;
   track: number[][];
   drivers: ReplayDriverDto[];
 }
@@ -131,6 +133,8 @@ export function toReplaySessionDto(
     session: payload.session,
     durationSeconds: payload.durationSeconds,
     lightsOutSeconds: payload.lightsOutSeconds,
+    trackWidth: payload.trackWidth,
+    carScale: payload.carScale,
     track: payload.track,
     drivers: payload.drivers,
   };

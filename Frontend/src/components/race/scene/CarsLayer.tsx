@@ -10,9 +10,10 @@ import { CarModel } from './CarModel';
 
 interface CarsLayerProps {
   source: RaceSource;
+  carScale: number;
 }
 
-const CAR_LIFT = 0.15;
+const CAR_LIFT = 0.02;
 const SNAP_DISTANCE = 12;
 const POSITION_LERP = 0.25;
 const ROTATION_LERP = 0.18;
@@ -25,7 +26,7 @@ function lerpAngle(current: number, goal: number, t: number): number {
   return current + delta * t;
 }
 
-export function CarsLayer({ source }: CarsLayerProps): JSX.Element {
+export function CarsLayer({ source, carScale }: CarsLayerProps): JSX.Element {
   const groups = useRef<Array<THREE.Group | null>>([]);
   const target = useMemo(() => new THREE.Vector3(), []);
   const selectedDriverId = useRaceStore((state) => state.selectedDriverId);
@@ -65,7 +66,7 @@ export function CarsLayer({ source }: CarsLayerProps): JSX.Element {
               selectDriver(driver.id);
             }}
           >
-            <CarModel color={driver.color} selected={isSelected} />
+            <CarModel color={driver.color} selected={isSelected} scale={carScale} />
             {isSelected ? (
               <Html position={[0, 1.6, 0]} center distanceFactor={40} occlude={false}>
                 <div className="whitespace-nowrap rounded-full border border-primary/60 bg-background/85 px-2 py-0.5 text-[0.7rem] font-semibold tracking-wide text-primary">

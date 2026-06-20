@@ -58,6 +58,8 @@ class ReplaySession(BaseModel):
     session: str
     durationSeconds: float
     lightsOutSeconds: float
+    trackWidth: float
+    carScale: float
     track: list[list[float]]
     drivers: list[ReplayDriver]
 
