@@ -28,10 +28,11 @@ if TYPE_CHECKING:
 _cache_enabled = False
 
 TRACK_WORLD_SPAN = 240.0
-TRACK_POINTS = 180
-TRACK_SMOOTH_WINDOW = 9
-REPLAY_SAMPLES = 200
-REPLAY_WINDOW_SECONDS = 100.0
+TRACK_POINTS = 220
+TRACK_SMOOTH_WINDOW = 5
+REPLAY_SAMPLES = 300
+REPLAY_RACE_SECONDS = 90.0
+REPLAY_PRESTART_SECONDS = 6.0
 
 
 def _ensure_cache() -> None:
@@ -237,14 +238,21 @@ def get_replay(season: int, round_number: int, session: str) -> ReplaySession:
     if not streams:
         return ReplaySession(
             season=season, round_number=round_number, session=session,
-            durationSeconds=0.0, track=track, drivers=[],
+            durationSeconds=0.0, lightsOutSeconds=0.0, track=track, drivers=[],
         )
 
-    start = _race_start_time(loaded)
-    if start is None:
-        start = max(first_times)
-    grid_abs = np.linspace(start, start + REPLAY_WINDOW_SECONDS, REPLAY_SAMPLES)
-    grid_rel = np.linspace(0, REPLAY_WINDOW_SECONDS, REPLAY_SAMPLES)
+    lights_out = _race_start_time(loaded)
+    if lights_out is None:
+        # No reliable start time: begin at the aligned data start, no countdown.
+        start_abs = max(first_times)
+        lights_out_rel = 0.0
+    else:
+        start_abs = lights_out - REPLAY_PRESTART_SECONDS
+        lights_out_rel = REPLAY_PRESTART_SECONDS
+
+    window = REPLAY_PRESTART_SECONDS + REPLAY_RACE_SECONDS
+    grid_abs = np.linspace(start_abs, start_abs + window, REPLAY_SAMPLES)
+    grid_rel = np.linspace(0, window, REPLAY_SAMPLES)
 
     drivers: list[ReplayDriver] = []
     for number, (st, xs, ys) in streams.items():
@@ -269,7 +277,8 @@ def get_replay(season: int, round_number: int, session: str) -> ReplaySession:
         season=season,
         round_number=round_number,
         session=session,
-        durationSeconds=float(REPLAY_WINDOW_SECONDS),
+        durationSeconds=float(window),
+        lightsOutSeconds=float(lights_out_rel),
         track=track,
         drivers=drivers,
     )

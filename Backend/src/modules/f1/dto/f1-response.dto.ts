@@ -80,6 +80,7 @@ export interface ReplaySessionDto {
   roundNumber: number;
   session: string;
   durationSeconds: number;
+  lightsOutSeconds: number;
   track: number[][];
   drivers: ReplayDriverDto[];
 }
@@ -92,6 +93,7 @@ export function toReplaySessionDto(
     roundNumber: payload.round_number,
     session: payload.session,
     durationSeconds: payload.durationSeconds,
+    lightsOutSeconds: payload.lightsOutSeconds,
     track: payload.track,
     drivers: payload.drivers,
   };

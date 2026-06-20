@@ -4,6 +4,7 @@ import type {
   DriverPose,
   DriverStanding,
   RaceSource,
+  RaceTiming,
   StandingDriver,
 } from './types';
 
@@ -36,10 +37,16 @@ export class ReplaySource implements RaceSource {
   readonly drivers: StandingDriver[];
   private readonly cars: ReplayCar[];
   private readonly duration: number;
+  private readonly lightsOut: number;
   private elapsed = 0;
 
-  constructor(replayDrivers: ReplayDriver[], durationSeconds: number) {
+  constructor(
+    replayDrivers: ReplayDriver[],
+    durationSeconds: number,
+    lightsOutSeconds: number,
+  ) {
     this.duration = durationSeconds > 0 ? durationSeconds : 1;
+    this.lightsOut = lightsOutSeconds;
     this.cars = replayDrivers.map((d, index) => ({
       driver: {
         id: d.code,
@@ -93,6 +100,14 @@ export class ReplaySource implements RaceSource {
       speedKmh: this.speedKmh(entry.car),
       trackT: entry.car.totalLength > 0 ? entry.distance / entry.car.totalLength : 0,
     }));
+  }
+
+  timing(): RaceTiming {
+    return {
+      clock: this.clock(),
+      lightsOut: this.lightsOut,
+      durationSeconds: this.duration,
+    };
   }
 
   private clock(): number {

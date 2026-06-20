@@ -1,7 +1,7 @@
-import { useRef, type JSX } from 'react';
+import { useMemo, useRef, type JSX } from 'react';
 import { Html } from '@react-three/drei';
 import { useFrame, type ThreeEvent } from '@react-three/fiber';
-import type * as THREE from 'three';
+import * as THREE from 'three';
 
 import type { RaceSource } from '@/lib/race/types';
 import { useRaceStore } from '@/stores/use-race-store';
@@ -13,9 +13,21 @@ interface CarsLayerProps {
 }
 
 const CAR_LIFT = 0.15;
+const SNAP_DISTANCE = 12;
+const POSITION_LERP = 0.25;
+const ROTATION_LERP = 0.18;
+
+function lerpAngle(current: number, goal: number, t: number): number {
+  const twoPi = Math.PI * 2;
+  let delta = (goal - current) % twoPi;
+  if (delta > Math.PI) delta -= twoPi;
+  if (delta < -Math.PI) delta += twoPi;
+  return current + delta * t;
+}
 
 export function CarsLayer({ source }: CarsLayerProps): JSX.Element {
   const groups = useRef<Array<THREE.Group | null>>([]);
+  const target = useMemo(() => new THREE.Vector3(), []);
   const selectedDriverId = useRaceStore((state) => state.selectedDriverId);
   const selectDriver = useRaceStore((state) => state.selectDriver);
 
@@ -25,8 +37,16 @@ export function CarsLayer({ source }: CarsLayerProps): JSX.Element {
       if (!group) return;
       const pose = source.pose(driver.id);
       if (!pose) return;
-      group.position.set(pose.x, CAR_LIFT, pose.z);
-      group.rotation.y = pose.headingY;
+      target.set(pose.x, CAR_LIFT, pose.z);
+      // Snap on big jumps (initial placement, loop wrap); otherwise ease for
+      // smooth motion and turning.
+      if (group.position.distanceTo(target) > SNAP_DISTANCE) {
+        group.position.copy(target);
+        group.rotation.y = pose.headingY;
+      } else {
+        group.position.lerp(target, POSITION_LERP);
+        group.rotation.y = lerpAngle(group.rotation.y, pose.headingY, ROTATION_LERP);
+      }
     });
   });
 

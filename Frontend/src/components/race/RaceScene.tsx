@@ -20,12 +20,14 @@ interface RaceSceneProps {
   trackPoints: ReadonlyArray<readonly [number, number]> | null;
   replayDrivers: ReplayDriver[] | null;
   replayDuration: number | null;
+  replayLightsOut: number | null;
 }
 
 export function RaceScene({
   trackPoints,
   replayDrivers,
   replayDuration,
+  replayLightsOut,
 }: RaceSceneProps): JSX.Element {
   const curve = useMemo(
     () => (trackPoints ? curveFromPoints(trackPoints) : createTrackCurve()),
@@ -35,9 +37,9 @@ export function RaceScene({
   const source = useMemo<RaceSource>(
     () =>
       replayDrivers && replayDrivers.length > 0
-        ? new ReplaySource(replayDrivers, replayDuration ?? 1)
+        ? new ReplaySource(replayDrivers, replayDuration ?? 1, replayLightsOut ?? 0)
         : new MockSource(curve),
-    [replayDrivers, replayDuration, curve],
+    [replayDrivers, replayDuration, replayLightsOut, curve],
   );
 
   useEffect(() => {

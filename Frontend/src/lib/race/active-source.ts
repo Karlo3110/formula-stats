@@ -1,4 +1,4 @@
-import type { DriverStanding, RaceSource } from './types';
+import type { DriverStanding, RaceSource, RaceTiming } from './types';
 
 /**
  * Module-level handle to the live race source, so the side panels (outside the
@@ -12,4 +12,8 @@ export function setActiveSource(source: RaceSource | null): void {
 
 export function readStandings(): DriverStanding[] {
   return activeSource ? activeSource.standings() : [];
+}
+
+export function readTiming(): RaceTiming | null {
+  return activeSource ? activeSource.timing() : null;
 }

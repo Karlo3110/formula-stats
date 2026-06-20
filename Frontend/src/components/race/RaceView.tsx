@@ -10,6 +10,7 @@ import { useRaceStore } from '@/stores/use-race-store';
 
 import { DriverList } from './DriverList';
 import { DriverTelemetry } from './DriverTelemetry';
+import { StartLights } from './StartLights';
 
 const RACE_SEASON = 2024;
 const RACE_ROUND = 1;
@@ -51,6 +52,7 @@ export function RaceView(): JSX.Element {
   const trackPoints = replayQuery.data?.track ?? null;
   const replayDrivers = replayQuery.data?.drivers ?? null;
   const replayDuration = replayQuery.data?.durationSeconds ?? null;
+  const replayLightsOut = replayQuery.data?.lightsOutSeconds ?? null;
 
   return (
     <div
@@ -62,8 +64,11 @@ export function RaceView(): JSX.Element {
           trackPoints={trackPoints}
           replayDrivers={replayDrivers}
           replayDuration={replayDuration}
+          replayLightsOut={replayLightsOut}
         />
       </div>
+
+      <StartLights />
 
       <div
         className="pointer-events-none absolute inset-0"

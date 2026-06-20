@@ -57,5 +57,6 @@ class ReplaySession(BaseModel):
     round_number: int
     session: str
     durationSeconds: float
+    lightsOutSeconds: float
     track: list[list[float]]
     drivers: list[ReplayDriver]

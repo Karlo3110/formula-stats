@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 
-export const TRACK_WIDTH = 4;
+export const TRACK_WIDTH = 9;
 const RIBBON_SEGMENTS = 800;
 const ARC_LENGTH_DIVISIONS = 4000;
 const UP = new THREE.Vector3(0, 1, 0);

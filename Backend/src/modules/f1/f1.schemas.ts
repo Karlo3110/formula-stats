@@ -54,6 +54,7 @@ export const ReplaySessionSchema = z.object({
   round_number: z.number().int(),
   session: z.string(),
   durationSeconds: z.number(),
+  lightsOutSeconds: z.number(),
   track: z.array(z.array(z.number())),
   drivers: z.array(ReplayDriverSchema),
 });

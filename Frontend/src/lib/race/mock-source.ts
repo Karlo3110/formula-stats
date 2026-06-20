@@ -1,7 +1,13 @@
 import * as THREE from 'three';
 
 import { RACE_DRIVERS, raceEngine } from './race-engine';
-import type { DriverPose, DriverStanding, RaceSource, StandingDriver } from './types';
+import type {
+  DriverPose,
+  DriverStanding,
+  RaceSource,
+  RaceTiming,
+  StandingDriver,
+} from './types';
 
 /** Wraps the synthetic race engine; used as a fallback when no official replay. */
 export class MockSource implements RaceSource {
@@ -36,5 +42,9 @@ export class MockSource implements RaceSource {
 
   standings(): DriverStanding[] {
     return raceEngine.standings();
+  }
+
+  timing(): RaceTiming | null {
+    return null;
   }
 }
