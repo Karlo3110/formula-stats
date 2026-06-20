@@ -45,3 +45,54 @@ model RefreshToken {
   @@index([userId])
   @@map("refresh_tokens")
 }
+
+// ── F1 data (fetched from FastF1 via the data service, persisted for history
+// and to shield upstream rate limits) ───────────────────────────────────────
+
+model F1Event {
+  id          String    @id @default(uuid(7)) @db.Uuid
+  season      Int
+  roundNumber Int       @map("round_number")
+  eventName   String    @map("event_name")
+  country     String
+  location    String
+  eventDate   DateTime? @map("event_date") @db.Timestamptz
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@unique([season, roundNumber])
+  @@map("f1_events")
+}
+
+model F1SessionResult {
+  id           String   @id @default(uuid(7)) @db.Uuid
+  season       Int
+  roundNumber  Int      @map("round_number")
+  session      String
+  position     Int?
+  driverNumber String   @map("driver_number")
+  abbreviation String
+  fullName     String   @map("full_name")
+  teamName     String   @map("team_name")
+  points       Float
+  status       String
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@unique([season, roundNumber, session, driverNumber])
+  @@index([season, roundNumber, session])
+  @@map("f1_session_results")
+}
+
+model F1TrackMap {
+  id          String   @id @default(uuid(7)) @db.Uuid
+  season      Int
+  roundNumber Int      @map("round_number")
+  session     String
+  points      Json
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@unique([season, roundNumber, session])
+  @@map("f1_track_maps")
+}

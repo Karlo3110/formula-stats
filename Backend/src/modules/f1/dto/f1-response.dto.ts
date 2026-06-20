@@ -1,3 +1,5 @@
+import type { F1Event, F1SessionResult, F1TrackMap } from '@prisma/client';
+
 import type {
   SeasonSchedulePayload,
   SessionResultsPayload,
@@ -63,6 +65,63 @@ export function toTrackMapDto(payload: TrackMapPayload): TrackMapDto {
     session: payload.session,
     track: payload.track,
   };
+}
+
+export function eventsToSeasonScheduleDto(
+  season: number,
+  rows: F1Event[],
+): SeasonScheduleDto {
+  return {
+    season,
+    events: rows.map((row) => ({
+      roundNumber: row.roundNumber,
+      country: row.country,
+      location: row.location,
+      eventName: row.eventName,
+      eventDate: row.eventDate ? row.eventDate.toISOString() : null,
+    })),
+  };
+}
+
+export function resultsToSessionResultsDto(
+  season: number,
+  roundNumber: number,
+  session: string,
+  rows: F1SessionResult[],
+): SessionResultsDto {
+  return {
+    season,
+    roundNumber,
+    session,
+    results: rows.map((row) => ({
+      position: row.position,
+      driverNumber: row.driverNumber,
+      abbreviation: row.abbreviation,
+      fullName: row.fullName,
+      teamName: row.teamName,
+      points: row.points,
+      status: row.status,
+    })),
+  };
+}
+
+export function trackMapRowToDto(row: F1TrackMap): TrackMapDto {
+  return {
+    season: row.season,
+    roundNumber: row.roundNumber,
+    session: row.session,
+    track: toNumberMatrix(row.points),
+  };
+}
+
+function toNumberMatrix(value: unknown): number[][] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+  return value.filter(
+    (row): row is number[] =>
+      Array.isArray(row) && row.every((n) => typeof n === 'number'),
+  );
 }
 
 export function toSessionResultsDto(
