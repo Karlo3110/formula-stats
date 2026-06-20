@@ -10,7 +10,6 @@ import {
   toSeasonScheduleDto,
   toSessionResultsDto,
   toTrackMapDto,
-  trackMapRowToDto,
   type SeasonScheduleDto,
   type SessionResultsDto,
   type TrackMapDto,
@@ -19,6 +18,8 @@ import {
 const SCHEDULE_TTL_SECONDS = 3600;
 const RESULTS_TTL_SECONDS = 86_400;
 const TRACK_MAP_TTL_SECONDS = 604_800;
+// Bump when the track-outline geometry algorithm changes, to invalidate caches.
+const TRACK_MAP_VERSION = 'v2';
 
 /**
  * Serves F1 data through three tiers so clients never hit FastF1 directly:
@@ -91,21 +92,17 @@ export class F1Service {
     round: number,
     session: string,
   ): Promise<TrackMapDto> {
-    const key = `f1:trackmap:${season}:${round}:${session}`;
+    // Track outline is derived render geometry (algorithm may change), so it is
+    // cached in Redis under a version key rather than persisted as history.
+    const key = `f1:trackmap:${TRACK_MAP_VERSION}:${season}:${round}:${session}`;
     const cached = await this.cache.get<TrackMapDto>(key);
     if (cached) {
       return cached;
     }
 
-    const stored = await this.repository.findTrackMap(season, round, session);
-    if (stored) {
-      return this.cacheAndReturn(key, trackMapRowToDto(stored), TRACK_MAP_TTL_SECONDS);
-    }
-
     const dto = toTrackMapDto(
       await this.dataService.getTrackMap(season, round, session),
     );
-    await this.repository.replaceTrackMap(season, round, session, dto.track);
     return this.cacheAndReturn(key, dto, TRACK_MAP_TTL_SECONDS);
   }
 

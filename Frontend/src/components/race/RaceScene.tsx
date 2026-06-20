@@ -24,13 +24,13 @@ export function RaceScene({ trackPoints }: RaceSceneProps): JSX.Element {
 
   return (
     <Canvas
-      camera={{ position: [0, 72, 115], fov: 38, near: 0.1, far: 700 }}
+      camera={{ position: [0, 155, 235], fov: 38, near: 0.1, far: 1200 }}
       dpr={[1, 1.75]}
       gl={{ antialias: true, powerPreference: 'high-performance' }}
       onPointerMissed={() => clearSelection()}
     >
       <color attach="background" args={['#070a0b']} />
-      <fog attach="fog" args={['#070a0b', 90, 320]} />
+      <fog attach="fog" args={['#070a0b', 300, 1050]} />
 
       <ambientLight intensity={0.7} />
       <directionalLight position={[40, 80, 20]} intensity={1.2} />

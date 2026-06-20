@@ -1,7 +1,8 @@
 import * as THREE from 'three';
 
-export const TRACK_WIDTH = 9;
-const RIBBON_SEGMENTS = 600;
+export const TRACK_WIDTH = 4;
+const RIBBON_SEGMENTS = 800;
+const ARC_LENGTH_DIVISIONS = 4000;
 const UP = new THREE.Vector3(0, 1, 0);
 
 const CONTROL_POINTS: ReadonlyArray<[number, number, number]> = [
@@ -18,9 +19,21 @@ const CONTROL_POINTS: ReadonlyArray<[number, number, number]> = [
   [-30, 0, -48],
 ];
 
+function withDenseArcLengths(
+  curve: THREE.CatmullRomCurve3,
+): THREE.CatmullRomCurve3 {
+  // A dense arc-length LUT keeps getPointAt() smooth so cars don't snap between
+  // samples on a long, detailed track.
+  curve.arcLengthDivisions = ARC_LENGTH_DIVISIONS;
+  curve.updateArcLengths();
+  return curve;
+}
+
 export function createTrackCurve(): THREE.CatmullRomCurve3 {
   const points = CONTROL_POINTS.map(([x, y, z]) => new THREE.Vector3(x, y, z));
-  return new THREE.CatmullRomCurve3(points, true, 'catmullrom', 0.5);
+  return withDenseArcLengths(
+    new THREE.CatmullRomCurve3(points, true, 'catmullrom', 0.5),
+  );
 }
 
 const MIN_TRACK_POINTS = 8;
@@ -37,7 +50,10 @@ export function curveFromPoints(
     return createTrackCurve();
   }
   const vectors = points.map(([x, y]) => new THREE.Vector3(x, 0, y));
-  return new THREE.CatmullRomCurve3(vectors, true, 'catmullrom', 0.5);
+  // Centripetal avoids the cusps/loops plain catmullrom produces on dense data.
+  return withDenseArcLengths(
+    new THREE.CatmullRomCurve3(vectors, true, 'centripetal'),
+  );
 }
 
 interface TrackGeometry {
@@ -64,6 +80,10 @@ export function buildTrackGeometry(
     const t = i / RIBBON_SEGMENTS;
     curve.getPointAt(t, point);
     curve.getTangentAt(t, tangent);
+    // Flatten the tangent to the ground plane so the offset normal stays stable
+    // (avoids the ribbon twisting/crossing on noisy curves).
+    tangent.y = 0;
+    tangent.normalize();
     normal.copy(tangent).cross(UP).normalize();
 
     const left = new THREE.Vector3().copy(point).addScaledVector(normal, half);

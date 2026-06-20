@@ -10,7 +10,7 @@ export function CarModel({ color, selected }: CarModelProps): JSX.Element {
   const emissiveIntensity = selected ? 0.9 : 0.25;
 
   return (
-    <group scale={selected ? 1.15 : 1}>
+    <group scale={selected ? 2 : 1.6}>
       <mesh position={[0, 0.32, 0]}>
         <boxGeometry args={[0.9, 0.32, 2.8]} />
         <meshStandardMaterial

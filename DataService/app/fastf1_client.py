@@ -15,12 +15,14 @@ from app.config import get_settings
 from app.models import DriverResult, EventSummary, SessionResults, TrackMap
 
 if TYPE_CHECKING:
+    import numpy as np
     import pandas as pd
 
 _cache_enabled = False
 
-TRACK_WORLD_SPAN = 120.0
-TRACK_MAX_POINTS = 240
+TRACK_WORLD_SPAN = 240.0
+TRACK_POINTS = 180
+TRACK_SMOOTH_WINDOW = 9
 
 
 def _ensure_cache() -> None:
@@ -102,23 +104,10 @@ def get_track_map(season: int, round_number: int, session: str) -> TrackMap:
     fastest = loaded.laps.pick_fastest()
     pos = fastest.get_pos_data()
 
-    xs = pos["X"].to_numpy(dtype=float)
-    ys = pos["Y"].to_numpy(dtype=float)
-
-    center_x = (float(xs.min()) + float(xs.max())) / 2
-    center_y = (float(ys.min()) + float(ys.max())) / 2
-    span = max(float(xs.max() - xs.min()), float(ys.max() - ys.min())) or 1.0
-    scale = TRACK_WORLD_SPAN / span
-
-    count = len(xs)
-    step = max(1, count // TRACK_MAX_POINTS)
-    track = [
-        [
-            round((float(xs[i]) - center_x) * scale, 2),
-            round((float(ys[i]) - center_y) * scale, 2),
-        ]
-        for i in range(0, count, step)
-    ]
+    track = _build_outline(
+        pos["X"].to_numpy(dtype=float),
+        pos["Y"].to_numpy(dtype=float),
+    )
 
     return TrackMap(
         season=season,
@@ -126,3 +115,47 @@ def get_track_map(season: int, round_number: int, session: str) -> TrackMap:
         session=session,
         track=track,
     )
+
+
+def _circular_smooth(values: "np.ndarray", window: int) -> "np.ndarray":
+    import numpy as np
+
+    if window < 2:
+        return values
+    padded = np.concatenate([values[-window:], values, values[:window]])
+    kernel = np.ones(window) / window
+    smoothed = np.convolve(padded, kernel, mode="same")
+    return smoothed[window:-window]
+
+
+def _build_outline(xs: "np.ndarray", ys: "np.ndarray") -> list[list[float]]:
+    """Clean a noisy GPS lap into an evenly-spaced, smoothed, normalized loop."""
+    import numpy as np
+
+    # Drop consecutive duplicate samples.
+    keep = np.concatenate([[True], (np.diff(xs) != 0) | (np.diff(ys) != 0)])
+    xs, ys = xs[keep], ys[keep]
+
+    # Resample evenly by arc length so the curve has no clustered points.
+    seg = np.sqrt(np.diff(xs) ** 2 + np.diff(ys) ** 2)
+    cumulative = np.concatenate([[0.0], np.cumsum(seg)])
+    total = float(cumulative[-1])
+    if total <= 0:
+        return []
+    samples = np.linspace(0, total, TRACK_POINTS, endpoint=False)
+    xr = np.interp(samples, cumulative, xs)
+    yr = np.interp(samples, cumulative, ys)
+
+    # Smooth out telemetry jitter (circular, since the lap is a loop).
+    xr = _circular_smooth(xr, TRACK_SMOOTH_WINDOW)
+    yr = _circular_smooth(yr, TRACK_SMOOTH_WINDOW)
+
+    center_x = (float(xr.min()) + float(xr.max())) / 2
+    center_y = (float(yr.min()) + float(yr.max())) / 2
+    span = max(float(xr.max() - xr.min()), float(yr.max() - yr.min())) or 1.0
+    scale = TRACK_WORLD_SPAN / span
+
+    return [
+        [round((float(x) - center_x) * scale, 2), round((float(y) - center_y) * scale, 2)]
+        for x, y in zip(xr, yr)
+    ]
