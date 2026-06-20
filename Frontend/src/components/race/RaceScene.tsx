@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, type JSX } from 'react';
 import { Canvas } from '@react-three/fiber';
+import { OrbitControls } from '@react-three/drei';
 
 import { setActiveSource } from '@/lib/race/active-source';
 import { MockSource } from '@/lib/race/mock-source';
@@ -11,6 +12,7 @@ import type { RaceSource } from '@/lib/race/types';
 import type { ReplayDriver } from '@/lib/validation/f1-schemas';
 import { useRaceStore } from '@/stores/use-race-store';
 
+import { ApexMarkers } from './scene/ApexMarkers';
 import { CarsLayer } from './scene/CarsLayer';
 import { RigCamera } from './scene/RigCamera';
 import { Ticker } from './scene/Ticker';
@@ -48,30 +50,40 @@ export function RaceScene({
   }, [source]);
 
   const clearSelection = useRaceStore((state) => state.clearSelection);
+  const cameraMode = useRaceStore((state) => state.cameraMode);
 
   return (
     <Canvas
-      camera={{ position: [0, 155, 235], fov: 38, near: 0.1, far: 1200 }}
+      camera={{ position: [0, 155, 235], fov: 38, near: 0.1, far: 1400 }}
       dpr={[1, 1.75]}
       gl={{ antialias: true, powerPreference: 'high-performance' }}
       onPointerMissed={() => clearSelection()}
     >
-      <color attach="background" args={['#070a0b']} />
-      <fog attach="fog" args={['#070a0b', 300, 1050]} />
+      <color attach="background" args={['#000000']} />
+      <fog attach="fog" args={['#000000', 340, 1200]} />
 
-      <ambientLight intensity={0.7} />
-      <directionalLight position={[40, 80, 20]} intensity={1.2} />
-      <hemisphereLight args={['#1a2a2e', '#05070a', 0.4]} />
-
-      <mesh rotation-x={-Math.PI / 2} position-y={-0.06}>
-        <planeGeometry args={[700, 700]} />
-        <meshStandardMaterial color="#05070a" roughness={1} />
-      </mesh>
+      <ambientLight intensity={0.85} />
+      <directionalLight position={[60, 120, 40]} intensity={1.3} />
+      <hemisphereLight args={['#3a3f42', '#000000', 0.5]} />
 
       <Ticker source={source} />
       <TrackMesh curve={curve} />
+      <ApexMarkers curve={curve} />
       <CarsLayer source={source} />
-      <RigCamera source={source} />
+
+      {cameraMode === 'orbit' ? (
+        <OrbitControls
+          makeDefault
+          enableDamping
+          dampingFactor={0.1}
+          minDistance={25}
+          maxDistance={520}
+          maxPolarAngle={Math.PI * 0.49}
+          target={[0, 0, 0]}
+        />
+      ) : (
+        <RigCamera source={source} curve={curve} />
+      )}
     </Canvas>
   );
 }

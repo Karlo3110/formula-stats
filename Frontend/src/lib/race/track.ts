@@ -29,6 +29,49 @@ function withDenseArcLengths(
   return curve;
 }
 
+const APEX_SAMPLES = 400;
+const APEX_MIN_GAP = 0.045;
+
+/** Detects corner apexes as local maxima of the track's turn angle. */
+export function findApexes(curve: THREE.CatmullRomCurve3): THREE.Vector3[] {
+  const points: THREE.Vector3[] = [];
+  for (let i = 0; i < APEX_SAMPLES; i += 1) {
+    points.push(curve.getPointAt(i / APEX_SAMPLES));
+  }
+
+  const angles = points.map((_, i) => {
+    const a = points[(i - 1 + APEX_SAMPLES) % APEX_SAMPLES];
+    const b = points[i];
+    const c = points[(i + 1) % APEX_SAMPLES];
+    if (!a || !b || !c) return 0;
+    const v1x = b.x - a.x;
+    const v1z = b.z - a.z;
+    const v2x = c.x - b.x;
+    const v2z = c.z - b.z;
+    return Math.abs(Math.atan2(v1x * v2z - v1z * v2x, v1x * v2x + v1z * v2z));
+  });
+
+  const mean = angles.reduce((sum, v) => sum + v, 0) / angles.length;
+  const threshold = mean * 1.8;
+
+  const apexes: THREE.Vector3[] = [];
+  let lastT = -1;
+  for (let i = 0; i < APEX_SAMPLES; i += 1) {
+    const t = i / APEX_SAMPLES;
+    const prev = angles[(i - 1 + APEX_SAMPLES) % APEX_SAMPLES] ?? 0;
+    const next = angles[(i + 1) % APEX_SAMPLES] ?? 0;
+    const here = angles[i] ?? 0;
+    if (here > threshold && here >= prev && here > next && t - lastT > APEX_MIN_GAP) {
+      const point = points[i];
+      if (point) {
+        apexes.push(point.clone());
+        lastT = t;
+      }
+    }
+  }
+  return apexes;
+}
+
 export function createTrackCurve(): THREE.CatmullRomCurve3 {
   const points = CONTROL_POINTS.map(([x, y, z]) => new THREE.Vector3(x, y, z));
   return withDenseArcLengths(

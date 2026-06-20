@@ -13,25 +13,12 @@ export function TrackMesh({ curve }: TrackMeshProps): JSX.Element {
 
   return (
     <group>
-      <mesh geometry={track.surface} receiveShadow={false}>
-        <meshStandardMaterial
-          color="#11181b"
-          roughness={0.85}
-          metalness={0.15}
-          emissive="#05080a"
-        />
+      <mesh geometry={track.surface}>
+        <meshStandardMaterial color="#2b2e30" roughness={0.95} metalness={0.05} />
       </mesh>
 
-      <Line points={track.leftEdge} color="#27f4d2" lineWidth={3} />
-      <Line points={track.rightEdge} color="#eef5f6" lineWidth={3} />
-
-      <Line
-        points={track.leftEdge}
-        color="#27f4d2"
-        lineWidth={10}
-        transparent
-        opacity={0.1}
-      />
+      <Line points={track.leftEdge} color="#f4f6f7" lineWidth={2.5} />
+      <Line points={track.rightEdge} color="#f4f6f7" lineWidth={2.5} />
     </group>
   );
 }

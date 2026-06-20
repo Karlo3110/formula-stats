@@ -4,9 +4,10 @@ import dynamic from 'next/dynamic';
 import { useRef, type JSX } from 'react';
 
 import { Spinner } from '@/components/ui/Spinner';
+import { cn } from '@/lib/utils/cn';
 import { useFullscreen } from '@/hooks/use-fullscreen';
 import { useReplay } from '@/hooks/use-f1';
-import { useRaceStore } from '@/stores/use-race-store';
+import { useRaceStore, type CameraMode } from '@/stores/use-race-store';
 
 import { DriverList } from './DriverList';
 import { DriverTelemetry } from './DriverTelemetry';
@@ -31,6 +32,11 @@ const RaceScene = dynamic(
 const VIGNETTE =
   'radial-gradient(120% 120% at 50% 35%, transparent 50%, rgba(0,0,0,0.55) 100%)';
 
+const CAMERA_MODES: ReadonlyArray<{ mode: CameraMode; label: string }> = [
+  { mode: 'cinematic', label: 'Cinematic' },
+  { mode: 'orbit', label: 'Free' },
+];
+
 function FullscreenIcon({ active }: { active: boolean }): JSX.Element {
   return (
     <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2}>
@@ -47,6 +53,8 @@ export function RaceView(): JSX.Element {
   const containerRef = useRef<HTMLDivElement>(null);
   const { isFullscreen, toggle } = useFullscreen(containerRef);
   const selectedDriverId = useRaceStore((state) => state.selectedDriverId);
+  const cameraMode = useRaceStore((state) => state.cameraMode);
+  const setCameraMode = useRaceStore((state) => state.setCameraMode);
 
   const replayQuery = useReplay(RACE_SEASON, RACE_ROUND, RACE_SESSION);
   const trackPoints = replayQuery.data?.track ?? null;
@@ -75,14 +83,33 @@ export function RaceView(): JSX.Element {
         style={{ background: VIGNETTE }}
       />
 
-      <button
-        type="button"
-        onClick={toggle}
-        aria-label="Toggle fullscreen"
-        className="glass-pill absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full text-foreground transition hover:text-primary"
-      >
-        <FullscreenIcon active={isFullscreen} />
-      </button>
+      <div className="pointer-events-auto absolute right-4 top-4 z-20 flex items-center gap-2">
+        <div className="glass-pill flex rounded-full p-1">
+          {CAMERA_MODES.map(({ mode, label }) => (
+            <button
+              key={mode}
+              type="button"
+              onClick={() => setCameraMode(mode)}
+              className={cn(
+                'rounded-full px-3 py-1 text-[0.6rem] uppercase tracking-[0.2em] transition',
+                cameraMode === mode
+                  ? 'bg-primary text-primary-foreground'
+                  : 'text-muted hover:text-foreground',
+              )}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+        <button
+          type="button"
+          onClick={toggle}
+          aria-label="Toggle fullscreen"
+          className="glass-pill flex h-9 w-9 items-center justify-center rounded-full text-foreground transition hover:text-primary"
+        >
+          <FullscreenIcon active={isFullscreen} />
+        </button>
+      </div>
 
       <div className="pointer-events-auto absolute bottom-20 left-4 top-4 w-44 animate-overlay-rise md:bottom-4 md:w-56">
         <DriverList />
