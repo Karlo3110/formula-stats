@@ -19,7 +19,7 @@ export function DriverList(): JSX.Element {
   const selectDriver = useRaceStore((state) => state.selectDriver);
 
   return (
-    <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-white/10 bg-black/35 backdrop-blur-xl">
+    <div className="glass-panel flex h-full flex-col overflow-hidden rounded-2xl">
       <div className="px-4 pb-2 pt-3 text-[0.6rem] uppercase tracking-[0.3em] text-muted">
         Running Order
       </div>

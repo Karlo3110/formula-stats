@@ -42,7 +42,7 @@ export function DriverTelemetry(): JSX.Element | null {
   const { driver } = standing;
 
   return (
-    <div className="w-full rounded-2xl border border-white/10 bg-black/35 p-5 backdrop-blur-xl">
+    <div className="glass-panel w-full rounded-2xl p-5">
       <div className="flex items-start gap-3">
         <span
           className="mt-1 h-9 w-1 rounded-full"

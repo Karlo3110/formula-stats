@@ -34,7 +34,7 @@ export function RaceTopBar(): JSX.Element {
         <Link
           href="/"
           aria-label="Exit live race"
-          className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-black/30 text-foreground backdrop-blur-md transition hover:border-primary/50 hover:text-primary"
+          className="glass-pill flex h-9 w-9 items-center justify-center rounded-full text-foreground transition hover:text-primary"
         >
           <ArrowLeftIcon />
         </Link>
@@ -50,14 +50,14 @@ export function RaceTopBar(): JSX.Element {
       </div>
 
       <div className="pointer-events-auto flex items-center gap-3">
-        <span className="rounded-full border border-warning/30 bg-warning/10 px-3 py-1 text-[0.6rem] uppercase tracking-[0.2em] text-warning">
+        <span className="glass-pill rounded-full px-3 py-1 text-[0.6rem] uppercase tracking-[0.2em] text-warning">
           Demo replay
         </span>
         <button
           type="button"
           onClick={toggle}
           aria-label="Toggle fullscreen"
-          className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-black/30 text-foreground backdrop-blur-md transition hover:border-primary/50 hover:text-primary"
+          className="glass-pill flex h-9 w-9 items-center justify-center rounded-full text-foreground transition hover:text-primary"
         >
           <ExpandIcon active={isFullscreen} />
         </button>

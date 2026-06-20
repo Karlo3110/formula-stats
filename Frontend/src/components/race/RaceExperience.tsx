@@ -54,7 +54,7 @@ export function RaceExperience(): JSX.Element {
         </div>
       ) : (
         <div className="pointer-events-none absolute inset-x-0 bottom-6 flex justify-center">
-          <span className="rounded-full border border-white/10 bg-black/30 px-4 py-1.5 text-[0.65rem] uppercase tracking-[0.25em] text-muted backdrop-blur-md">
+          <span className="glass-pill rounded-full px-4 py-1.5 text-[0.65rem] uppercase tracking-[0.25em] text-muted">
             Select a car to follow
           </span>
         </div>

@@ -22,15 +22,22 @@ export function TrackMesh({ curve }: TrackMeshProps): JSX.Element {
         />
       </mesh>
 
-      <Line points={track.leftEdge} color="#27f4d2" lineWidth={2.5} />
-      <Line points={track.rightEdge} color="#dfe9ea" lineWidth={1.5} />
+      <Line points={track.leftEdge} color="#27f4d2" lineWidth={5} />
+      <Line points={track.rightEdge} color="#eef5f6" lineWidth={4} />
 
       <Line
         points={track.leftEdge}
         color="#27f4d2"
-        lineWidth={7}
+        lineWidth={16}
         transparent
-        opacity={0.12}
+        opacity={0.14}
+      />
+      <Line
+        points={track.rightEdge}
+        color="#9fb6b9"
+        lineWidth={12}
+        transparent
+        opacity={0.08}
       />
     </group>
   );
