@@ -3,6 +3,7 @@ export const f1Keys = {
   all: ['f1'] as const,
   seasonEvents: (season: number) =>
     [...f1Keys.all, 'season-events', season] as const,
+  schedule: (season: number) => [...f1Keys.all, 'schedule', season] as const,
   sessionResults: (season: number, round: number, session: string) =>
     [...f1Keys.all, 'session-results', season, round, session] as const,
   trackMap: (season: number, round: number, session: string) =>

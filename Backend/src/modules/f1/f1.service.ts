@@ -11,13 +11,17 @@ import {
   toSeasonScheduleDto,
   toSessionResultsDto,
   toTrackMapDto,
+  toWeekendScheduleDto,
   type ReplaySessionDto,
   type SeasonScheduleDto,
   type SessionResultsDto,
   type TrackMapDto,
+  type WeekendScheduleDto,
 } from './dto/f1-response.dto';
 
 const SCHEDULE_TTL_SECONDS = 3600;
+const WEEKEND_TTL_SECONDS = 3600;
+const WEEKEND_VERSION = 'v1';
 const RESULTS_TTL_SECONDS = 86_400;
 const TRACK_MAP_TTL_SECONDS = 604_800;
 const REPLAY_TTL_SECONDS = 604_800;
@@ -108,6 +112,16 @@ export class F1Service {
       await this.dataService.getTrackMap(season, round, session),
     );
     return this.cacheAndReturn(key, dto, TRACK_MAP_TTL_SECONDS);
+  }
+
+  async getSchedule(season: number): Promise<WeekendScheduleDto> {
+    const key = `f1:schedule:${WEEKEND_VERSION}:${season}`;
+    const cached = await this.cache.get<WeekendScheduleDto>(key);
+    if (cached) {
+      return cached;
+    }
+    const dto = toWeekendScheduleDto(await this.dataService.getSchedule(season));
+    return this.cacheAndReturn(key, dto, WEEKEND_TTL_SECONDS);
   }
 
   async getReplay(

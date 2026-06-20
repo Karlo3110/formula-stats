@@ -8,6 +8,7 @@ import type {
   SeasonScheduleDto,
   SessionResultsDto,
   TrackMapDto,
+  WeekendScheduleDto,
 } from './dto/f1-response.dto';
 
 /**
@@ -25,6 +26,13 @@ export class F1Controller {
     @Param('season', ParseIntPipe) season: number,
   ): Promise<SeasonScheduleDto> {
     return this.f1Service.getSeasonEvents(season);
+  }
+
+  @Get('seasons/:season/schedule')
+  getSchedule(
+    @Param('season', ParseIntPipe) season: number,
+  ): Promise<WeekendScheduleDto> {
+    return this.f1Service.getSchedule(season);
   }
 
   @Get('seasons/:season/rounds/:round/sessions/:session/results')

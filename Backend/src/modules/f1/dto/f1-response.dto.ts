@@ -5,6 +5,7 @@ import type {
   SeasonSchedulePayload,
   SessionResultsPayload,
   TrackMapPayload,
+  WeekendSchedulePayload,
 } from '../f1.schemas';
 
 export interface EventSummaryDto {
@@ -83,6 +84,42 @@ export interface ReplaySessionDto {
   lightsOutSeconds: number;
   track: number[][];
   drivers: ReplayDriverDto[];
+}
+
+export interface WeekendSessionDto {
+  name: string;
+  startUtc: string | null;
+}
+
+export interface WeekendEventDto {
+  roundNumber: number;
+  country: string;
+  location: string;
+  eventName: string;
+  sessions: WeekendSessionDto[];
+}
+
+export interface WeekendScheduleDto {
+  season: number;
+  events: WeekendEventDto[];
+}
+
+export function toWeekendScheduleDto(
+  payload: WeekendSchedulePayload,
+): WeekendScheduleDto {
+  return {
+    season: payload.season,
+    events: payload.events.map((event) => ({
+      roundNumber: event.round_number,
+      country: event.country,
+      location: event.location,
+      eventName: event.event_name,
+      sessions: event.sessions.map((s) => ({
+        name: s.name,
+        startUtc: s.start_utc,
+      })),
+    })),
+  };
 }
 
 export function toReplaySessionDto(

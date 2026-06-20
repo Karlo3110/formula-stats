@@ -3,10 +3,17 @@ from fastapi import APIRouter, Depends
 from app.fastf1_client import (
     get_event_schedule,
     get_replay,
+    get_schedule,
     get_session_results,
     get_track_map,
 )
-from app.models import ReplaySession, SeasonSchedule, SessionResults, TrackMap
+from app.models import (
+    ReplaySession,
+    SeasonSchedule,
+    SessionResults,
+    TrackMap,
+    WeekendSchedule,
+)
 from app.security import require_internal_key
 
 router = APIRouter(
@@ -19,6 +26,11 @@ router = APIRouter(
 @router.get("/seasons/{season}/events", response_model=SeasonSchedule)
 def list_events(season: int) -> SeasonSchedule:
     return SeasonSchedule(season=season, events=get_event_schedule(season))
+
+
+@router.get("/seasons/{season}/schedule", response_model=WeekendSchedule)
+def schedule(season: int) -> WeekendSchedule:
+    return get_schedule(season)
 
 
 @router.get(

@@ -4,10 +4,12 @@ import {
   SeasonScheduleSchema,
   SessionResultsSchema,
   TrackMapSchema,
+  WeekendScheduleSchema,
   type ReplaySession,
   type SeasonSchedule,
   type SessionResults,
   type TrackMap,
+  type WeekendSchedule,
 } from '@/lib/validation/f1-schemas';
 
 export const f1Service = {
@@ -36,6 +38,11 @@ export const f1Service = {
       `/f1/seasons/${season}/rounds/${round}/sessions/${session}/track-map`,
     );
     return TrackMapSchema.parse(data);
+  },
+
+  async getSchedule(season: number): Promise<WeekendSchedule> {
+    const data = await httpClient.get<unknown>(`/f1/seasons/${season}/schedule`);
+    return WeekendScheduleSchema.parse(data);
   },
 
   async getReplay(

@@ -19,6 +19,9 @@ from app.models import (
     ReplaySession,
     SessionResults,
     TrackMap,
+    WeekendEvent,
+    WeekendSchedule,
+    WeekendSession,
 )
 
 if TYPE_CHECKING:
@@ -72,6 +75,33 @@ def get_event_schedule(season: int) -> list[EventSummary]:
             )
         )
     return events
+
+
+def get_schedule(season: int) -> WeekendSchedule:
+    """Full season schedule with each event's sessions and UTC start times."""
+    _ensure_cache()
+    import fastf1
+    import pandas as pd
+
+    schedule = fastf1.get_event_schedule(season, include_testing=False)
+    events: list[WeekendEvent] = []
+    for _, row in schedule.iterrows():
+        sessions: list[WeekendSession] = []
+        for i in range(1, 6):
+            name = row.get(f"Session{i}")
+            date = row.get(f"Session{i}DateUtc")
+            if isinstance(name, str) and name and date is not None and not pd.isna(date):
+                sessions.append(WeekendSession(name=name, start_utc=date.isoformat()))
+        events.append(
+            WeekendEvent(
+                round_number=int(row["RoundNumber"]),
+                country=str(row["Country"]),
+                location=str(row["Location"]),
+                event_name=str(row["EventName"]),
+                sessions=sessions,
+            )
+        )
+    return WeekendSchedule(season=season, events=events)
 
 
 def get_session_results(season: int, round_number: int, session: str) -> SessionResults:

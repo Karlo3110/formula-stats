@@ -1,7 +1,7 @@
 import type { JSX } from 'react';
 
-import { DashboardView } from '@/components/dashboard/DashboardView';
+import { HomeView } from '@/components/home/HomeView';
 
 export default function HomePage(): JSX.Element {
-  return <DashboardView />;
+  return <HomeView />;
 }

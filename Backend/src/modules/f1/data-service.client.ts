@@ -9,10 +9,12 @@ import {
   SeasonScheduleSchema,
   SessionResultsSchema,
   TrackMapSchema,
+  WeekendScheduleSchema,
   type ReplaySessionPayload,
   type SeasonSchedulePayload,
   type SessionResultsPayload,
   type TrackMapPayload,
+  type WeekendSchedulePayload,
 } from './f1.schemas';
 
 const INTERNAL_KEY_HEADER = 'X-Internal-Key';
@@ -32,6 +34,10 @@ export class DataServiceClient {
       `/api/v1/seasons/${season}/events`,
       SeasonScheduleSchema,
     );
+  }
+
+  getSchedule(season: number): Promise<WeekendSchedulePayload> {
+    return this.get(`/api/v1/seasons/${season}/schedule`, WeekendScheduleSchema);
   }
 
   getSessionResults(

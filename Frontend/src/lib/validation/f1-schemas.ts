@@ -57,6 +57,28 @@ export const ReplaySessionSchema = z.object({
 export type ReplayDriver = z.infer<typeof ReplayDriverSchema>;
 export type ReplaySession = z.infer<typeof ReplaySessionSchema>;
 
+export const WeekendSessionSchema = z.object({
+  name: z.string(),
+  startUtc: z.string().nullable(),
+});
+
+export const WeekendEventSchema = z.object({
+  roundNumber: z.number().int(),
+  country: z.string(),
+  location: z.string(),
+  eventName: z.string(),
+  sessions: z.array(WeekendSessionSchema),
+});
+
+export const WeekendScheduleSchema = z.object({
+  season: z.number().int(),
+  events: z.array(WeekendEventSchema),
+});
+
+export type WeekendSession = z.infer<typeof WeekendSessionSchema>;
+export type WeekendEvent = z.infer<typeof WeekendEventSchema>;
+export type WeekendSchedule = z.infer<typeof WeekendScheduleSchema>;
+
 export type EventSummary = z.infer<typeof EventSummarySchema>;
 export type SeasonSchedule = z.infer<typeof SeasonScheduleSchema>;
 export type DriverResult = z.infer<typeof DriverResultSchema>;

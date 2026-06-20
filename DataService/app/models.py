@@ -60,3 +60,21 @@ class ReplaySession(BaseModel):
     lightsOutSeconds: float
     track: list[list[float]]
     drivers: list[ReplayDriver]
+
+
+class WeekendSession(BaseModel):
+    name: str
+    start_utc: str | None
+
+
+class WeekendEvent(BaseModel):
+    round_number: int
+    country: str
+    location: str
+    event_name: str
+    sessions: list[WeekendSession]
+
+
+class WeekendSchedule(BaseModel):
+    season: int
+    events: list[WeekendEvent]

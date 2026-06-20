@@ -9,6 +9,7 @@ import type {
   SeasonSchedule,
   SessionResults,
   TrackMap,
+  WeekendSchedule,
 } from '@/lib/validation/f1-schemas';
 
 const ONE_HOUR_MS = 3_600_000;
@@ -30,6 +31,14 @@ export function useSessionResults(
   return useQuery({
     queryKey: f1Keys.sessionResults(season, round, session),
     queryFn: () => f1Service.getSessionResults(season, round, session),
+    staleTime: ONE_HOUR_MS,
+  });
+}
+
+export function useSchedule(season: number): UseQueryResult<WeekendSchedule> {
+  return useQuery({
+    queryKey: f1Keys.schedule(season),
+    queryFn: () => f1Service.getSchedule(season),
     staleTime: ONE_HOUR_MS,
   });
 }
