@@ -33,11 +33,11 @@ export function HomeView(): JSX.Element {
   }
 
   return (
-    <div className="mx-auto flex max-w-[80rem] flex-col gap-6">
+    <div className="mx-auto max-w-[88rem] px-2 sm:px-6">
       {featured ? (
         <CountdownHero event={featured.event} next={featured.next} />
       ) : (
-        <div className="glass-panel rounded-3xl p-10">
+        <div className="py-20">
           <Text variant="muted">
             {isError
               ? 'Could not load the schedule right now.'
@@ -46,10 +46,12 @@ export function HomeView(): JSX.Element {
         </div>
       )}
 
-      <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
-        {featured ? <SessionScheduleCard event={featured.event} /> : <div />}
-        <LiveRaceCard />
-      </div>
+      {featured ? (
+        <section className="mt-16 grid gap-x-16 gap-y-10 lg:grid-cols-[1.5fr_1fr]">
+          <SessionScheduleCard event={featured.event} />
+          <LiveRaceCard />
+        </section>
+      ) : null}
     </div>
   );
 }

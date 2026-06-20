@@ -1,30 +1,45 @@
 import Link from 'next/link';
 import type { JSX } from 'react';
 
-import { Heading, Text } from '@/components/ui/Typography';
 import type { LearnTopic } from '@/lib/learn/topics';
+
+function pad(n: number): string {
+  return n.toString().padStart(2, '0');
+}
 
 export function LearnArticle({ topic }: { topic: LearnTopic }): JSX.Element {
   return (
-    <article className="mx-auto flex max-w-3xl flex-col gap-6">
-      <header className="flex flex-col gap-2">
+    <article className="mx-auto max-w-3xl px-2 sm:px-6">
+      <header className="border-b border-white/10 pb-10 pt-6">
         <Link
           href="/learn"
-          className="text-xs uppercase tracking-[0.25em] text-primary hover:underline"
+          className="text-[0.7rem] uppercase tracking-[0.35em] text-primary transition hover:text-foreground"
         >
           ← Learning Center
         </Link>
-        <Heading level={1} display>
+        <h1 className="mt-5 font-display text-6xl uppercase leading-[0.9] tracking-tight text-heading sm:text-8xl">
           {topic.title}
-        </Heading>
-        <Text variant="muted">{topic.tagline}</Text>
+        </h1>
+        <p className="mt-5 max-w-2xl text-xl leading-relaxed text-foreground/70">
+          {topic.tagline}
+        </p>
       </header>
 
-      <div className="flex flex-col gap-4">
-        {topic.sections.map((section) => (
-          <section key={section.heading} className="glass-panel rounded-2xl p-6">
-            <h2 className="text-lg font-semibold text-heading">{section.heading}</h2>
-            <p className="mt-2 leading-relaxed text-foreground/80">{section.body}</p>
+      <div className="flex flex-col gap-16 py-16">
+        {topic.sections.map((section, index) => (
+          <section key={section.heading}>
+            <div className="flex items-center gap-4">
+              <span className="font-display text-xl tabular-nums text-primary">
+                {pad(index + 1)}
+              </span>
+              <span className="h-px flex-1 bg-white/10" />
+            </div>
+            <h2 className="mt-5 font-display text-3xl uppercase leading-tight text-heading sm:text-4xl">
+              {section.heading}
+            </h2>
+            <p className="mt-4 text-lg leading-relaxed text-foreground/80">
+              {section.body}
+            </p>
           </section>
         ))}
       </div>
