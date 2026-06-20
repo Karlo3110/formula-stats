@@ -4,7 +4,7 @@ import type { JSX } from 'react';
 const PRODUCT_LINKS: ReadonlyArray<{ href: string; label: string }> = [
   { href: '/', label: 'Dashboard' },
   { href: '/race', label: 'Live Race' },
-  { href: '/drivers', label: 'Drivers' },
+  { href: '/standings', label: 'Standings' },
   { href: '/history', label: 'History' },
   { href: '/learn', label: 'Learn' },
 ];

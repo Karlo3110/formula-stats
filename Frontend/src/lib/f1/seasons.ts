@@ -5,9 +5,9 @@ export function getCurrentSeason(now: Date = new Date()): number {
   return now.getUTCFullYear();
 }
 
-/** Selectable seasons, newest first, from the current season back to the earliest. */
-export function getSelectableSeasons(now: Date = new Date()): number[] {
+/** Past seasons only (everything before the current one), newest first. */
+export function getPastSeasons(now: Date = new Date()): number[] {
   const current = getCurrentSeason(now);
-  const count = Math.max(current - EARLIEST_SEASON + 1, 1);
-  return Array.from({ length: count }, (_, index) => current - index);
+  const count = Math.max(current - EARLIEST_SEASON, 0);
+  return Array.from({ length: count }, (_, index) => current - 1 - index);
 }

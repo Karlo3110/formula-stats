@@ -28,7 +28,7 @@ export function ChampionshipTeaser(): JSX.Element | null {
           </h2>
         </div>
         <Link
-          href="/history"
+          href="/standings"
           className="text-xs uppercase tracking-[0.25em] text-primary transition hover:text-foreground"
         >
           Full table →
