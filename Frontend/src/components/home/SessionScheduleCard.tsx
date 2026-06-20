@@ -37,23 +37,28 @@ export function SessionScheduleCard({
           return (
             <li
               key={session.name}
-              className="flex items-center gap-4 border-b border-white/10 py-4"
+              className="flex items-center gap-3 border-b border-white/10 py-4 sm:gap-4"
             >
-              <span className={cn('h-2.5 w-2.5 rounded-full', DOT_STYLES[status])} />
               <span
                 className={cn(
-                  'text-base font-medium sm:text-lg',
+                  'h-2.5 w-2.5 shrink-0 rounded-full',
+                  DOT_STYLES[status],
+                )}
+              />
+              <span
+                className={cn(
+                  'min-w-0 flex-1 truncate text-base font-medium sm:text-lg',
                   status === 'done' ? 'text-muted' : 'text-foreground',
                 )}
               >
                 {session.name}
               </span>
-              <span className="ml-auto text-sm tabular-nums text-muted">
+              <span className="shrink-0 text-sm tabular-nums text-muted">
                 {start ? formatSessionTime(start) : '—'}
               </span>
               <span
                 className={cn(
-                  'w-20 text-right text-[0.6rem] uppercase tracking-[0.2em]',
+                  'hidden w-20 shrink-0 text-right text-[0.6rem] uppercase tracking-[0.2em] sm:block',
                   status === 'live' ? 'text-accent' : 'text-muted',
                 )}
               >

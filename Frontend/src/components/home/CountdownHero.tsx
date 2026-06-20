@@ -20,10 +20,10 @@ function pad(value: number): string {
 function Unit({ value, label }: { value: number; label: string }): JSX.Element {
   return (
     <div className="flex flex-col">
-      <span className="font-display text-6xl leading-none tabular-nums text-heading sm:text-8xl">
+      <span className="font-display text-4xl leading-none tabular-nums text-heading sm:text-8xl">
         {pad(value)}
       </span>
-      <span className="mt-2 text-[0.6rem] uppercase tracking-[0.4em] text-muted">
+      <span className="mt-2 text-[0.55rem] uppercase tracking-[0.2em] text-muted sm:text-[0.6rem] sm:tracking-[0.4em]">
         {label}
       </span>
     </div>
@@ -53,38 +53,40 @@ export function CountdownHero({ event, next }: CountdownHeroProps): JSX.Element 
         Next Grand Prix — Round {event.roundNumber}
       </p>
 
-      <h1 className="mt-4 max-w-4xl font-display text-6xl uppercase leading-[0.88] tracking-tight text-heading sm:text-8xl">
+      <h1 className="mt-4 max-w-4xl font-display text-[2.75rem] uppercase leading-[0.9] tracking-tight text-heading sm:text-8xl">
         {event.eventName}
       </h1>
 
-      <p className="mt-3 text-sm uppercase tracking-[0.3em] text-muted">
+      <p className="mt-3 text-xs uppercase tracking-[0.25em] text-muted sm:text-sm sm:tracking-[0.3em]">
         {event.location}, {event.country}
       </p>
 
       {next ? (
-        <div className="mt-14">
-          <p className="mb-5 text-xs uppercase tracking-[0.4em] text-foreground/55">
+        <div className="mt-10 sm:mt-14">
+          <p className="mb-5 text-[0.65rem] uppercase tracking-[0.3em] text-foreground/55 sm:text-xs sm:tracking-[0.4em]">
             {next.sessionName} begins in
           </p>
-          <div className="flex items-end gap-8 sm:gap-14">
+          <div className="flex items-end gap-5 sm:gap-14">
             <Unit value={cd.days} label="Days" />
             <Unit value={cd.hours} label="Hours" />
-            <Unit value={cd.minutes} label="Minutes" />
-            <Unit value={cd.seconds} label="Seconds" />
+            <Unit value={cd.minutes} label="Mins" />
+            <Unit value={cd.seconds} label="Secs" />
           </div>
         </div>
       ) : (
-        <p className="mt-14 text-sm uppercase tracking-[0.3em] text-muted">
+        <p className="mt-10 text-sm uppercase tracking-[0.3em] text-muted sm:mt-14">
           Season complete — relive it in History
         </p>
       )}
 
-      <div className="mt-14 flex flex-wrap gap-3">
-        <Link href="/race">
-          <Button size="lg">Watch live race</Button>
+      <div className="mt-10 flex flex-col gap-3 sm:mt-14 sm:flex-row sm:flex-wrap">
+        <Link href="/race" className="w-full sm:w-auto">
+          <Button size="lg" className="w-full sm:w-auto">
+            Watch live race
+          </Button>
         </Link>
-        <Link href="/learn">
-          <Button size="lg" variant="secondary">
+        <Link href="/learn" className="w-full sm:w-auto">
+          <Button size="lg" variant="secondary" className="w-full sm:w-auto">
             Learn the sport
           </Button>
         </Link>
