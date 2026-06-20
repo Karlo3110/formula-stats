@@ -72,7 +72,6 @@ export interface ReplayDriverDto {
   code: string;
   team: string;
   color: string | null;
-  lapTimeSeconds: number;
   samples: number[][];
 }
 
@@ -80,6 +79,7 @@ export interface ReplaySessionDto {
   season: number;
   roundNumber: number;
   session: string;
+  durationSeconds: number;
   track: number[][];
   drivers: ReplayDriverDto[];
 }
@@ -91,6 +91,7 @@ export function toReplaySessionDto(
     season: payload.season,
     roundNumber: payload.round_number,
     session: payload.session,
+    durationSeconds: payload.durationSeconds,
     track: payload.track,
     drivers: payload.drivers,
   };

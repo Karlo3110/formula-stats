@@ -13,7 +13,7 @@ import { DriverTelemetry } from './DriverTelemetry';
 
 const RACE_SEASON = 2024;
 const RACE_ROUND = 1;
-const RACE_SESSION = 'Q';
+const RACE_SESSION = 'R';
 
 const RaceScene = dynamic(
   () => import('./RaceScene').then((mod) => mod.RaceScene),
@@ -50,6 +50,7 @@ export function RaceView(): JSX.Element {
   const replayQuery = useReplay(RACE_SEASON, RACE_ROUND, RACE_SESSION);
   const trackPoints = replayQuery.data?.track ?? null;
   const replayDrivers = replayQuery.data?.drivers ?? null;
+  const replayDuration = replayQuery.data?.durationSeconds ?? null;
 
   return (
     <div
@@ -57,7 +58,11 @@ export function RaceView(): JSX.Element {
       className="relative h-[calc(100dvh-7rem)] min-h-[30rem] overflow-hidden rounded-2xl border border-white/10 bg-[#070a0b]"
     >
       <div className="absolute inset-0">
-        <RaceScene trackPoints={trackPoints} replayDrivers={replayDrivers} />
+        <RaceScene
+          trackPoints={trackPoints}
+          replayDrivers={replayDrivers}
+          replayDuration={replayDuration}
+        />
       </div>
 
       <div
@@ -88,7 +93,7 @@ export function RaceView(): JSX.Element {
       ) : (
         <div className="pointer-events-none absolute inset-x-0 bottom-5 flex justify-center">
           <span className="glass-pill rounded-full px-4 py-1.5 text-[0.65rem] uppercase tracking-[0.25em] text-muted">
-            {replayDrivers ? 'Official lap replay · tap a car' : 'Loading official data…'}
+            {replayDrivers ? 'Race start replay · tap a car' : 'Loading official data…'}
           </span>
         </div>
       )}

@@ -30,7 +30,8 @@ _cache_enabled = False
 TRACK_WORLD_SPAN = 240.0
 TRACK_POINTS = 180
 TRACK_SMOOTH_WINDOW = 9
-REPLAY_SAMPLES = 160
+REPLAY_SAMPLES = 200
+REPLAY_WINDOW_SECONDS = 100.0
 
 
 def _ensure_cache() -> None:
@@ -176,8 +177,30 @@ def _build_outline(xs: "np.ndarray", ys: "np.ndarray") -> list[list[float]]:
     ]
 
 
+def _driver_pos(loaded: object, number: str) -> "pd.DataFrame | None":
+    """Raw per-driver position stream over the whole session."""
+    pos_data = getattr(loaded, "pos_data", None)
+    if isinstance(pos_data, dict) and number in pos_data:
+        return pos_data[number]
+    try:
+        return loaded.laps.pick_drivers(number).get_pos_data()  # type: ignore[attr-defined]
+    except Exception:
+        return None
+
+
+def _race_start_time(loaded: object) -> "float | None":
+    try:
+        laps = loaded.laps  # type: ignore[attr-defined]
+        lap_one = laps[laps["LapNumber"] == 1]["LapStartTime"].dropna()
+        if len(lap_one) > 0:
+            return float(lap_one.min().total_seconds())
+    except Exception:
+        pass
+    return None
+
+
 def get_replay(season: int, round_number: int, session: str) -> ReplaySession:
-    """Official per-driver fastest-lap position traces, replayed on the real track."""
+    """Session-time-aligned position replay (real wheel-to-wheel racing)."""
     _ensure_cache()
     import fastf1
     import numpy as np
@@ -186,39 +209,51 @@ def get_replay(season: int, round_number: int, session: str) -> ReplaySession:
     loaded.load(laps=True, telemetry=True, weather=False, messages=False)
 
     fastest = loaded.laps.pick_fastest()
-    fx = fastest.get_pos_data()["X"].to_numpy(dtype=float)
-    fy = fastest.get_pos_data()["Y"].to_numpy(dtype=float)
-
-    outline_x, outline_y = _clean_resample_smooth(fx, fy)
+    fpos = fastest.get_pos_data()
+    outline_x, outline_y = _clean_resample_smooth(
+        fpos["X"].to_numpy(dtype=float), fpos["Y"].to_numpy(dtype=float)
+    )
     cx, cy, scale = _normalization(outline_x, outline_y)
     track = [
         [round((float(x) - cx) * scale, 2), round((float(y) - cy) * scale, 2)]
         for x, y in zip(outline_x, outline_y)
     ]
 
-    drivers: list[ReplayDriver] = []
+    streams: dict[str, tuple] = {}
+    first_times: list[float] = []
     for number in loaded.drivers:
-        lap = loaded.laps.pick_drivers(number).pick_fastest()
-        if lap is None:
+        df = _driver_pos(loaded, number)
+        if df is None or df.empty:
             continue
-        pos = lap.get_pos_data()
-        if pos.empty:
-            continue
+        st = df["SessionTime"].dt.total_seconds().to_numpy(dtype=float)
+        order = np.argsort(st)
+        streams[number] = (
+            st[order],
+            df["X"].to_numpy(dtype=float)[order],
+            df["Y"].to_numpy(dtype=float)[order],
+        )
+        first_times.append(float(st[order][0]))
 
-        times = pos["Time"].dt.total_seconds().to_numpy(dtype=float)
-        times = times - times[0]
-        duration = float(times[-1])
-        if duration <= 0:
-            continue
+    if not streams:
+        return ReplaySession(
+            season=season, round_number=round_number, session=session,
+            durationSeconds=0.0, track=track, drivers=[],
+        )
 
-        grid = np.linspace(0, duration, REPLAY_SAMPLES)
-        xi = (np.interp(grid, times, pos["X"].to_numpy(dtype=float)) - cx) * scale
-        yi = (np.interp(grid, times, pos["Y"].to_numpy(dtype=float)) - cy) * scale
+    start = _race_start_time(loaded)
+    if start is None:
+        start = max(first_times)
+    grid_abs = np.linspace(start, start + REPLAY_WINDOW_SECONDS, REPLAY_SAMPLES)
+    grid_rel = np.linspace(0, REPLAY_WINDOW_SECONDS, REPLAY_SAMPLES)
 
+    drivers: list[ReplayDriver] = []
+    for number, (st, xs, ys) in streams.items():
+        xi = (np.interp(grid_abs, st, xs) - cx) * scale
+        yi = (np.interp(grid_abs, st, ys) - cy) * scale
         info = loaded.get_driver(number)
         team_color = info.get("TeamColor")
         samples = [
-            [round(float(grid[i] / duration), 4), round(float(xi[i]), 2), round(float(yi[i]), 2)]
+            [round(float(grid_rel[i]), 2), round(float(xi[i]), 2), round(float(yi[i]), 2)]
             for i in range(REPLAY_SAMPLES)
         ]
         drivers.append(
@@ -226,17 +261,15 @@ def get_replay(season: int, round_number: int, session: str) -> ReplaySession:
                 code=str(info.get("Abbreviation") or number),
                 team=str(info.get("TeamName") or ""),
                 color=f"#{team_color}" if team_color else None,
-                lapTimeSeconds=round(duration, 3),
                 samples=samples,
             )
         )
-
-    drivers.sort(key=lambda d: d.lapTimeSeconds)
 
     return ReplaySession(
         season=season,
         round_number=round_number,
         session=session,
+        durationSeconds=float(REPLAY_WINDOW_SECONDS),
         track=track,
         drivers=drivers,
     )

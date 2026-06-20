@@ -47,8 +47,8 @@ class ReplayDriver(BaseModel):
     code: str
     team: str
     color: str | None
-    lapTimeSeconds: float
-    # [t, x, y] where t is 0..1 over the lap; x, y are normalized world coords.
+    # [t, x, y] where t is seconds from the window start (shared race clock);
+    # x, y are normalized world coords.
     samples: list[list[float]]
 
 
@@ -56,5 +56,6 @@ class ReplaySession(BaseModel):
     season: int
     round_number: int
     session: str
+    durationSeconds: float
     track: list[list[float]]
     drivers: list[ReplayDriver]
