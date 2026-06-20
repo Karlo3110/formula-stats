@@ -2,68 +2,77 @@
 
 import type { JSX } from 'react';
 
-import { Button } from '@/components/ui/Button';
-import { Text } from '@/components/ui/Typography';
-import { Panel } from '@/components/dashboard/Panel';
-import { Stat } from '@/components/dashboard/Stat';
+import { cn } from '@/lib/utils/cn';
 import { useStandings } from '@/hooks/use-standings';
 import { useRaceStore } from '@/stores/use-race-store';
 
-export function DriverTelemetry(): JSX.Element {
+interface FocusStatProps {
+  label: string;
+  value: string;
+  accent?: boolean;
+}
+
+function FocusStat({ label, value, accent = false }: FocusStatProps): JSX.Element {
+  return (
+    <div className="flex flex-col gap-1">
+      <span className="text-[0.55rem] uppercase tracking-[0.25em] text-muted">
+        {label}
+      </span>
+      <span
+        className={cn(
+          'font-display text-2xl tabular-nums',
+          accent ? 'text-primary' : 'text-heading',
+        )}
+      >
+        {value}
+      </span>
+    </div>
+  );
+}
+
+export function DriverTelemetry(): JSX.Element | null {
   const standings = useStandings();
   const selectedDriverId = useRaceStore((state) => state.selectedDriverId);
-  const clearSelection = useRaceStore((state) => state.clearSelection);
 
   const standing = standings.find((s) => s.driver.id === selectedDriverId);
-
   if (!standing) {
-    return (
-      <Panel title="Driver Focus">
-        <Text variant="muted">
-          Tap a car on the track or a name in the running order to follow a
-          driver.
-        </Text>
-      </Panel>
-    );
+    return null;
   }
 
   const { driver } = standing;
 
   return (
-    <Panel title="Driver Focus">
-      <div className="flex flex-col gap-4">
-        <div className="flex items-center gap-3">
-          <span
-            className="h-10 w-1.5 rounded-full"
-            style={{ backgroundColor: driver.color }}
-          />
-          <div>
-            <h3 className="font-display text-3xl uppercase leading-none text-heading">
-              {driver.code}
-            </h3>
-            <p className="text-xs uppercase tracking-widest text-muted">
-              {driver.name} · {driver.team}
-            </p>
-          </div>
-          <span className="ml-auto font-display text-3xl text-primary">
-            P{standing.position}
-          </span>
+    <div className="w-full rounded-2xl border border-white/10 bg-black/35 p-5 backdrop-blur-xl">
+      <div className="flex items-start gap-3">
+        <span
+          className="mt-1 h-9 w-1 rounded-full"
+          style={{ backgroundColor: driver.color }}
+        />
+        <div className="min-w-0">
+          <h2 className="font-display text-4xl uppercase leading-none text-heading">
+            {driver.code}
+          </h2>
+          <p className="mt-1 truncate text-[0.65rem] uppercase tracking-[0.2em] text-muted">
+            {driver.name}
+          </p>
         </div>
-
-        <div className="grid grid-cols-3 gap-3 border-t border-border/50 pt-3">
-          <Stat label="Speed" value={`${standing.speedKmh} km/h`} />
-          <Stat
-            label="Gap"
-            value={standing.position === 1 ? 'Leader' : `+${standing.gapSeconds.toFixed(1)}s`}
-          />
-          <Stat label="Lap" value={standing.lap} />
-        </div>
-
-        <Button variant="secondary" size="sm" onClick={clearSelection}>
-          Back to overview
-        </Button>
-        <Text variant="small">Live position replay · demo data</Text>
+        <span className="ml-auto font-display text-3xl text-primary">
+          P{standing.position}
+        </span>
       </div>
-    </Panel>
+
+      <div className="mt-5 grid grid-cols-3 gap-3 border-t border-white/10 pt-4">
+        <FocusStat label="km/h" value={`${standing.speedKmh}`} accent />
+        <FocusStat
+          label="Gap"
+          value={standing.position === 1 ? 'LDR' : `+${standing.gapSeconds.toFixed(1)}`}
+        />
+        <FocusStat label="Lap" value={`${standing.lap}`} />
+      </div>
+
+      <p className="mt-4 text-[0.55rem] uppercase tracking-[0.2em] text-muted">
+        {driver.team}
+      </p>
+    </div>
   );
 }

@@ -7,12 +7,10 @@ import { useStandings } from '@/hooks/use-standings';
 import { useRaceStore } from '@/stores/use-race-store';
 import type { DriverStanding } from '@/lib/race/types';
 
-import { Panel } from '@/components/dashboard/Panel';
-
 function gapLabel(standing: DriverStanding): string {
   return standing.position === 1
-    ? 'LEADER'
-    : `+${standing.gapSeconds.toFixed(1)}s`;
+    ? 'LDR'
+    : `+${standing.gapSeconds.toFixed(1)}`;
 }
 
 export function DriverList(): JSX.Element {
@@ -21,8 +19,11 @@ export function DriverList(): JSX.Element {
   const selectDriver = useRaceStore((state) => state.selectDriver);
 
   return (
-    <Panel title="Running Order" contentClassName="p-2">
-      <ul className="flex flex-col gap-1">
+    <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-white/10 bg-black/35 backdrop-blur-xl">
+      <div className="px-4 pb-2 pt-3 text-[0.6rem] uppercase tracking-[0.3em] text-muted">
+        Running Order
+      </div>
+      <ul className="flex-1 overflow-y-auto px-2 pb-2">
         {standings.map((standing) => {
           const isSelected = standing.driver.id === selectedDriverId;
           return (
@@ -31,28 +32,31 @@ export function DriverList(): JSX.Element {
                 type="button"
                 onClick={() => selectDriver(standing.driver.id)}
                 className={cn(
-                  'flex w-full items-center gap-3 rounded-md px-2.5 py-2 text-left transition',
-                  isSelected
-                    ? 'bg-primary/15 ring-1 ring-primary/40'
-                    : 'hover:bg-elevated/60',
+                  'group flex w-full items-center gap-2.5 rounded-lg px-2 py-1.5 text-left transition',
+                  isSelected ? 'bg-primary/15' : 'hover:bg-white/5',
                 )}
               >
-                <span className="w-5 text-center font-display text-lg text-muted">
+                <span
+                  className={cn(
+                    'w-4 text-right font-display text-base tabular-nums',
+                    isSelected ? 'text-primary' : 'text-muted',
+                  )}
+                >
                   {standing.position}
                 </span>
                 <span
-                  className="h-6 w-1 rounded-full"
+                  className="h-5 w-[3px] rounded-full"
                   style={{ backgroundColor: standing.driver.color }}
                 />
-                <span className="flex flex-col">
-                  <span className="text-sm font-semibold tracking-wide text-foreground">
-                    {standing.driver.code}
-                  </span>
-                  <span className="text-[0.65rem] uppercase tracking-wider text-muted">
-                    {standing.driver.team}
-                  </span>
+                <span
+                  className={cn(
+                    'text-sm font-semibold tracking-wide',
+                    isSelected ? 'text-foreground' : 'text-foreground/85',
+                  )}
+                >
+                  {standing.driver.code}
                 </span>
-                <span className="ml-auto text-xs tabular-nums text-muted">
+                <span className="ml-auto text-[0.7rem] tabular-nums text-muted">
                   {gapLabel(standing)}
                 </span>
               </button>
@@ -60,6 +64,6 @@ export function DriverList(): JSX.Element {
           );
         })}
       </ul>
-    </Panel>
+    </div>
   );
 }
