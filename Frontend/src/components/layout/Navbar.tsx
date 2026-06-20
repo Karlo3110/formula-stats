@@ -9,9 +9,10 @@ import { Spinner } from '@/components/ui/Spinner';
 import { cn } from '@/lib/utils/cn';
 import { useAuthStore } from '@/stores/use-auth-store';
 
+import { MobileMenu, type NavLink } from './MobileMenu';
 import { UserMenu } from './UserMenu';
 
-const NAV_LINKS: ReadonlyArray<{ href: string; label: string }> = [
+const NAV_LINKS: ReadonlyArray<NavLink> = [
   { href: '/', label: 'Dashboard' },
   { href: '/race', label: 'Live Race' },
   { href: '/drivers', label: 'Drivers' },
@@ -21,25 +22,6 @@ const NAV_LINKS: ReadonlyArray<{ href: string; label: string }> = [
 
 function isActive(pathname: string, href: string): boolean {
   return href === '/' ? pathname === '/' : pathname.startsWith(href);
-}
-
-function MenuIcon({ open }: { open: boolean }): JSX.Element {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      className="h-5 w-5"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={2}
-      strokeLinecap="round"
-    >
-      {open ? (
-        <path d="M6 6l12 12M18 6L6 18" />
-      ) : (
-        <path d="M4 7h16M4 12h16M4 17h16" />
-      )}
-    </svg>
-  );
 }
 
 export function Navbar(): JSX.Element {
@@ -99,47 +81,32 @@ export function Navbar(): JSX.Element {
 
           <button
             type="button"
-            onClick={() => setIsMenuOpen((open) => !open)}
-            aria-label="Toggle menu"
+            onClick={() => setIsMenuOpen(true)}
+            aria-label="Open menu"
             aria-expanded={isMenuOpen}
             className="glass-pill flex h-9 w-9 items-center justify-center rounded-full text-foreground transition hover:text-primary md:hidden"
           >
-            <MenuIcon open={isMenuOpen} />
+            <svg
+              viewBox="0 0 24 24"
+              className="h-5 w-5"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              strokeLinecap="round"
+            >
+              <path d="M4 7h16M4 12h16M4 17h16" />
+            </svg>
           </button>
         </div>
       </nav>
 
-      {isMenuOpen ? (
-        <div className="border-t border-white/5 bg-background/95 backdrop-blur-xl md:hidden">
-          <div className="mx-auto flex max-w-[100rem] flex-col px-4 py-3 sm:px-6">
-            {NAV_LINKS.map((link) => {
-              const active = isActive(pathname, link.href);
-              return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={cn(
-                    'rounded-lg px-3 py-3 text-base font-medium transition',
-                    active
-                      ? 'bg-primary/15 text-foreground ring-1 ring-primary/30'
-                      : 'text-muted hover:bg-white/5 hover:text-foreground',
-                  )}
-                >
-                  {link.label}
-                </Link>
-              );
-            })}
-
-            {status === 'unauthenticated' ? (
-              <Link href="/login" className="mt-2 sm:hidden">
-                <Button size="lg" className="w-full">
-                  Sign in
-                </Button>
-              </Link>
-            ) : null}
-          </div>
-        </div>
-      ) : null}
+      <MobileMenu
+        open={isMenuOpen}
+        onClose={() => setIsMenuOpen(false)}
+        links={NAV_LINKS}
+        pathname={pathname}
+        isAuthenticated={status === 'authenticated'}
+      />
     </header>
   );
 }
