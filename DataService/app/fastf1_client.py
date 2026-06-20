@@ -244,15 +244,22 @@ def get_replay(season: int, round_number: int, session: str) -> ReplaySession:
     lights_out = _race_start_time(loaded)
     if lights_out is None:
         # No reliable start time: begin at the aligned data start, no countdown.
-        start_abs = max(first_times)
+        window = REPLAY_RACE_SECONDS
+        grid_abs = np.linspace(max(first_times), max(first_times) + window, REPLAY_SAMPLES)
+        grid_rel = np.linspace(0, window, REPLAY_SAMPLES)
         lights_out_rel = 0.0
     else:
-        start_abs = lights_out - REPLAY_PRESTART_SECONDS
+        # Hold cars at their real grid positions (sample at lights-out) during the
+        # countdown, then play the race — avoids clamping everyone onto one point.
+        window = REPLAY_PRESTART_SECONDS + REPLAY_RACE_SECONDS
+        pre_count = max(1, round(REPLAY_SAMPLES * REPLAY_PRESTART_SECONDS / window))
+        race_count = REPLAY_SAMPLES - pre_count
+        grid_abs = np.concatenate([
+            np.full(pre_count, lights_out),
+            np.linspace(lights_out, lights_out + REPLAY_RACE_SECONDS, race_count),
+        ])
+        grid_rel = np.linspace(0, window, REPLAY_SAMPLES)
         lights_out_rel = REPLAY_PRESTART_SECONDS
-
-    window = REPLAY_PRESTART_SECONDS + REPLAY_RACE_SECONDS
-    grid_abs = np.linspace(start_abs, start_abs + window, REPLAY_SAMPLES)
-    grid_rel = np.linspace(0, window, REPLAY_SAMPLES)
 
     drivers: list[ReplayDriver] = []
     for number, (st, xs, ys) in streams.items():

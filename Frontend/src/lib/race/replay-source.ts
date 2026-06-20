@@ -12,6 +12,8 @@ const FALLBACK_COLORS = ['#27f4d2', '#3671c6', '#e8002d', '#ff8000', '#229971'];
 const SPEED_BASE_KMH = 240;
 const SPEED_MIN_KMH = 0;
 const SPEED_MAX_KMH = 360;
+// A car must be clearly ahead (world units) to take a position — kills flicker.
+const OVERTAKE_EPSILON = 1.5;
 
 interface ReplayCar {
   driver: StandingDriver;
@@ -36,8 +38,10 @@ function buildCumulative(samples: number[][]): number[] {
 export class ReplaySource implements RaceSource {
   readonly drivers: StandingDriver[];
   private readonly cars: ReplayCar[];
+  private readonly byId: Map<string, ReplayCar>;
   private readonly duration: number;
   private readonly lightsOut: number;
+  private order: string[];
   private elapsed = 0;
 
   constructor(
@@ -63,6 +67,8 @@ export class ReplaySource implements RaceSource {
       car.totalLength = car.cumulative[car.cumulative.length - 1] ?? 0;
     });
     this.drivers = this.cars.map((car) => car.driver);
+    this.byId = new Map(this.cars.map((car) => [car.driver.id, car]));
+    this.order = this.cars.map((car) => car.driver.id);
   }
 
   tick(dt: number): void {
@@ -70,7 +76,7 @@ export class ReplaySource implements RaceSource {
   }
 
   pose(driverId: string): DriverPose | null {
-    const car = this.cars.find((c) => c.driver.id === driverId);
+    const car = this.byId.get(driverId);
     if (!car) return null;
     const { a, b, frac } = this.locate(car);
     const ax = a?.[1] ?? 0;
@@ -85,21 +91,55 @@ export class ReplaySource implements RaceSource {
   }
 
   standings(): DriverStanding[] {
-    const clock = this.clock();
-    const ranked = this.cars
-      .map((car) => ({ car, distance: this.distanceAt(car) }))
-      .sort((x, y) => y.distance - x.distance);
-    const leader = ranked[0]?.distance ?? 0;
-    const refSpeed = leader / Math.max(clock, 1);
+    const distance = new Map<string, number>();
+    for (const car of this.cars) {
+      distance.set(car.driver.id, this.distanceAt(car));
+    }
 
-    return ranked.map((entry, index) => ({
-      driver: entry.car.driver,
-      position: index + 1,
-      lap: 1,
-      gapSeconds: refSpeed > 0 ? (leader - entry.distance) / refSpeed : 0,
-      speedKmh: this.speedKmh(entry.car),
-      trackT: entry.car.totalLength > 0 ? entry.distance / entry.car.totalLength : 0,
-    }));
+    // Reorder the persistent order only when a car is clearly ahead (hysteresis),
+    // so the running order is stable and matches what's on screen.
+    const order = this.order;
+    let changed = true;
+    while (changed) {
+      changed = false;
+      for (let i = 0; i < order.length - 1; i += 1) {
+        const ahead = order[i];
+        const behind = order[i + 1];
+        if (!ahead || !behind) continue;
+        if (
+          (distance.get(behind) ?? 0) >
+          (distance.get(ahead) ?? 0) + OVERTAKE_EPSILON
+        ) {
+          order[i] = behind;
+          order[i + 1] = ahead;
+          changed = true;
+        }
+      }
+    }
+
+    const leaderId = order[0];
+    const leaderCar = leaderId ? this.byId.get(leaderId) : undefined;
+    const leaderDistance = leaderId ? distance.get(leaderId) ?? 0 : 0;
+    const refSpeed =
+      leaderCar && leaderCar.totalLength > 0
+        ? leaderCar.totalLength / this.duration
+        : 1;
+
+    const result: DriverStanding[] = [];
+    order.forEach((id, index) => {
+      const car = this.byId.get(id);
+      if (!car) return;
+      const d = distance.get(id) ?? 0;
+      result.push({
+        driver: car.driver,
+        position: index + 1,
+        lap: 1,
+        gapSeconds: refSpeed > 0 ? (leaderDistance - d) / refSpeed : 0,
+        speedKmh: this.speedKmh(car),
+        trackT: car.totalLength > 0 ? d / car.totalLength : 0,
+      });
+    });
+    return result;
   }
 
   timing(): RaceTiming {
