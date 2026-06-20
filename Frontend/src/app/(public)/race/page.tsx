@@ -6,9 +6,10 @@ interface RacePageProps {
   searchParams: Promise<{ season?: string; round?: string; session?: string }>;
 }
 
-function toInt(value: string | undefined, fallback: number): number {
-  const parsed = Number.parseInt(value ?? '', 10);
-  return Number.isFinite(parsed) ? parsed : fallback;
+function toInt(value: string | undefined): number | undefined {
+  if (value === undefined) return undefined;
+  const parsed = Number.parseInt(value, 10);
+  return Number.isFinite(parsed) ? parsed : undefined;
 }
 
 export default async function RacePage({
@@ -17,8 +18,8 @@ export default async function RacePage({
   const { season, round, session } = await searchParams;
   return (
     <RaceView
-      season={toInt(season, 2024)}
-      round={toInt(round, 1)}
+      season={toInt(season)}
+      round={toInt(round)}
       session={session ?? 'R'}
     />
   );

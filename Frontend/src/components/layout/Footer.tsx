@@ -14,9 +14,9 @@ const COMPANY_LINKS: ReadonlyArray<{ href: string; label: string }> = [
   { href: '/privacy', label: 'Privacy Policy' },
 ];
 
-const CURRENT_YEAR = 2026;
-
 export function Footer(): JSX.Element {
+  const currentYear = new Date().getUTCFullYear();
+
   return (
     <footer className="mt-24 border-t border-white/5 bg-background/40">
       <div className="mx-auto max-w-[100rem] px-4 py-12 sm:px-6">
@@ -73,7 +73,7 @@ export function Footer(): JSX.Element {
         </div>
 
         <div className="mt-12 flex flex-col gap-2 border-t border-white/5 pt-6 text-xs text-foreground/40 sm:flex-row sm:items-center sm:justify-between">
-          <p>© {CURRENT_YEAR} Formula Stats. All rights reserved.</p>
+          <p>© {currentYear} Formula Stats. All rights reserved.</p>
           <p>
             Unofficial. Not associated with Formula 1, the FIA, or any team.
             Data via FastF1 and Ergast.

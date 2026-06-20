@@ -6,7 +6,7 @@ import { useRef, type JSX } from 'react';
 import { Spinner } from '@/components/ui/Spinner';
 import { cn } from '@/lib/utils/cn';
 import { useFullscreen } from '@/hooks/use-fullscreen';
-import { useReplay } from '@/hooks/use-f1';
+import { useLatestRace, useReplay } from '@/hooks/use-f1';
 import { useRaceStore, type CameraMode } from '@/stores/use-race-store';
 
 import { DriverList } from './DriverList';
@@ -52,8 +52,8 @@ function FullscreenIcon({ active }: { active: boolean }): JSX.Element {
 }
 
 export function RaceView({
-  season = 2024,
-  round = 1,
+  season: seasonProp,
+  round: roundProp,
   session = 'R',
 }: RaceViewProps): JSX.Element {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -62,8 +62,20 @@ export function RaceView({
   const cameraMode = useRaceStore((state) => state.cameraMode);
   const setCameraMode = useRaceStore((state) => state.setCameraMode);
 
-  const replayQuery = useReplay(season, round, session);
-  const isLoadingReplay = replayQuery.isLoading;
+  const isExplicit = seasonProp !== undefined && roundProp !== undefined;
+  const { race: latest, isLoading: isResolvingRace } = useLatestRace({
+    enabled: !isExplicit,
+  });
+
+  const season = isExplicit ? seasonProp : latest?.season;
+  const round = isExplicit ? roundProp : latest?.round;
+  const hasTarget = season !== undefined && round !== undefined;
+
+  const replayQuery = useReplay(season ?? 0, round ?? 0, session, {
+    enabled: hasTarget,
+  });
+  const isLoadingReplay =
+    isResolvingRace || !hasTarget || replayQuery.isLoading;
   const trackPoints = replayQuery.data?.track ?? null;
   const replayDrivers = replayQuery.data?.drivers ?? null;
   const replayDuration = replayQuery.data?.durationSeconds ?? null;

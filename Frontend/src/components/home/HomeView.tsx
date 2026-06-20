@@ -1,29 +1,18 @@
 'use client';
 
-import { useMemo, type JSX } from 'react';
+import type { JSX } from 'react';
 
 import { Spinner } from '@/components/ui/Spinner';
 import { Text } from '@/components/ui/Typography';
-import { useSchedule } from '@/hooks/use-f1';
-import { findFeaturedEvent, findNextSession } from '@/lib/race-weekend';
+import { useCurrentWeekend } from '@/hooks/use-f1';
 
 import { ChampionshipTeaser } from './ChampionshipTeaser';
 import { CountdownHero } from './CountdownHero';
 import { LiveRaceCard } from './LiveRaceCard';
 import { SessionScheduleCard } from './SessionScheduleCard';
 
-const SEASON = 2026;
-
 export function HomeView(): JSX.Element {
-  const { data, isLoading, isError } = useSchedule(SEASON);
-
-  const featured = useMemo(() => {
-    if (!data) return null;
-    const now = new Date();
-    const event = findFeaturedEvent(data, now);
-    const next = findNextSession(data, now);
-    return event ? { event, next } : null;
-  }, [data]);
+  const { event, next, isLoading, isError } = useCurrentWeekend();
 
   if (isLoading) {
     return (
@@ -35,8 +24,8 @@ export function HomeView(): JSX.Element {
 
   return (
     <div className="mx-auto max-w-[88rem] px-2 sm:px-6">
-      {featured ? (
-        <CountdownHero event={featured.event} next={featured.next} />
+      {event ? (
+        <CountdownHero event={event} next={next} />
       ) : (
         <div className="py-20">
           <Text variant="muted">
@@ -47,9 +36,9 @@ export function HomeView(): JSX.Element {
         </div>
       )}
 
-      {featured ? (
+      {event ? (
         <section className="mt-16 grid gap-x-16 gap-y-10 lg:grid-cols-[1.5fr_1fr]">
-          <SessionScheduleCard event={featured.event} />
+          <SessionScheduleCard event={event} />
           <LiveRaceCard />
         </section>
       ) : null}

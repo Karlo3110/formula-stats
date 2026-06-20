@@ -1,21 +1,21 @@
 'use client';
 
-import { useState, type JSX } from 'react';
+import { useMemo, useState, type JSX } from 'react';
 
 import { AdSlot } from '@/components/ads/AdSlot';
 import { Spinner } from '@/components/ui/Spinner';
 import { Text } from '@/components/ui/Typography';
 import { cn } from '@/lib/utils/cn';
+import { getCurrentSeason, getSelectableSeasons } from '@/lib/f1/seasons';
 import { useSeasonStandings } from '@/hooks/use-f1';
 
 import { DriverStatCard } from './DriverStatCard';
 
 const DRIVERS_AD_SLOT = '0000000000';
 
-const SEASONS = [2025, 2024, 2023, 2022, 2021] as const;
-
 export function DriversView(): JSX.Element {
-  const [season, setSeason] = useState<number>(2024);
+  const seasons = useMemo(() => getSelectableSeasons(), []);
+  const [season, setSeason] = useState<number>(() => getCurrentSeason());
   const { data, isLoading, isError } = useSeasonStandings(season);
 
   return (
@@ -33,7 +33,7 @@ export function DriversView(): JSX.Element {
       </header>
 
       <div className="mt-4 flex flex-wrap gap-2">
-        {SEASONS.map((year) => (
+        {seasons.map((year) => (
           <button
             key={year}
             type="button"

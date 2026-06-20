@@ -46,6 +46,29 @@ export function findFeaturedEvent(
   return schedule.events[schedule.events.length - 1] ?? null;
 }
 
+const RACE_SESSION_NAME = 'Race';
+
+/** The most recent event whose Race session has already started (newest first). */
+export function findLatestCompletedRace(
+  schedule: WeekendSchedule,
+  now: Date,
+): WeekendEvent | null {
+  let best: WeekendEvent | null = null;
+  let bestStart = Number.NEGATIVE_INFINITY;
+  for (const event of schedule.events) {
+    const race = event.sessions.find(
+      (s) => s.name === RACE_SESSION_NAME && s.startUtc,
+    );
+    if (!race?.startUtc) continue;
+    const start = new Date(race.startUtc).getTime();
+    if (start <= now.getTime() && start > bestStart) {
+      bestStart = start;
+      best = event;
+    }
+  }
+  return best;
+}
+
 export function sessionStatus(start: Date, now: Date): SessionStatus {
   const diff = now.getTime() - start.getTime();
   if (diff < 0) return 'upcoming';

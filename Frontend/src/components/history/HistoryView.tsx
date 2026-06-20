@@ -1,17 +1,16 @@
 'use client';
 
-import { useState, type JSX } from 'react';
+import { useMemo, useState, type JSX } from 'react';
 
 import { Spinner } from '@/components/ui/Spinner';
 import { Text } from '@/components/ui/Typography';
 import { cn } from '@/lib/utils/cn';
+import { getCurrentSeason, getSelectableSeasons } from '@/lib/f1/seasons';
 import { useSeasonStandings } from '@/hooks/use-f1';
 import type {
   ConstructorStandingRow,
   DriverStandingRow,
 } from '@/lib/validation/f1-schemas';
-
-const SEASONS = [2025, 2024, 2023, 2022, 2021] as const;
 
 function DriverRow({
   row,
@@ -74,7 +73,8 @@ function ConstructorRow({ row }: { row: ConstructorStandingRow }): JSX.Element {
 }
 
 export function HistoryView(): JSX.Element {
-  const [season, setSeason] = useState<number>(2024);
+  const seasons = useMemo(() => getSelectableSeasons(), []);
+  const [season, setSeason] = useState<number>(() => getCurrentSeason());
   const { data, isLoading, isError } = useSeasonStandings(season);
   const leaderPoints = data?.drivers[0]?.points ?? 0;
 
@@ -93,7 +93,7 @@ export function HistoryView(): JSX.Element {
       </header>
 
       <div className="mt-4 flex flex-wrap gap-2">
-        {SEASONS.map((year) => (
+        {seasons.map((year) => (
           <button
             key={year}
             type="button"

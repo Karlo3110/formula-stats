@@ -4,14 +4,13 @@ import Link from 'next/link';
 import type { JSX } from 'react';
 
 import { Spinner } from '@/components/ui/Spinner';
-import { useSeasonStandings } from '@/hooks/use-f1';
+import { useLatestStandings } from '@/hooks/use-f1';
 
-const STANDINGS_SEASON = 2024;
 const TOP_DRIVERS = 5;
 const TOP_TEAMS = 3;
 
 export function ChampionshipTeaser(): JSX.Element | null {
-  const { data, isLoading, isError } = useSeasonStandings(STANDINGS_SEASON);
+  const { data, season, isLoading, isError } = useLatestStandings();
 
   if (isError || (!isLoading && !data?.drivers.length)) {
     return null;
@@ -22,7 +21,7 @@ export function ChampionshipTeaser(): JSX.Element | null {
       <div className="flex items-end justify-between">
         <div>
           <p className="text-[0.7rem] font-semibold uppercase tracking-[0.4em] text-primary">
-            Championship · {STANDINGS_SEASON}
+            Championship · {season}
           </p>
           <h2 className="mt-2 font-display text-4xl uppercase leading-none text-heading sm:text-5xl">
             Standings
