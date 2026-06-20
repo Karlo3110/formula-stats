@@ -12,12 +12,15 @@ import os
 from typing import TYPE_CHECKING
 
 from app.config import get_settings
-from app.models import DriverResult, EventSummary, SessionResults
+from app.models import DriverResult, EventSummary, SessionResults, TrackMap
 
 if TYPE_CHECKING:
     import pandas as pd
 
 _cache_enabled = False
+
+TRACK_WORLD_SPAN = 120.0
+TRACK_MAX_POINTS = 240
 
 
 def _ensure_cache() -> None:
@@ -86,4 +89,40 @@ def get_session_results(season: int, round_number: int, session: str) -> Session
         round_number=round_number,
         session=session,
         results=results,
+    )
+
+
+def get_track_map(season: int, round_number: int, session: str) -> TrackMap:
+    _ensure_cache()
+    import fastf1
+
+    loaded = fastf1.get_session(season, round_number, session)
+    loaded.load(laps=True, telemetry=True, weather=False, messages=False)
+
+    fastest = loaded.laps.pick_fastest()
+    pos = fastest.get_pos_data()
+
+    xs = pos["X"].to_numpy(dtype=float)
+    ys = pos["Y"].to_numpy(dtype=float)
+
+    center_x = (float(xs.min()) + float(xs.max())) / 2
+    center_y = (float(ys.min()) + float(ys.max())) / 2
+    span = max(float(xs.max() - xs.min()), float(ys.max() - ys.min())) or 1.0
+    scale = TRACK_WORLD_SPAN / span
+
+    count = len(xs)
+    step = max(1, count // TRACK_MAX_POINTS)
+    track = [
+        [
+            round((float(xs[i]) - center_x) * scale, 2),
+            round((float(ys[i]) - center_y) * scale, 2),
+        ]
+        for i in range(0, count, step)
+    ]
+
+    return TrackMap(
+        season=season,
+        round_number=round_number,
+        session=session,
+        track=track,
     )

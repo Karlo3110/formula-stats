@@ -4,9 +4,14 @@ import { useQuery, type UseQueryResult } from '@tanstack/react-query';
 
 import { f1Keys } from '@/lib/api/f1-keys';
 import { f1Service } from '@/services/f1.service';
-import type { SeasonSchedule, SessionResults } from '@/lib/validation/f1-schemas';
+import type {
+  SeasonSchedule,
+  SessionResults,
+  TrackMap,
+} from '@/lib/validation/f1-schemas';
 
 const ONE_HOUR_MS = 3_600_000;
+const ONE_DAY_MS = 86_400_000;
 
 export function useSeasonEvents(season: number): UseQueryResult<SeasonSchedule> {
   return useQuery({
@@ -25,5 +30,18 @@ export function useSessionResults(
     queryKey: f1Keys.sessionResults(season, round, session),
     queryFn: () => f1Service.getSessionResults(season, round, session),
     staleTime: ONE_HOUR_MS,
+  });
+}
+
+export function useTrackMap(
+  season: number,
+  round: number,
+  session: string,
+): UseQueryResult<TrackMap> {
+  return useQuery({
+    queryKey: f1Keys.trackMap(season, round, session),
+    queryFn: () => f1Service.getTrackMap(season, round, session),
+    staleTime: ONE_DAY_MS,
+    retry: 1,
   });
 }

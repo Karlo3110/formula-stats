@@ -23,6 +23,23 @@ export function createTrackCurve(): THREE.CatmullRomCurve3 {
   return new THREE.CatmullRomCurve3(points, true, 'catmullrom', 0.5);
 }
 
+const MIN_TRACK_POINTS = 8;
+
+/**
+ * Builds a closed track curve from real FastF1 outline points ([x, y] pairs,
+ * mapped to the X/Z ground plane). Falls back to the stylised curve if the
+ * outline is too small to be usable.
+ */
+export function curveFromPoints(
+  points: ReadonlyArray<readonly [number, number]>,
+): THREE.CatmullRomCurve3 {
+  if (points.length < MIN_TRACK_POINTS) {
+    return createTrackCurve();
+  }
+  const vectors = points.map(([x, y]) => new THREE.Vector3(x, 0, y));
+  return new THREE.CatmullRomCurve3(vectors, true, 'catmullrom', 0.5);
+}
+
 interface TrackGeometry {
   surface: THREE.BufferGeometry;
   leftEdge: THREE.Vector3[];

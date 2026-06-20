@@ -3,7 +3,7 @@
 import { useMemo, type JSX } from 'react';
 import { Canvas } from '@react-three/fiber';
 
-import { createTrackCurve } from '@/lib/race/track';
+import { createTrackCurve, curveFromPoints } from '@/lib/race/track';
 import { useRaceStore } from '@/stores/use-race-store';
 
 import { CarsLayer } from './scene/CarsLayer';
@@ -11,8 +11,15 @@ import { RigCamera } from './scene/RigCamera';
 import { Ticker } from './scene/Ticker';
 import { TrackMesh } from './scene/TrackMesh';
 
-export function RaceScene(): JSX.Element {
-  const curve = useMemo(() => createTrackCurve(), []);
+interface RaceSceneProps {
+  trackPoints: ReadonlyArray<readonly [number, number]> | null;
+}
+
+export function RaceScene({ trackPoints }: RaceSceneProps): JSX.Element {
+  const curve = useMemo(
+    () => (trackPoints ? curveFromPoints(trackPoints) : createTrackCurve()),
+    [trackPoints],
+  );
   const clearSelection = useRaceStore((state) => state.clearSelection);
 
   return (

@@ -7,8 +7,10 @@ import { DataServiceUnavailableException } from '@/common/exceptions/domain.exce
 import {
   SeasonScheduleSchema,
   SessionResultsSchema,
+  TrackMapSchema,
   type SeasonSchedulePayload,
   type SessionResultsPayload,
+  type TrackMapPayload,
 } from './f1.schemas';
 
 const INTERNAL_KEY_HEADER = 'X-Internal-Key';
@@ -38,6 +40,17 @@ export class DataServiceClient {
     return this.get(
       `/api/v1/seasons/${season}/rounds/${round}/sessions/${encodeURIComponent(session)}/results`,
       SessionResultsSchema,
+    );
+  }
+
+  getTrackMap(
+    season: number,
+    round: number,
+    session: string,
+  ): Promise<TrackMapPayload> {
+    return this.get(
+      `/api/v1/seasons/${season}/rounds/${round}/sessions/${encodeURIComponent(session)}/track-map`,
+      TrackMapSchema,
     );
   }
 

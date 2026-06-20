@@ -33,3 +33,11 @@ class SessionResults(BaseModel):
     round_number: int
     session: str
     results: list[DriverResult]
+
+
+class TrackMap(BaseModel):
+    season: int
+    round_number: int
+    session: str
+    # Normalized circuit outline as [x, y] pairs (centered, scaled to world units).
+    track: list[list[float]]

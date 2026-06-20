@@ -1,13 +1,16 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, type RefObject } from 'react';
 
 interface FullscreenControls {
   isFullscreen: boolean;
   toggle: () => void;
 }
 
-export function useFullscreen(): FullscreenControls {
+/** Fullscreen the given element (defaults to the document root). */
+export function useFullscreen(
+  targetRef?: RefObject<HTMLElement | null>,
+): FullscreenControls {
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   useEffect(() => {
@@ -20,10 +23,11 @@ export function useFullscreen(): FullscreenControls {
   const toggle = useCallback((): void => {
     if (document.fullscreenElement) {
       void document.exitFullscreen();
-    } else {
-      void document.documentElement.requestFullscreen().catch(() => undefined);
+      return;
     }
-  }, []);
+    const target = targetRef?.current ?? document.documentElement;
+    void target.requestFullscreen().catch(() => undefined);
+  }, [targetRef]);
 
   return { isFullscreen, toggle };
 }

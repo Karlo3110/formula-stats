@@ -30,7 +30,15 @@ export const SessionResultsSchema = z.object({
   results: z.array(DriverResultSchema),
 });
 
+export const TrackMapSchema = z.object({
+  season: z.number().int(),
+  roundNumber: z.number().int(),
+  session: z.string(),
+  track: z.array(z.tuple([z.number(), z.number()])),
+});
+
 export type EventSummary = z.infer<typeof EventSummarySchema>;
 export type SeasonSchedule = z.infer<typeof SeasonScheduleSchema>;
 export type DriverResult = z.infer<typeof DriverResultSchema>;
 export type SessionResults = z.infer<typeof SessionResultsSchema>;
+export type TrackMap = z.infer<typeof TrackMapSchema>;

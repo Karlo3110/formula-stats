@@ -1,6 +1,7 @@
 import type {
   SeasonSchedulePayload,
   SessionResultsPayload,
+  TrackMapPayload,
 } from '../f1.schemas';
 
 export interface EventSummaryDto {
@@ -45,6 +46,22 @@ export function toSeasonScheduleDto(
       eventName: event.event_name,
       eventDate: event.event_date,
     })),
+  };
+}
+
+export interface TrackMapDto {
+  season: number;
+  roundNumber: number;
+  session: string;
+  track: number[][];
+}
+
+export function toTrackMapDto(payload: TrackMapPayload): TrackMapDto {
+  return {
+    season: payload.season,
+    roundNumber: payload.round_number,
+    session: payload.session,
+    track: payload.track,
   };
 }
 

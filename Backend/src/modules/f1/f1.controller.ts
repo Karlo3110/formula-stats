@@ -6,6 +6,7 @@ import { F1Service } from './f1.service';
 import type {
   SeasonScheduleDto,
   SessionResultsDto,
+  TrackMapDto,
 } from './dto/f1-response.dto';
 
 /**
@@ -32,5 +33,14 @@ export class F1Controller {
     @Param('session') session: string,
   ): Promise<SessionResultsDto> {
     return this.f1Service.getSessionResults(season, round, session);
+  }
+
+  @Get('seasons/:season/rounds/:round/sessions/:session/track-map')
+  getTrackMap(
+    @Param('season', ParseIntPipe) season: number,
+    @Param('round', ParseIntPipe) round: number,
+    @Param('session') session: string,
+  ): Promise<TrackMapDto> {
+    return this.f1Service.getTrackMap(season, round, session);
   }
 }
