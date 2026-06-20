@@ -189,6 +189,23 @@ def _driver_pos(loaded: object, number: str) -> "pd.DataFrame | None":
         return None
 
 
+def _driver_speed(
+    car_data: object, number: str, grid_abs: "np.ndarray"
+) -> "np.ndarray":
+    """Official speed (km/h) from the car telemetry, aligned to the time grid."""
+    import numpy as np
+
+    if isinstance(car_data, dict) and number in car_data:
+        cdf = car_data[number]
+        if cdf is not None and not cdf.empty and "Speed" in cdf.columns:
+            cst = cdf["SessionTime"].dt.total_seconds().to_numpy(dtype=float)
+            order = np.argsort(cst)
+            return np.interp(
+                grid_abs, cst[order], cdf["Speed"].to_numpy(dtype=float)[order]
+            )
+    return np.zeros(len(grid_abs))
+
+
 def _race_start_time(loaded: object) -> "float | None":
     try:
         laps = loaded.laps  # type: ignore[attr-defined]
@@ -220,6 +237,7 @@ def get_replay(season: int, round_number: int, session: str) -> ReplaySession:
         for x, y in zip(outline_x, outline_y)
     ]
 
+    car_data = getattr(loaded, "car_data", None)
     streams: dict[str, tuple] = {}
     first_times: list[float] = []
     for number in loaded.drivers:
@@ -228,12 +246,13 @@ def get_replay(season: int, round_number: int, session: str) -> ReplaySession:
             continue
         st = df["SessionTime"].dt.total_seconds().to_numpy(dtype=float)
         order = np.argsort(st)
-        streams[number] = (
-            st[order],
-            df["X"].to_numpy(dtype=float)[order],
-            df["Y"].to_numpy(dtype=float)[order],
-        )
-        first_times.append(float(st[order][0]))
+        st = st[order]
+        xs = df["X"].to_numpy(dtype=float)[order]
+        ys = df["Y"].to_numpy(dtype=float)[order]
+        seg = np.sqrt(np.diff(xs) ** 2 + np.diff(ys) ** 2)
+        cumulative = np.concatenate([[0.0], np.cumsum(seg)]) / 10.0  # metres
+        streams[number] = (st, xs, ys, cumulative)
+        first_times.append(float(st[0]))
 
     if not streams:
         return ReplaySession(
@@ -262,13 +281,21 @@ def get_replay(season: int, round_number: int, session: str) -> ReplaySession:
         lights_out_rel = REPLAY_PRESTART_SECONDS
 
     drivers: list[ReplayDriver] = []
-    for number, (st, xs, ys) in streams.items():
+    for number, (st, xs, ys, cumulative) in streams.items():
         xi = (np.interp(grid_abs, st, xs) - cx) * scale
         yi = (np.interp(grid_abs, st, ys) - cy) * scale
+        dist = np.interp(grid_abs, st, cumulative)
+        speed = _driver_speed(car_data, number, grid_abs)
         info = loaded.get_driver(number)
         team_color = info.get("TeamColor")
         samples = [
-            [round(float(grid_rel[i]), 2), round(float(xi[i]), 2), round(float(yi[i]), 2)]
+            [
+                round(float(grid_rel[i]), 2),
+                round(float(xi[i]), 2),
+                round(float(yi[i]), 2),
+                round(float(speed[i]), 1),
+                round(float(dist[i]), 1),
+            ]
             for i in range(REPLAY_SAMPLES)
         ]
         drivers.append(

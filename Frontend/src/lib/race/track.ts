@@ -121,6 +121,7 @@ export function buildTrackGeometry(
 ): TrackGeometry {
   const half = width / 2;
   const positions: number[] = [];
+  const uvs: number[] = [];
   const indices: number[] = [];
   const leftEdge: THREE.Vector3[] = [];
   const rightEdge: THREE.Vector3[] = [];
@@ -145,6 +146,8 @@ export function buildTrackGeometry(
     rightEdge.push(right);
 
     positions.push(left.x, left.y, left.z, right.x, right.y, right.z);
+    const v = (i / RIBBON_SEGMENTS) * 90;
+    uvs.push(0, v, 1, v);
 
     if (i < RIBBON_SEGMENTS) {
       const a = i * 2;
@@ -157,6 +160,7 @@ export function buildTrackGeometry(
     'position',
     new THREE.Float32BufferAttribute(positions, 3),
   );
+  surface.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
   surface.setIndex(indices);
   surface.computeVertexNormals();
 
