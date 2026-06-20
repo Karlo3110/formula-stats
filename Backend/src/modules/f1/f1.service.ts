@@ -27,7 +27,7 @@ const TRACK_MAP_TTL_SECONDS = 604_800;
 const REPLAY_TTL_SECONDS = 604_800;
 // Bump when the derived geometry algorithms change, to invalidate caches.
 const TRACK_MAP_VERSION = 'v2';
-const REPLAY_VERSION = 'v5';
+const REPLAY_VERSION = 'v6';
 
 /**
  * Serves F1 data through three tiers so clients never hit FastF1 directly:

@@ -236,6 +236,34 @@ def _driver_speed(
     return np.zeros(len(grid_abs))
 
 
+def _track_progress(
+    xi: "np.ndarray",
+    yi: "np.ndarray",
+    ox: "np.ndarray",
+    oy: "np.ndarray",
+    arclen: "np.ndarray",
+    lap_length: float,
+) -> "np.ndarray":
+    """Distance each car has covered along the track (lap*length + arc-length).
+
+    Projects each position onto the nearest track-outline vertex and accumulates
+    a lap each time it wraps past start/finish — this is the real on-track order.
+    """
+    import numpy as np
+
+    d2 = (xi[:, None] - ox[None, :]) ** 2 + (yi[:, None] - oy[None, :]) ** 2
+    s = arclen[np.argmin(d2, axis=1)]
+
+    progress = np.empty_like(s)
+    offset = 0.0
+    progress[0] = s[0]
+    for k in range(1, len(s)):
+        if s[k] < s[k - 1] - lap_length * 0.5:
+            offset += lap_length
+        progress[k] = s[k] + offset
+    return progress
+
+
 def _race_start_time(loaded: object) -> "float | None":
     try:
         laps = loaded.laps  # type: ignore[attr-defined]
@@ -310,29 +338,51 @@ def get_replay(season: int, round_number: int, session: str) -> ReplaySession:
         grid_rel = np.linspace(0, window, REPLAY_SAMPLES)
         lights_out_rel = REPLAY_PRESTART_SECONDS
 
-    drivers: list[ReplayDriver] = []
-    for number, (st, xs, ys, cumulative) in streams.items():
-        xi = (np.interp(grid_abs, st, xs) - cx) * scale
-        yi = (np.interp(grid_abs, st, ys) - cy) * scale
-        dist = np.interp(grid_abs, st, cumulative)
-        speed = _driver_speed(car_data, number, grid_abs)
+    # Pass 1: normalized positions + official speed per driver.
+    built: list[dict] = []
+    for number, (st, xs, ys, _cum) in streams.items():
         info = loaded.get_driver(number)
         team_color = info.get("TeamColor")
+        built.append({
+            "xi": (np.interp(grid_abs, st, xs) - cx) * scale,
+            "yi": (np.interp(grid_abs, st, ys) - cy) * scale,
+            "speed": _driver_speed(car_data, number, grid_abs),
+            "code": str(info.get("Abbreviation") or number),
+            "team": str(info.get("TeamName") or ""),
+            "color": f"#{team_color}" if team_color else None,
+        })
+
+    # Track progress (lap + arc-length) per driver → true on-track order.
+    ox = np.array([p[0] for p in track])
+    oy = np.array([p[1] for p in track])
+    seg = np.sqrt(np.diff(ox) ** 2 + np.diff(oy) ** 2)
+    arclen = np.concatenate([[0.0], np.cumsum(seg)])
+    lap_length = float(arclen[-1] + np.hypot(ox[0] - ox[-1], oy[0] - oy[-1]))
+
+    progress = np.vstack(
+        [_track_progress(b["xi"], b["yi"], ox, oy, arclen, lap_length) for b in built]
+    )
+    # Position 1..N per sample: rank by progress (furthest along = leader).
+    ranks = np.argsort(np.argsort(-progress, axis=0), axis=0) + 1
+
+    drivers: list[ReplayDriver] = []
+    for d, b in enumerate(built):
         samples = [
             [
                 round(float(grid_rel[i]), 2),
-                round(float(xi[i]), 2),
-                round(float(yi[i]), 2),
-                round(float(speed[i]), 1),
-                round(float(dist[i]), 1),
+                round(float(b["xi"][i]), 2),
+                round(float(b["yi"][i]), 2),
+                round(float(b["speed"][i]), 1),
+                int(ranks[d, i]),
+                round(float(progress[d, i]), 2),
             ]
             for i in range(REPLAY_SAMPLES)
         ]
         drivers.append(
             ReplayDriver(
-                code=str(info.get("Abbreviation") or number),
-                team=str(info.get("TeamName") or ""),
-                color=f"#{team_color}" if team_color else None,
+                code=b["code"],
+                team=b["team"],
+                color=b["color"],
                 samples=samples,
             )
         )

@@ -8,30 +8,29 @@ import type {
   StandingDriver,
 } from './types';
 
-const FALLBACK_COLORS = ['#27f4d2', '#3671c6', '#e8002d', '#ff8000', '#229971'];
-// A car must be clearly ahead (metres) to take a position — kills flicker.
-const OVERTAKE_EPSILON = 2;
+const FALLBACK_COLORS = ['#3671c6', '#e8002d', '#ff8000', '#27a8d2', '#229971'];
 
-// Sample layout: [t, x, y, speedKmh, distanceMetres]
+// Sample layout: [t, x, y, speedKmh, position, progressMetres]
 const X = 1;
 const Y = 2;
 const SPEED = 3;
-const DISTANCE = 4;
+const POSITION = 4;
+const PROGRESS = 5;
 
 interface ReplayCar {
   driver: StandingDriver;
   samples: number[][];
-  maxDistance: number;
+  maxProgress: number;
 }
 
-/** Plays all drivers on one shared race clock from official telemetry. */
+/** Plays all drivers on one shared race clock from official telemetry.
+ *  Order and gaps come from the position/progress computed server-side. */
 export class ReplaySource implements RaceSource {
   readonly drivers: StandingDriver[];
   private readonly cars: ReplayCar[];
   private readonly byId: Map<string, ReplayCar>;
   private readonly duration: number;
   private readonly lightsOut: number;
-  private order: string[];
   private elapsed = 0;
 
   constructor(
@@ -52,12 +51,11 @@ export class ReplaySource implements RaceSource {
           color: d.color ?? FALLBACK_COLORS[index % FALLBACK_COLORS.length] ?? '#9fb6b9',
         },
         samples: d.samples,
-        maxDistance: last?.[DISTANCE] ?? 0,
+        maxProgress: last?.[PROGRESS] ?? 0,
       };
     });
     this.drivers = this.cars.map((car) => car.driver);
     this.byId = new Map(this.cars.map((car) => [car.driver.id, car]));
-    this.order = this.cars.map((car) => car.driver.id);
   }
 
   tick(dt: number): void {
@@ -80,46 +78,29 @@ export class ReplaySource implements RaceSource {
   }
 
   standings(): DriverStanding[] {
-    const distance = new Map<string, number>();
-    for (const car of this.cars) {
-      distance.set(car.driver.id, this.field(car, DISTANCE));
-    }
+    const rows = this.cars.map((car) => ({
+      car,
+      position: this.current(car, POSITION),
+      progress: this.field(car, PROGRESS),
+    }));
+    rows.sort((p, q) => p.position - q.position);
 
-    const order = this.order;
-    let changed = true;
-    while (changed) {
-      changed = false;
-      for (let i = 0; i < order.length - 1; i += 1) {
-        const ahead = order[i];
-        const behind = order[i + 1];
-        if (!ahead || !behind) continue;
-        if ((distance.get(behind) ?? 0) > (distance.get(ahead) ?? 0) + OVERTAKE_EPSILON) {
-          order[i] = behind;
-          order[i + 1] = ahead;
-          changed = true;
-        }
-      }
-    }
+    const leaderProgress = rows[0]?.progress ?? 0;
+    const leaderCar = rows[0]?.car;
+    const avgSpeedMps =
+      leaderCar && leaderCar.maxProgress > 0
+        ? leaderCar.maxProgress / this.duration
+        : 1;
 
-    const leaderId = order[0];
-    const leaderDistance = leaderId ? distance.get(leaderId) ?? 0 : 0;
-    const avgSpeedMps = leaderDistance / this.duration;
-
-    const result: DriverStanding[] = [];
-    order.forEach((id, index) => {
-      const car = this.byId.get(id);
-      if (!car) return;
-      const d = distance.get(id) ?? 0;
-      result.push({
-        driver: car.driver,
-        position: index + 1,
-        lap: 1,
-        gapSeconds: avgSpeedMps > 0 ? (leaderDistance - d) / avgSpeedMps : 0,
-        speedKmh: Math.round(this.field(car, SPEED)),
-        trackT: car.maxDistance > 0 ? d / car.maxDistance : 0,
-      });
-    });
-    return result;
+    return rows.map((row) => ({
+      driver: row.car.driver,
+      position: row.position,
+      lap: 1,
+      gapSeconds:
+        avgSpeedMps > 0 ? Math.max(0, (leaderProgress - row.progress) / avgSpeedMps) : 0,
+      speedKmh: Math.round(this.field(row.car, SPEED)),
+      trackT: row.car.maxProgress > 0 ? row.progress / row.car.maxProgress : 0,
+    }));
   }
 
   timing(): RaceTiming {
@@ -137,6 +118,7 @@ export class ReplaySource implements RaceSource {
   private locate(car: ReplayCar): {
     a: number[] | undefined;
     b: number[] | undefined;
+    index: number;
     frac: number;
   } {
     const n = car.samples.length;
@@ -145,15 +127,22 @@ export class ReplaySource implements RaceSource {
     return {
       a: car.samples[index],
       b: car.samples[Math.min(index + 1, n - 1)],
+      index,
       frac: p - Math.floor(p),
     };
   }
 
-  /** Interpolated value of a sample field at the current clock. */
+  /** Interpolated sample field at the current clock. */
   private field(car: ReplayCar, fieldIndex: number): number {
     const { a, b, frac } = this.locate(car);
     const av = a?.[fieldIndex] ?? 0;
     const bv = b?.[fieldIndex] ?? av;
     return av + (bv - av) * frac;
+  }
+
+  /** Discrete sample field at the current clock (no interpolation). */
+  private current(car: ReplayCar, fieldIndex: number): number {
+    const { a, index } = this.locate(car);
+    return a?.[fieldIndex] ?? index + 1;
   }
 }
