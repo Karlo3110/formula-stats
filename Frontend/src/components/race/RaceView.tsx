@@ -13,9 +13,11 @@ import { DriverList } from './DriverList';
 import { DriverTelemetry } from './DriverTelemetry';
 import { StartLights } from './StartLights';
 
-const RACE_SEASON = 2024;
-const RACE_ROUND = 1;
-const RACE_SESSION = 'R';
+interface RaceViewProps {
+  season?: number;
+  round?: number;
+  session?: string;
+}
 
 const RaceScene = dynamic(
   () => import('./RaceScene').then((mod) => mod.RaceScene),
@@ -49,14 +51,18 @@ function FullscreenIcon({ active }: { active: boolean }): JSX.Element {
   );
 }
 
-export function RaceView(): JSX.Element {
+export function RaceView({
+  season = 2024,
+  round = 1,
+  session = 'R',
+}: RaceViewProps): JSX.Element {
   const containerRef = useRef<HTMLDivElement>(null);
   const { isFullscreen, toggle } = useFullscreen(containerRef);
   const selectedDriverId = useRaceStore((state) => state.selectedDriverId);
   const cameraMode = useRaceStore((state) => state.cameraMode);
   const setCameraMode = useRaceStore((state) => state.setCameraMode);
 
-  const replayQuery = useReplay(RACE_SEASON, RACE_ROUND, RACE_SESSION);
+  const replayQuery = useReplay(season, round, session);
   const trackPoints = replayQuery.data?.track ?? null;
   const replayDrivers = replayQuery.data?.drivers ?? null;
   const replayDuration = replayQuery.data?.durationSeconds ?? null;
