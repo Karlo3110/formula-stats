@@ -7,6 +7,7 @@ import { Text } from '@/components/ui/Typography';
 import { useSchedule } from '@/hooks/use-f1';
 import { findFeaturedEvent, findNextSession } from '@/lib/race-weekend';
 
+import { ChampionshipTeaser } from './ChampionshipTeaser';
 import { CountdownHero } from './CountdownHero';
 import { LiveRaceCard } from './LiveRaceCard';
 import { SessionScheduleCard } from './SessionScheduleCard';
@@ -52,6 +53,8 @@ export function HomeView(): JSX.Element {
           <LiveRaceCard />
         </section>
       ) : null}
+
+      <ChampionshipTeaser />
     </div>
   );
 }

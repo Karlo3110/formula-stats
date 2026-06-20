@@ -14,6 +14,7 @@ import { UserMenu } from './UserMenu';
 const NAV_LINKS: ReadonlyArray<{ href: string; label: string }> = [
   { href: '/', label: 'Dashboard' },
   { href: '/race', label: 'Live Race' },
+  { href: '/drivers', label: 'Drivers' },
   { href: '/history', label: 'History' },
   { href: '/learn', label: 'Learn' },
 ];
