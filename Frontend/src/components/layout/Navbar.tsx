@@ -11,6 +11,7 @@ import { UserMenu } from './UserMenu';
 
 const NAV_LINKS: ReadonlyArray<{ href: string; label: string }> = [
   { href: '/', label: 'Dashboard' },
+  { href: '/race', label: 'Live Race' },
 ];
 
 export function Navbar(): JSX.Element {
