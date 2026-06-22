@@ -69,6 +69,19 @@ export function findLatestCompletedRace(
   return best;
 }
 
+/** A session of the given event that is currently within its live window. */
+export function findLiveSession(
+  event: WeekendEvent,
+  now: Date,
+): { name: string; start: Date } | null {
+  for (const { name, start } of sessionStarts(event)) {
+    if (sessionStatus(start, now) === 'live') {
+      return { name, start };
+    }
+  }
+  return null;
+}
+
 export function sessionStatus(start: Date, now: Date): SessionStatus {
   const diff = now.getTime() - start.getTime();
   if (diff < 0) return 'upcoming';

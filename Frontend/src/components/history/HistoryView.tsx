@@ -1,20 +1,38 @@
 'use client';
 
 import { useMemo, useState, type JSX } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 
 import { StandingsTables } from '@/components/standings/StandingsTables';
 import { Spinner } from '@/components/ui/Spinner';
 import { Text } from '@/components/ui/Typography';
 import { cn } from '@/lib/utils/cn';
+import { f1Keys } from '@/lib/api/f1-keys';
 import { getPastSeasons } from '@/lib/f1/seasons';
 import { useSeasonStandings } from '@/hooks/use-f1';
+import { f1Service } from '@/services/f1.service';
+
+// Past-season standings never change, so cache them forever and keep the
+// current table on screen while switching years (no spinner flash).
+const IMMUTABLE = Number.POSITIVE_INFINITY;
 
 export function HistoryView(): JSX.Element {
   const seasons = useMemo(() => getPastSeasons(), []);
   const [season, setSeason] = useState<number>(() => seasons[0] ?? 0);
-  const { data, isLoading, isError } = useSeasonStandings(season, {
+  const queryClient = useQueryClient();
+  const { data, isLoading, isFetching, isError } = useSeasonStandings(season, {
     enabled: season > 0,
+    staleTime: IMMUTABLE,
+    keepPrevious: true,
   });
+
+  function prefetchSeason(year: number): void {
+    void queryClient.prefetchQuery({
+      queryKey: f1Keys.standings(year),
+      queryFn: () => f1Service.getStandings(year),
+      staleTime: IMMUTABLE,
+    });
+  }
 
   return (
     <div className="mx-auto max-w-[80rem] px-2 sm:px-6">
@@ -42,6 +60,8 @@ export function HistoryView(): JSX.Element {
                 key={year}
                 type="button"
                 onClick={() => setSeason(year)}
+                onMouseEnter={() => prefetchSeason(year)}
+                onFocus={() => prefetchSeason(year)}
                 className={cn(
                   'rounded-full px-4 py-1.5 text-sm font-medium transition',
                   season === year
@@ -63,7 +83,12 @@ export function HistoryView(): JSX.Element {
               Standings for {season} aren’t available right now.
             </Text>
           ) : (
-            <div className="mt-12">
+            <div
+              className={cn(
+                'mt-12 transition-opacity',
+                isFetching && 'opacity-60',
+              )}
+            >
               <StandingsTables data={data} />
             </div>
           )}

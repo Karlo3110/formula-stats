@@ -1,6 +1,10 @@
 'use client';
 
-import { useQuery, type UseQueryResult } from '@tanstack/react-query';
+import {
+  keepPreviousData,
+  useQuery,
+  type UseQueryResult,
+} from '@tanstack/react-query';
 
 import { f1Keys } from '@/lib/api/f1-keys';
 import { getCurrentSeason } from '@/lib/f1/seasons';
@@ -26,6 +30,13 @@ const ONE_DAY_MS = 86_400_000;
 
 interface QueryOptions {
   enabled?: boolean;
+}
+
+interface StandingsOptions extends QueryOptions {
+  /** Override the default 1h freshness (e.g. Infinity for immutable past seasons). */
+  staleTime?: number;
+  /** Keep showing the previous season's table while the next one loads. */
+  keepPrevious?: boolean;
 }
 
 export function useSeasonEvents(season: number): UseQueryResult<SeasonSchedule> {
@@ -62,13 +73,14 @@ export function useSchedule(
 
 export function useSeasonStandings(
   season: number,
-  options: QueryOptions = {},
+  options: StandingsOptions = {},
 ): UseQueryResult<SeasonStandings> {
   return useQuery({
     queryKey: f1Keys.standings(season),
     queryFn: () => f1Service.getStandings(season),
-    staleTime: ONE_HOUR_MS,
+    staleTime: options.staleTime ?? ONE_HOUR_MS,
     enabled: options.enabled ?? true,
+    ...(options.keepPrevious ? { placeholderData: keepPreviousData } : {}),
   });
 }
 

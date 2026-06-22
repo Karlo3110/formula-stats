@@ -11,6 +11,7 @@ import { useRaceStore, type CameraMode } from '@/stores/use-race-store';
 
 import { DriverList } from './DriverList';
 import { DriverTelemetry } from './DriverTelemetry';
+import { RaceStatusBanner } from './RaceStatusBanner';
 import { StartLights } from './StartLights';
 
 interface RaceViewProps {
@@ -100,6 +101,12 @@ export function RaceView({
       </div>
 
       <StartLights />
+
+      {!isExplicit ? (
+        <div className="pointer-events-none absolute left-1/2 top-4 z-20 -translate-x-1/2">
+          <RaceStatusBanner />
+        </div>
+      ) : null}
 
       {isLoadingReplay ? (
         <div className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-4 bg-background/80 backdrop-blur-md">
