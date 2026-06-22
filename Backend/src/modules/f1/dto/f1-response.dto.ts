@@ -77,6 +77,14 @@ export interface ReplayDriverDto {
   samples: number[][];
 }
 
+export interface ReplayMessageDto {
+  time: number;
+  category: string;
+  message: string;
+  flag: string | null;
+  scope: string | null;
+}
+
 export interface ReplaySessionDto {
   season: number;
   roundNumber: number;
@@ -87,6 +95,7 @@ export interface ReplaySessionDto {
   carScale: number;
   track: number[][];
   drivers: ReplayDriverDto[];
+  messages: ReplayMessageDto[];
 }
 
 export interface WeekendSessionDto {
@@ -184,6 +193,7 @@ export function toReplaySessionDto(
     carScale: payload.carScale,
     track: payload.track,
     drivers: payload.drivers,
+    messages: payload.messages,
   };
 }
 

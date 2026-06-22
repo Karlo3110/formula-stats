@@ -11,6 +11,8 @@ import { useRaceStore, type CameraMode } from '@/stores/use-race-store';
 
 import { DriverList } from './DriverList';
 import { DriverTelemetry } from './DriverTelemetry';
+import { FlagOverlay } from './FlagOverlay';
+import { RaceControlFeed } from './RaceControlFeed';
 import { RaceStatusBanner } from './RaceStatusBanner';
 import { StartLights } from './StartLights';
 
@@ -83,6 +85,7 @@ export function RaceView({
   const replayLightsOut = replayQuery.data?.lightsOutSeconds ?? null;
   const trackWidth = replayQuery.data?.trackWidth ?? 4;
   const carScale = replayQuery.data?.carScale ?? 1.5;
+  const replayMessages = replayQuery.data?.messages ?? [];
 
   return (
     <div
@@ -102,11 +105,14 @@ export function RaceView({
 
       <StartLights />
 
-      {!isExplicit ? (
-        <div className="pointer-events-none absolute left-1/2 top-4 z-20 -translate-x-1/2">
-          <RaceStatusBanner />
-        </div>
-      ) : null}
+      <div className="pointer-events-none absolute left-1/2 top-4 z-20 flex -translate-x-1/2 flex-col items-center gap-2">
+        {!isExplicit ? <RaceStatusBanner /> : null}
+        <FlagOverlay messages={replayMessages} />
+      </div>
+
+      <div className="pointer-events-none absolute bottom-4 right-4 z-20 hidden md:block">
+        <RaceControlFeed messages={replayMessages} />
+      </div>
 
       {isLoadingReplay ? (
         <div className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-4 bg-background/80 backdrop-blur-md">

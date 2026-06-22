@@ -47,6 +47,15 @@ export const ReplayDriverSchema = z.object({
   samples: z.array(z.array(z.number())),
 });
 
+export const ReplayMessageSchema = z.object({
+  /** Seconds on the shared replay clock (same axis as a driver sample's t). */
+  time: z.number(),
+  category: z.string(),
+  message: z.string(),
+  flag: z.string().nullable(),
+  scope: z.string().nullable(),
+});
+
 export const ReplaySessionSchema = z.object({
   season: z.number().int(),
   roundNumber: z.number().int(),
@@ -57,9 +66,11 @@ export const ReplaySessionSchema = z.object({
   carScale: z.number(),
   track: TrackOutlineSchema,
   drivers: z.array(ReplayDriverSchema),
+  messages: z.array(ReplayMessageSchema).default([]),
 });
 
 export type ReplayDriver = z.infer<typeof ReplayDriverSchema>;
+export type ReplayMessage = z.infer<typeof ReplayMessageSchema>;
 export type ReplaySession = z.infer<typeof ReplaySessionSchema>;
 
 export const WeekendSessionSchema = z.object({

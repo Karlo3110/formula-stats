@@ -49,6 +49,14 @@ export const ReplayDriverSchema = z.object({
   samples: z.array(z.array(z.number())),
 });
 
+export const ReplayMessageSchema = z.object({
+  time: z.number(),
+  category: z.string(),
+  message: z.string(),
+  flag: z.string().nullable(),
+  scope: z.string().nullable(),
+});
+
 export const ReplaySessionSchema = z.object({
   season: z.number().int(),
   round_number: z.number().int(),
@@ -59,6 +67,7 @@ export const ReplaySessionSchema = z.object({
   carScale: z.number(),
   track: z.array(z.array(z.number())),
   drivers: z.array(ReplayDriverSchema),
+  messages: z.array(ReplayMessageSchema).default([]),
 });
 
 export const WeekendSessionSchema = z.object({

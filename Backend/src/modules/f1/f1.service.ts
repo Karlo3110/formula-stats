@@ -31,8 +31,9 @@ const TRACK_MAP_TTL_SECONDS = 604_800;
 const REPLAY_TTL_SECONDS = 604_800;
 // Bump when the derived geometry algorithms change, to invalidate caches.
 // v3/v8: track + car samples now carry Z elevation and an on-track flag.
+// v9: replay now carries race-control messages (flags / radio feed).
 const TRACK_MAP_VERSION = 'v3';
-const REPLAY_VERSION = 'v8';
+const REPLAY_VERSION = 'v9';
 
 /**
  * Serves F1 data through three tiers so clients never hit FastF1 directly:

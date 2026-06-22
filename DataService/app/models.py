@@ -54,6 +54,17 @@ class ReplayDriver(BaseModel):
     samples: list[list[float]]
 
 
+class ReplayMessage(BaseModel):
+    # Seconds on the shared replay clock (same axis as ReplayDriver sample t).
+    time: float
+    category: str
+    message: str
+    # Flag colour for Category=="Flag" (e.g. GREEN/YELLOW/DOUBLE YELLOW/RED).
+    flag: str | None
+    # Where it applies: Track / Sector / Driver.
+    scope: str | None
+
+
 class ReplaySession(BaseModel):
     season: int
     round_number: int
@@ -64,6 +75,7 @@ class ReplaySession(BaseModel):
     carScale: float
     track: list[list[float]]
     drivers: list[ReplayDriver]
+    messages: list[ReplayMessage]
 
 
 class WeekendSession(BaseModel):

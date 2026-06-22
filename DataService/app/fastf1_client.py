@@ -18,6 +18,7 @@ from app.models import (
     DriverStandingRow,
     EventSummary,
     ReplayDriver,
+    ReplayMessage,
     ReplaySession,
     SeasonStandings,
     SessionResults,
@@ -374,6 +375,62 @@ def _race_start_time(loaded: object) -> "float | None":
     return None
 
 
+_HAZARD_FLAGS = {"YELLOW", "DOUBLE YELLOW", "RED"}
+
+
+def _race_control_messages(
+    loaded: object,
+    lights_out: "float | None",
+    lights_out_rel: float,
+    window: float,
+    grid_start: float,
+) -> list[ReplayMessage]:
+    """Race-control messages (flags, safety car, incidents) mapped onto the
+    replay clock. Best-effort: any failure yields an empty feed rather than
+    breaking the replay.
+    """
+    import pandas as pd
+
+    try:
+        msgs = getattr(loaded, "race_control_messages", None)
+        if msgs is None or msgs.empty:
+            return []
+        t0 = getattr(loaded, "t0_date", None)
+        out: list[ReplayMessage] = []
+        for _, row in msgs.iterrows():
+            stamp = row.get("Time")
+            if stamp is None or pd.isna(stamp):
+                continue
+            # race_control "Time" is an absolute timestamp; convert to seconds
+            # from session start (t0_date), the same axis as the position data.
+            if t0 is not None:
+                secs = float((stamp - t0).total_seconds())
+            else:
+                secs = float(stamp.total_seconds())
+            rel = (
+                secs - grid_start
+                if lights_out is None
+                else lights_out_rel + (secs - lights_out)
+            )
+            if rel < -1.0 or rel > window + 1.0:
+                continue
+            flag = row.get("Flag")
+            scope = row.get("Scope")
+            out.append(
+                ReplayMessage(
+                    time=round(min(max(rel, 0.0), window), 2),
+                    category=str(row.get("Category") or "Other"),
+                    message=str(row.get("Message") or "").strip(),
+                    flag=str(flag) if isinstance(flag, str) and flag else None,
+                    scope=str(scope) if isinstance(scope, str) and scope else None,
+                )
+            )
+        out.sort(key=lambda m: m.time)
+        return out
+    except Exception:
+        return []
+
+
 def get_replay(season: int, round_number: int, session: str) -> ReplaySession:
     """Session-time-aligned position replay (real wheel-to-wheel racing)."""
     _ensure_cache()
@@ -381,7 +438,7 @@ def get_replay(season: int, round_number: int, session: str) -> ReplaySession:
     import numpy as np
 
     loaded = fastf1.get_session(season, round_number, session)
-    loaded.load(laps=True, telemetry=True, weather=False, messages=False)
+    loaded.load(laps=True, telemetry=True, weather=False, messages=True)
 
     fastest = loaded.laps.pick_fastest()
     fpos = fastest.get_pos_data()
@@ -423,6 +480,7 @@ def get_replay(season: int, round_number: int, session: str) -> ReplaySession:
             season=season, round_number=round_number, session=session,
             durationSeconds=0.0, lightsOutSeconds=0.0,
             trackWidth=track_width, carScale=car_scale, track=track, drivers=[],
+            messages=[],
         )
 
     lights_out = _race_start_time(loaded)
@@ -499,6 +557,10 @@ def get_replay(season: int, round_number: int, session: str) -> ReplaySession:
             )
         )
 
+    messages = _race_control_messages(
+        loaded, lights_out, lights_out_rel, float(window), float(grid_abs[0])
+    )
+
     return ReplaySession(
         season=season,
         round_number=round_number,
@@ -509,4 +571,5 @@ def get_replay(season: int, round_number: int, session: str) -> ReplaySession:
         carScale=car_scale,
         track=track,
         drivers=drivers,
+        messages=messages,
     )
