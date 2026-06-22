@@ -30,11 +30,14 @@ export const SessionResultsSchema = z.object({
   results: z.array(DriverResultSchema),
 });
 
+// Circuit outline points: [x, elevation, y]. Tolerant of legacy [x, y] pairs.
+export const TrackOutlineSchema = z.array(z.array(z.number()));
+
 export const TrackMapSchema = z.object({
   season: z.number().int(),
   roundNumber: z.number().int(),
   session: z.string(),
-  track: z.array(z.tuple([z.number(), z.number()])),
+  track: TrackOutlineSchema,
 });
 
 export const ReplayDriverSchema = z.object({
@@ -52,7 +55,7 @@ export const ReplaySessionSchema = z.object({
   lightsOutSeconds: z.number(),
   trackWidth: z.number(),
   carScale: z.number(),
-  track: z.array(z.tuple([z.number(), z.number()])),
+  track: TrackOutlineSchema,
   drivers: z.array(ReplayDriverSchema),
 });
 

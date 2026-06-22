@@ -35,8 +35,10 @@ export class MockSource implements RaceSource {
     this.curve.getTangentAt(t, this.tangent);
     return {
       x: this.point.x,
+      y: this.point.y,
       z: this.point.z,
       headingY: Math.atan2(this.tangent.x, this.tangent.z),
+      onTrack: true,
     };
   }
 

@@ -39,7 +39,8 @@ class TrackMap(BaseModel):
     season: int
     round_number: int
     session: str
-    # Normalized circuit outline as [x, y] pairs (centered, scaled to world units).
+    # Normalized circuit outline as [x, elevation, y] triples (centered, scaled
+    # to world units; elevation lifted so the lowest point sits at 0).
     track: list[list[float]]
 
 
@@ -47,8 +48,9 @@ class ReplayDriver(BaseModel):
     code: str
     team: str
     color: str | None
-    # [t, x, y] where t is seconds from the window start (shared race clock);
-    # x, y are normalized world coords.
+    # [t, x, y, elevation, speed, position, progress, onTrack] where t is seconds
+    # from the window start (shared race clock); x/y/elevation are normalized
+    # world coords; onTrack is 1.0 (OnTrack) or 0.0 (OffTrack).
     samples: list[list[float]]
 
 

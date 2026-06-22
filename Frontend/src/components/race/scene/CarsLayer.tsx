@@ -28,6 +28,7 @@ function lerpAngle(current: number, goal: number, t: number): number {
 
 export function CarsLayer({ source, carScale }: CarsLayerProps): JSX.Element {
   const groups = useRef<Array<THREE.Group | null>>([]);
+  const offMarkers = useRef<Array<THREE.Mesh | null>>([]);
   const target = useMemo(() => new THREE.Vector3(), []);
   const selectedDriverId = useRaceStore((state) => state.selectedDriverId);
   const selectDriver = useRaceStore((state) => state.selectDriver);
@@ -38,7 +39,8 @@ export function CarsLayer({ source, carScale }: CarsLayerProps): JSX.Element {
       if (!group) return;
       const pose = source.pose(driver.id);
       if (!pose) return;
-      target.set(pose.x, CAR_LIFT, pose.z);
+      // Sit the car on the track surface (pose.y is real circuit elevation).
+      target.set(pose.x, pose.y + CAR_LIFT, pose.z);
       // Snap on big jumps (initial placement, loop wrap); otherwise ease for
       // smooth motion and turning.
       if (group.position.distanceTo(target) > SNAP_DISTANCE) {
@@ -47,6 +49,11 @@ export function CarsLayer({ source, carScale }: CarsLayerProps): JSX.Element {
       } else {
         group.position.lerp(target, POSITION_LERP);
         group.rotation.y = lerpAngle(group.rotation.y, pose.headingY, ROTATION_LERP);
+      }
+      // Real on/off-track flag from the position telemetry: flag a car in run-off.
+      const marker = offMarkers.current[index];
+      if (marker) {
+        marker.visible = !pose.onTrack;
       }
     });
   });
@@ -67,6 +74,23 @@ export function CarsLayer({ source, carScale }: CarsLayerProps): JSX.Element {
             }}
           >
             <CarModel color={driver.color} selected={isSelected} scale={carScale} />
+            <mesh
+              ref={(element) => {
+                offMarkers.current[index] = element;
+              }}
+              visible={false}
+              rotation-x={-Math.PI / 2}
+              position={[0, 0.05, 0]}
+            >
+              <ringGeometry args={[1.7, 2.1, 28]} />
+              <meshBasicMaterial
+                color="#f5a623"
+                transparent
+                opacity={0.85}
+                blending={THREE.AdditiveBlending}
+                depthWrite={false}
+              />
+            </mesh>
             {isSelected ? (
               <Html position={[0, 1.6, 0]} center distanceFactor={40} occlude={false}>
                 <div className="whitespace-nowrap rounded-full border border-primary/60 bg-background/85 px-2 py-0.5 text-[0.7rem] font-semibold tracking-wide text-primary">

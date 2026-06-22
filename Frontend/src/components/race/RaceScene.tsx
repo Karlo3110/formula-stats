@@ -18,7 +18,7 @@ import { Ticker } from './scene/Ticker';
 import { TrackMesh } from './scene/TrackMesh';
 
 interface RaceSceneProps {
-  trackPoints: ReadonlyArray<readonly [number, number]> | null;
+  trackPoints: ReadonlyArray<ReadonlyArray<number>> | null;
   replayDrivers: ReplayDriver[] | null;
   replayDuration: number | null;
   replayLightsOut: number | null;

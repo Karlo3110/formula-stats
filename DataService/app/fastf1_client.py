@@ -190,6 +190,7 @@ def get_track_map(season: int, round_number: int, session: str) -> TrackMap:
     track = _build_outline(
         pos["X"].to_numpy(dtype=float),
         pos["Y"].to_numpy(dtype=float),
+        pos["Z"].to_numpy(dtype=float) if "Z" in pos.columns else None,
     )
 
     return TrackMap(
@@ -212,27 +213,35 @@ def _circular_smooth(values: "np.ndarray", window: int) -> "np.ndarray":
 
 
 def _clean_resample_smooth(
-    xs: "np.ndarray", ys: "np.ndarray"
-) -> tuple["np.ndarray", "np.ndarray"]:
-    """Clean a noisy GPS lap into an evenly-spaced, smoothed (un-normalized) loop."""
+    xs: "np.ndarray", ys: "np.ndarray", zs: "np.ndarray | None" = None
+) -> tuple["np.ndarray", "np.ndarray", "np.ndarray | None"]:
+    """Clean a noisy GPS lap into an evenly-spaced, smoothed (un-normalized) loop.
+
+    When a Z (elevation) channel is supplied it is resampled and smoothed onto
+    the same arc-length grid so the outline carries real circuit elevation.
+    """
     import numpy as np
 
     keep = np.concatenate([[True], (np.diff(xs) != 0) | (np.diff(ys) != 0)])
     xs, ys = xs[keep], ys[keep]
+    if zs is not None:
+        zs = zs[keep]
 
     seg = np.sqrt(np.diff(xs) ** 2 + np.diff(ys) ** 2)
     cumulative = np.concatenate([[0.0], np.cumsum(seg)])
     total = float(cumulative[-1])
     if total <= 0:
-        return xs, ys
+        return xs, ys, zs
 
     samples = np.linspace(0, total, TRACK_POINTS, endpoint=False)
-    xr = np.interp(samples, cumulative, xs)
-    yr = np.interp(samples, cumulative, ys)
-    return (
-        _circular_smooth(xr, TRACK_SMOOTH_WINDOW),
-        _circular_smooth(yr, TRACK_SMOOTH_WINDOW),
+    xr = _circular_smooth(np.interp(samples, cumulative, xs), TRACK_SMOOTH_WINDOW)
+    yr = _circular_smooth(np.interp(samples, cumulative, ys), TRACK_SMOOTH_WINDOW)
+    zr = (
+        _circular_smooth(np.interp(samples, cumulative, zs), TRACK_SMOOTH_WINDOW)
+        if zs is not None
+        else None
     )
+    return xr, yr, zr
 
 
 def _normalization(xs: "np.ndarray", ys: "np.ndarray") -> tuple[float, float, float]:
@@ -242,13 +251,44 @@ def _normalization(xs: "np.ndarray", ys: "np.ndarray") -> tuple[float, float, fl
     return center_x, center_y, TRACK_WORLD_SPAN / span
 
 
-def _build_outline(xs: "np.ndarray", ys: "np.ndarray") -> list[list[float]]:
-    xr, yr = _clean_resample_smooth(xs, ys)
+def _elevation_ref(
+    xr: "np.ndarray", zr: "np.ndarray | None"
+) -> tuple[float, "np.ndarray"]:
+    """Datum + filled elevation array. Flat (zeros) when Z is missing/constant."""
+    import numpy as np
+
+    if zr is None or float(np.ptp(zr)) <= 0:
+        return 0.0, np.zeros(len(xr))
+    return float(np.min(zr)), zr
+
+
+def _outline_with_norm(
+    xs: "np.ndarray", ys: "np.ndarray", zs: "np.ndarray | None" = None
+) -> tuple[list[list[float]], float, float, float, float]:
+    """Normalized 3D outline ([x, elevation, y]) plus the shared centering/scale.
+
+    Elevation uses the same horizontal scale and is lifted so the lowest point
+    sits at 0, keeping the circuit's real undulation in proportion.
+    """
+    xr, yr, zr = _clean_resample_smooth(xs, ys, zs)
     cx, cy, scale = _normalization(xr, yr)
-    return [
-        [round((float(x) - cx) * scale, 2), round((float(y) - cy) * scale, 2)]
-        for x, y in zip(xr, yr)
+    cz, zr = _elevation_ref(xr, zr)
+    track = [
+        [
+            round((float(x) - cx) * scale, 2),
+            round((float(z) - cz) * scale, 2),
+            round((float(y) - cy) * scale, 2),
+        ]
+        for x, y, z in zip(xr, yr, zr)
     ]
+    return track, cx, cy, cz, scale
+
+
+def _build_outline(
+    xs: "np.ndarray", ys: "np.ndarray", zs: "np.ndarray | None" = None
+) -> list[list[float]]:
+    track, *_ = _outline_with_norm(xs, ys, zs)
+    return track
 
 
 def _driver_pos(loaded: object, number: str) -> "pd.DataFrame | None":
@@ -260,6 +300,22 @@ def _driver_pos(loaded: object, number: str) -> "pd.DataFrame | None":
         return loaded.laps.pick_drivers(number).get_pos_data()  # type: ignore[attr-defined]
     except Exception:
         return None
+
+
+def _driver_ontrack(
+    status: "np.ndarray | None", st: "np.ndarray", grid_abs: "np.ndarray"
+) -> "np.ndarray":
+    """On-track flag (1.0/0.0) per grid time from the position 'Status' channel.
+
+    Status is categorical ('OnTrack'/'OffTrack'), so it is held with a
+    nearest-previous lookup rather than interpolated.
+    """
+    import numpy as np
+
+    if status is None:
+        return np.ones(len(grid_abs))
+    idx = np.clip(np.searchsorted(st, grid_abs, side="right") - 1, 0, len(status) - 1)
+    return np.array([1.0 if str(status[i]) == "OnTrack" else 0.0 for i in idx])
 
 
 def _driver_speed(
@@ -329,14 +385,11 @@ def get_replay(season: int, round_number: int, session: str) -> ReplaySession:
 
     fastest = loaded.laps.pick_fastest()
     fpos = fastest.get_pos_data()
-    outline_x, outline_y = _clean_resample_smooth(
-        fpos["X"].to_numpy(dtype=float), fpos["Y"].to_numpy(dtype=float)
+    track, cx, cy, cz, scale = _outline_with_norm(
+        fpos["X"].to_numpy(dtype=float),
+        fpos["Y"].to_numpy(dtype=float),
+        fpos["Z"].to_numpy(dtype=float) if "Z" in fpos.columns else None,
     )
-    cx, cy, scale = _normalization(outline_x, outline_y)
-    track = [
-        [round((float(x) - cx) * scale, 2), round((float(y) - cy) * scale, 2)]
-        for x, y in zip(outline_x, outline_y)
-    ]
 
     # Scale ribbon + cars to the circuit's real size for consistent proportions
     # on every track (X/Y are 1/10 m, so metres->world = scale * 10).
@@ -356,9 +409,13 @@ def get_replay(season: int, round_number: int, session: str) -> ReplaySession:
         st = st[order]
         xs = df["X"].to_numpy(dtype=float)[order]
         ys = df["Y"].to_numpy(dtype=float)[order]
-        seg = np.sqrt(np.diff(xs) ** 2 + np.diff(ys) ** 2)
-        cumulative = np.concatenate([[0.0], np.cumsum(seg)]) / 10.0  # metres
-        streams[number] = (st, xs, ys, cumulative)
+        zs = (
+            df["Z"].to_numpy(dtype=float)[order]
+            if "Z" in df.columns
+            else np.zeros(len(st))
+        )
+        status = df["Status"].to_numpy()[order] if "Status" in df.columns else None
+        streams[number] = (st, xs, ys, zs, status)
         first_times.append(float(st[0]))
 
     if not streams:
@@ -388,15 +445,17 @@ def get_replay(season: int, round_number: int, session: str) -> ReplaySession:
         grid_rel = np.linspace(0, window, REPLAY_SAMPLES)
         lights_out_rel = REPLAY_PRESTART_SECONDS
 
-    # Pass 1: normalized positions + official speed per driver.
+    # Pass 1: normalized positions (+ elevation), official speed, on-track flag.
     built: list[dict] = []
-    for number, (st, xs, ys, _cum) in streams.items():
+    for number, (st, xs, ys, zs, status) in streams.items():
         info = loaded.get_driver(number)
         team_color = info.get("TeamColor")
         built.append({
             "xi": (np.interp(grid_abs, st, xs) - cx) * scale,
             "yi": (np.interp(grid_abs, st, ys) - cy) * scale,
+            "zi": (np.interp(grid_abs, st, zs) - cz) * scale,
             "speed": _driver_speed(car_data, number, grid_abs),
+            "ontrack": _driver_ontrack(status, st, grid_abs),
             "code": str(info.get("Abbreviation") or number),
             "team": str(info.get("TeamName") or ""),
             "color": f"#{team_color}" if team_color else None,
@@ -417,14 +476,17 @@ def get_replay(season: int, round_number: int, session: str) -> ReplaySession:
 
     drivers: list[ReplayDriver] = []
     for d, b in enumerate(built):
+        # Sample layout: [t, x, y, elevation, speed, position, progress, onTrack]
         samples = [
             [
                 round(float(grid_rel[i]), 2),
                 round(float(b["xi"][i]), 2),
                 round(float(b["yi"][i]), 2),
+                round(float(b["zi"][i]), 2),
                 round(float(b["speed"][i]), 1),
                 int(ranks[d, i]),
                 round(float(progress[d, i]), 2),
+                int(b["ontrack"][i]),
             ]
             for i in range(REPLAY_SAMPLES)
         ]

@@ -116,7 +116,7 @@ export function RigCamera({ source, curve, trackWidth }: RigCameraProps): null {
       return;
     }
 
-    s.car.set(pose.x, 0, pose.z);
+    s.car.set(pose.x, pose.y, pose.z);
     s.hold += delta;
     if (s.hold >= CUT_INTERVAL || s.camIndex < 0) {
       s.hold = 0;

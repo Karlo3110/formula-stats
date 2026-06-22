@@ -92,17 +92,24 @@ export function createTrackCurve(): THREE.CatmullRomCurve3 {
 const MIN_TRACK_POINTS = 8;
 
 /**
- * Builds a closed track curve from real FastF1 outline points ([x, y] pairs,
- * mapped to the X/Z ground plane). Falls back to the stylised curve if the
- * outline is too small to be usable.
+ * Builds a closed track curve from real FastF1 outline points, mapped onto the
+ * scene axes. Points are `[x, elevation, y]` (THREE x/y/z); legacy `[x, y]`
+ * pairs (no elevation) are treated as flat. Falls back to the stylised curve if
+ * the outline is too small to be usable.
  */
 export function curveFromPoints(
-  points: ReadonlyArray<readonly [number, number]>,
+  points: ReadonlyArray<ReadonlyArray<number>>,
 ): THREE.CatmullRomCurve3 {
   if (points.length < MIN_TRACK_POINTS) {
     return createTrackCurve();
   }
-  const vectors = points.map(([x, y]) => new THREE.Vector3(x, 0, y));
+  const vectors = points.map((point) => {
+    const x = point[0] ?? 0;
+    const hasElevation = point.length >= 3;
+    const elevation = hasElevation ? (point[1] ?? 0) : 0;
+    const y = hasElevation ? (point[2] ?? 0) : (point[1] ?? 0);
+    return new THREE.Vector3(x, elevation, y);
+  });
   // Centripetal avoids the cusps/loops plain catmullrom produces on dense data.
   return withDenseArcLengths(
     new THREE.CatmullRomCurve3(vectors, true, 'centripetal'),

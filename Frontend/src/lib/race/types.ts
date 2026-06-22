@@ -29,8 +29,12 @@ export interface DriverStanding {
 
 export interface DriverPose {
   x: number;
+  /** Elevation (world up axis) so cars sit on the sloped track surface. */
+  y: number;
   z: number;
   headingY: number;
+  /** Whether the car is on the track (vs run-off) at this moment. */
+  onTrack: boolean;
 }
 
 export interface RaceTiming {

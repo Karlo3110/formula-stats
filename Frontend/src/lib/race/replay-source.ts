@@ -10,12 +10,14 @@ import type {
 
 const FALLBACK_COLORS = ['#3671c6', '#e8002d', '#ff8000', '#27a8d2', '#229971'];
 
-// Sample layout: [t, x, y, speedKmh, position, progressMetres]
+// Sample layout: [t, x, y, elevation, speedKmh, position, progressMetres, onTrack]
 const X = 1;
 const Y = 2;
-const SPEED = 3;
-const POSITION = 4;
-const PROGRESS = 5;
+const ELEVATION = 3;
+const SPEED = 4;
+const POSITION = 5;
+const PROGRESS = 6;
+const ON_TRACK = 7;
 
 interface ReplayCar {
   driver: StandingDriver;
@@ -70,10 +72,14 @@ export class ReplaySource implements RaceSource {
     const ay = a?.[Y] ?? 0;
     const bx = b?.[X] ?? ax;
     const by = b?.[Y] ?? ay;
+    const aElev = a?.[ELEVATION] ?? 0;
+    const bElev = b?.[ELEVATION] ?? aElev;
     return {
       x: ax + (bx - ax) * frac,
+      y: aElev + (bElev - aElev) * frac,
       z: ay + (by - ay) * frac,
       headingY: Math.atan2(bx - ax, by - ay),
+      onTrack: (a?.[ON_TRACK] ?? 1) > 0.5,
     };
   }
 
