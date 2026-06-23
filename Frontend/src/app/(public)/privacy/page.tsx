@@ -158,8 +158,8 @@ export default function PrivacyPage(): JSX.Element {
         <h2>Contact</h2>
         <p>
           Questions about this policy can be sent to{' '}
-          <a href="mailto:privacy@formula-stats.com">privacy@formula-stats.com</a>{' '}
-          or through our <a href="/contact">contact page</a>.
+          <a href="mailto:info@starcode.tech">info@starcode.tech</a> or through
+          our <a href="/contact">contact page</a>.
         </p>
       </section>
     </LegalPage>

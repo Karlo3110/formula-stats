@@ -37,6 +37,8 @@ if (!parsed.success) {
   throw new Error(`Invalid client env: ${parsed.error.message}`);
 }
 
+// Ads activate only where NEXT_PUBLIC_ADSENSE_CLIENT is set. Set it in the
+// production environment only, so staging and local dev stay ad-free.
 const adsenseClient = parsed.data.NEXT_PUBLIC_ADSENSE_CLIENT ?? null;
 
 export const clientConfig = {

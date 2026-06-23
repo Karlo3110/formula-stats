@@ -28,8 +28,8 @@ export default function ContactPage(): JSX.Element {
         <p>
           For anything about the site — features, bugs, partnerships, or
           feedback — email{' '}
-          <a href="mailto:contact@formula-stats.com">contact@formula-stats.com</a>.
-          We typically reply within a few business days.
+          <a href="mailto:info@starcode.tech">info@starcode.tech</a>. We
+          typically reply within a few business days.
         </p>
       </section>
 
@@ -47,9 +47,8 @@ export default function ContactPage(): JSX.Element {
         <h2>Privacy &amp; account requests</h2>
         <p>
           For data access, correction, or deletion requests, email{' '}
-          <a href="mailto:privacy@formula-stats.com">privacy@formula-stats.com</a>.
-          See our <a href="/privacy">Privacy Policy</a> for how we handle your
-          data.
+          <a href="mailto:info@starcode.tech">info@starcode.tech</a>. See our{' '}
+          <a href="/privacy">Privacy Policy</a> for how we handle your data.
         </p>
       </section>
 
