@@ -23,15 +23,26 @@ export const penalties: LearnTopic = {
           text: 'When an incident happens, the stewards gather evidence — telemetry, onboard and trackside video, team radio, and representations from the teams involved — and decide who, if anyone, was **predominantly to blame**. Their goal is not to punish every touch, but to penalise the driver mainly responsible for an avoidable incident.',
         },
         {
+          type: 'paragraph',
+          text: 'To keep calls consistent from race to race, the stewards work to a set of **driving-standards guidelines** — agreed principles on things like when a car is far enough alongside to be “entitled” to a corner, and how much room must be left. The guidelines are not a rigid rulebook; they are a shared yardstick that helps different panels reach similar verdicts on similar moves.',
+        },
+        {
           type: 'callout',
           tone: 'info',
           title: '“Racing incident”',
           text: 'Sometimes the stewards judge that two drivers simply raced hard and neither was mainly at fault. That verdict — a “racing incident” — means no penalty, even after a collision.',
         },
+        {
+          type: 'callout',
+          tone: 'info',
+          title: 'Decisions can be revisited',
+          text: 'A team that believes a verdict was wrong can request a **right of review**, but only by presenting a significant, genuinely new piece of evidence that was not available at the time. Without that, the stewards’ decision stands.',
+        },
       ],
       takeaways: [
         'Stewards are the referees; the panel includes a former driver.',
         'They weigh telemetry, video, radio and team input.',
+        'Driving-standards guidelines keep wheel-to-wheel calls consistent.',
         'They penalise the driver “predominantly to blame,” not every contact.',
       ],
     },
@@ -49,6 +60,7 @@ export const penalties: LearnTopic = {
           caption: 'Common penalties, from lightest to heaviest',
           columns: ['Penalty', 'How it is served'],
           rows: [
+            ['Reprimand', 'A formal warning; enough of them brings a grid penalty'],
             ['5-second penalty', 'Added at the next stop, or to the final race time'],
             ['10-second penalty', 'As above, for a more serious offence'],
             ['Drive-through', 'Drive through the pit lane without stopping'],
@@ -63,11 +75,16 @@ export const penalties: LearnTopic = {
           title: 'A served penalty still costs time',
           text: 'With a 5- or 10-second penalty, the driver’s pit crew may not touch the car until the time has elapsed at their stop — so the clock ticks while everyone waits. It is a real, visible cost, not just an after-the-fact adjustment.',
         },
+        {
+          type: 'paragraph',
+          text: 'There is often a way to avoid a penalty altogether: **give the advantage back**. A driver who passes by cutting a corner, or who forces a rival wide, can hand the place back within a lap or two and the stewards may take no further action. It is why you sometimes see a driver let a rival re-pass almost immediately — they are erasing an advantage the stewards would otherwise punish.',
+        },
       ],
       takeaways: [
-        'Penalties scale with the offence, up to disqualification.',
+        'Penalties scale from a reprimand up to disqualification.',
         'Time penalties are served at a stop or added to the final time.',
         'Drive-through and stop-go penalties are served live in the pit lane.',
+        'Giving an unfairly gained position back can avoid a penalty entirely.',
       ],
     },
     {
@@ -78,6 +95,10 @@ export const penalties: LearnTopic = {
         {
           type: 'paragraph',
           text: 'Beyond in-race penalties, drivers carry **penalty points** on their superlicence. The stewards add points for incidents they judge a driver responsible for, and those points stick around far longer than a single race.',
+        },
+        {
+          type: 'paragraph',
+          text: 'The number added scales with how serious the incident was — typically one to three points for the kind of offences seen most often, such as causing a collision. They are handed out *in addition* to any in-race penalty, so a single mistake can cost a driver time on Sunday and edge them closer to a ban at the same time.',
         },
         {
           type: 'callout',
@@ -92,6 +113,7 @@ export const penalties: LearnTopic = {
       ],
       takeaways: [
         'Penalty points are added to a driver’s licence for incidents they cause.',
+        'Each incident adds roughly one to three points, on top of any race penalty.',
         'Twelve points in twelve months triggers an automatic one-race ban.',
         'Points expire a year after they are issued, so the window keeps rolling.',
       ],
@@ -109,9 +131,13 @@ export const penalties: LearnTopic = {
           type: 'list',
           items: [
             'In qualifying, a lap with a track-limits breach is simply deleted.',
-            'In the race, repeated breaches earn a warning, then a time penalty.',
+            'In the race, repeated breaches earn a warning (often the black-and-white flag), then a time penalty.',
             'At the worst-offending corners, sensors and cameras flag breaches automatically.',
           ],
+        },
+        {
+          type: 'paragraph',
+          text: 'Enforcement is usually focused on just a few corners per circuit — the handful where going wide actually gains time — and the limit is the same for everyone, applied consistently lap after lap. In the race the breaches are tallied: a driver gets a few “free” warnings, but keep running wide and the escalation to a five-second penalty is automatic, no judgement call required.',
         },
         {
           type: 'callout',
@@ -122,7 +148,8 @@ export const penalties: LearnTopic = {
       ],
       takeaways: [
         'All four wheels beyond the white line exceeds track limits.',
-        'Qualifying laps are deleted; race breaches escalate to penalties.',
+        'Qualifying laps are deleted; race breaches escalate from warning to penalty.',
+        'Enforcement focuses on the few corners where going wide gains time.',
         'Modern asphalt run-off is why the rule has to be enforced so tightly.',
       ],
     },
@@ -137,7 +164,11 @@ export const penalties: LearnTopic = {
         },
         {
           type: 'paragraph',
-          text: 'There is a web of procedural rules around the grid and the **formation lap**: being out of position, crossing the pit-exit line on the way out, weaving excessively, or failing to follow the start procedure can all be punished. Even small infringements here are caught, because the consequences of a chaotic start are so severe.',
+          text: 'A jump start is not a judgement call — a **transponder** in each grid box measures the car’s position to the millimetre and detects any movement before the lights go out, so the offence is caught automatically and usually draws a time penalty. Creep forward and you are caught; anticipate perfectly and stay put, and you have a legal flying start.',
+        },
+        {
+          type: 'paragraph',
+          text: 'There is a web of procedural rules around the grid and the **formation lap**: being out of position, crossing the pit-exit line on the way out, weaving excessively, or failing to follow the start procedure can all be punished. Overtaking on the formation lap is forbidden unless a car ahead is clearly delayed, and everyone must reach the grid in the correct order and in time.',
         },
         {
           type: 'callout',
@@ -148,7 +179,8 @@ export const penalties: LearnTopic = {
       ],
       takeaways: [
         'Moving before the lights go out is a jump start and is penalised.',
-        'Grid and formation-lap procedure is tightly enforced.',
+        'A transponder in each grid box detects jump starts automatically.',
+        'Grid and formation-lap procedure is tightly enforced; no overtaking unless a car is delayed.',
         'Small start-procedure errors are caught because the stakes are so high.',
       ],
     },

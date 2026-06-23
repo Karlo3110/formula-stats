@@ -41,10 +41,15 @@ export const powerUnit: LearnTopic = {
           title: 'Roughly half the power is now electric',
           text: 'The modern regulations push the electrical contribution dramatically upward, toward an even split with the combustion engine. The electric motor is no longer a small boost — it is half the story.',
         },
+        {
+          type: 'paragraph',
+          text: 'The reason for the hybrid is efficiency. A 1.6-litre V6 sounds modest — smaller than many family-car engines — yet it produces enormous power because it is turbocharged, revs far higher than any road engine, and is paired with an electric system that reclaims energy a normal car simply throws away. That blend of small capacity and huge output is exactly the engineering challenge the rules set out to provoke, and it is why the technology is meant to be relevant to road cars, not just the track.',
+        },
       ],
       takeaways: [
         'A power unit = a 1.6L turbo V6 plus a powerful electric system.',
         'Combined output is around 1,000 hp, at remarkable efficiency.',
+        'The small turbo engine revs high and is paired with energy recovery.',
         'The cars run on fully sustainable fuel, with electric power near half the total.',
       ],
     },
@@ -80,10 +85,15 @@ export const powerUnit: LearnTopic = {
           title: 'A simpler, more powerful hybrid',
           text: 'Earlier power units also had an MGU-H that recovered heat from the turbo. The modern rules drop that component to cut cost and complexity, and instead make the MGU-K far more powerful — so the electric system is simpler but punches much harder.',
         },
+        {
+          type: 'paragraph',
+          text: 'Because the MGU-K does much of its harvesting *through* the rear brakes, the braking system is **brake-by-wire**: a computer blends the driver’s pedal pressure with the electrical harvesting so the car slows smoothly and predictably. Get that blend wrong and the brake feel changes from corner to corner — one reason braking consistency is such a prized driver skill in the hybrid era.',
+        },
       ],
       takeaways: [
         'The MGU-K harvests braking energy and redeploys it for acceleration.',
         'Recovered energy is stored in the battery (Energy Store).',
+        'Rear braking is blended electronically (brake-by-wire) with harvesting.',
         'The heat-recovery MGU-H has been dropped; the MGU-K is now much more powerful.',
       ],
     },
@@ -101,6 +111,10 @@ export const powerUnit: LearnTopic = {
           text: 'The car follows energy **modes** and delta targets set by the team, and the deployment is mapped corner by corner. Run the battery flat too early and the car is left slow and exposed on the next straight; hoard it and you give away lap time you could have used.',
         },
         {
+          type: 'paragraph',
+          text: 'This is why the same car can feel like two different machines. In **qualifying** the engineers unlock the most aggressive deployment for one explosive lap; in the **race** they manage the energy conservatively to last the distance, sometimes spending a lap deliberately under-deploying to bank charge — a “charging lap” — so the boost is there for an attack or a defence a few corners later.',
+        },
+        {
           type: 'callout',
           tone: 'key',
           title: 'Override: the overtaking boost',
@@ -110,6 +124,7 @@ export const powerUnit: LearnTopic = {
       takeaways: [
         'Electrical energy per lap is limited and must be managed corner by corner.',
         'Teams set energy modes and delta targets to place the boost where it matters.',
+        'Qualifying unlocks aggressive deployment; the race is managed to last.',
         'A chasing car can deploy extra “override” energy to help overtake.',
       ],
     },
@@ -139,12 +154,17 @@ export const powerUnit: LearnTopic = {
         },
         {
           type: 'paragraph',
+          text: 'Because each element is counted separately, the penalties can stack: take a fresh ICE *and* a fresh turbo at the same race and the drops add up, which is why a driver who needs new parts will often take several at once and accept a single back-of-grid start rather than bleeding places over multiple weekends. Teams also nurse their hardware with conservative **engine modes** in practice and lower-stakes races, saving the most stressful settings for when points are truly on the line.',
+        },
+        {
+          type: 'paragraph',
           text: 'This turns reliability into a strategic resource. A team nursing a fragile engine has to weigh protecting it (and driving more conservatively) against the near-certainty of a back-of-grid start later in the year when they finally need a fresh one.',
         },
       ],
       takeaways: [
         'Each PU element has a fixed seasonal allowance per driver.',
         'Going over the allowance brings grid penalties, sometimes a back-row start.',
+        'Penalties stack, so teams often take several fresh parts in one weekend.',
         'Reliability becomes a strategic resource to be managed across the season.',
       ],
     },
@@ -162,6 +182,10 @@ export const powerUnit: LearnTopic = {
           text: 'There is also a limit on how much fuel a car may use in the race, so fuel becomes part of strategy. Drivers are sometimes told to **lift and coast** — ease off the throttle before a braking point — to save fuel or cool the PU, trading a sliver of lap time for finishing the race within the allowance.',
         },
         {
+          type: 'paragraph',
+          text: 'The fuel itself is now a performance and sustainability frontier. Running a fully **sustainable fuel** — made from non-fossil sources rather than crude oil — the manufacturers must wring the same energy from a “greener” blend, and the lessons feed directly into road-car fuels that work in ordinary engines. A dedicated fuel-flow sensor polices the flow limit continuously, so there is no hiding a few extra grams per second.',
+        },
+        {
           type: 'callout',
           tone: 'info',
           title: 'Among the most efficient engines on Earth',
@@ -171,6 +195,7 @@ export const powerUnit: LearnTopic = {
       takeaways: [
         'A fuel-flow limit caps power, forcing engineers to chase efficiency.',
         'A total fuel allowance makes fuel-saving (“lift and coast”) part of strategy.',
+        'Cars run a fully sustainable fuel, with the gains relevant to road cars.',
         'The result is one of the most thermally efficient engines ever built.',
       ],
     },

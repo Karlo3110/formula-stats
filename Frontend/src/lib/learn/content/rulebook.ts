@@ -38,6 +38,16 @@ export const rulebook: LearnTopic = {
           text: 'In practice the engineers chase the right **setup**: ride height, wing angles, brake cooling, differential and suspension settings. They also run the tyres deliberately hard to measure how quickly they wear — the **degradation** data that shapes Sunday’s strategy. A driver might top a practice session and still be slow on race day, because practice times are run on different fuel loads and tyres.',
         },
         {
+          type: 'paragraph',
+          text: 'Each session is split into two distinct jobs. A **qualifying simulation** is a low-fuel run on fresh soft tyres to see the car’s outright pace; a **long run** is a heavy-fuel stint that mimics the race to gather degradation data. When pundits say a car “looks strong on the long runs,” they mean its race pace looks better than its single-lap speed — a hint the team may be quicker on Sunday than Saturday suggests.',
+        },
+        {
+          type: 'callout',
+          tone: 'info',
+          title: 'The track gets faster all weekend',
+          text: 'Every car that runs lays down a thin film of rubber, and the racing line gradually “rubbers in,” adding grip. This **track evolution** means lap times tumble across the weekend even if no car changes — so the last runners in qualifying often have the fastest track.',
+        },
+        {
           type: 'callout',
           tone: 'info',
           title: 'Why the race is ~305 km',
@@ -47,6 +57,7 @@ export const rulebook: LearnTopic = {
       takeaways: [
         'A weekend runs Friday practice → Saturday qualifying → Sunday race.',
         'Practice scores nothing but sets up the car and gathers tyre data.',
+        'Teams split running into low-fuel qualifying sims and heavy-fuel long runs.',
         'Race distance is the laps needed to pass 305 km, capped at two hours.',
       ],
     },
@@ -81,11 +92,16 @@ export const rulebook: LearnTopic = {
           type: 'paragraph',
           text: 'Sprint points go to the top eight finishers on a reduced scale (8-7-6-5-4-3-2-1). With only a single practice hour, teams have far less time to react to problems, which rewards getting the car right out of the box and punishes anyone chasing a setup all weekend.',
         },
+        {
+          type: 'paragraph',
+          text: 'The compressed format also changes how the Sprint itself is raced. It is short enough to run flat-out on a single set of tyres with no mandatory stop, so it becomes a pure sprint rather than a strategy puzzle. And because the car is locked under **parc fermé** from the start of Sprint Qualifying on Friday, a team that misjudges its setup is stuck with it for the entire weekend.',
+        },
       ],
       takeaways: [
         'Sprint weekends have just one practice session.',
         'The Saturday Sprint is a short race that pays points to the top eight.',
         'The Grand Prix grid still comes from normal qualifying, not the Sprint.',
+        'The car is locked under parc fermé from Friday, so setup mistakes stick.',
       ],
     },
     {
@@ -119,16 +135,27 @@ export const rulebook: LearnTopic = {
           text: 'A qualifying lap is a balancing act. The tyres must be at the right temperature (too cold and there is no grip; too hot and they fall away), the fuel load is as low as the rules allow, and the driver needs a gap to the car ahead so they are not held up or driving in its disturbed air. Get all three right on the same lap and you have pole.',
         },
         {
+          type: 'paragraph',
+          text: 'Timing the run is its own skill. Because the track rubbers in, the very end of each segment is usually fastest — but waiting too long risks a yellow flag or traffic ruining the lap. On long straights drivers also hunt a **tow**: tucking into the slipstream of a car ahead to cut drag and gain a tenth or two, a favour team-mates sometimes trade deliberately.',
+        },
+        {
           type: 'callout',
           tone: 'warning',
           title: 'Track limits in qualifying',
           text: 'Run even slightly beyond the white lines at the exit of a corner and the lap is deleted instantly. Drivers regularly lose pole to a deleted lap for putting all four wheels off the track.',
+        },
+        {
+          type: 'callout',
+          tone: 'info',
+          title: 'Why pole matters more at some tracks',
+          text: 'Where overtaking is hard — Monaco being the extreme — starting position is almost everything, and qualifying effectively decides the race. Where passing is easy, a strong car can recover from a poor grid slot, so qualifying matters less.',
         },
       ],
       takeaways: [
         'Qualifying is three knockout segments: Q1, Q2, Q3.',
         'Five cars drop out after Q1 and Q2; the top ten contest pole in Q3.',
         'Only the single fastest lap counts, and exceeding track limits deletes it.',
+        'Timing the run and catching a tow can be worth crucial tenths.',
       ],
     },
     {
@@ -163,6 +190,16 @@ export const rulebook: LearnTopic = {
         {
           type: 'callout',
           tone: 'info',
+          title: 'How ties are broken',
+          text: 'If two drivers or teams finish level on points, the tie is settled by **countback**: whoever has more wins ranks higher, then more second places, then thirds, and so on. A single victory can outweigh a season of consistent podiums.',
+        },
+        {
+          type: 'paragraph',
+          text: 'Sprint weekends add a second, smaller pool of points (8 down to 1 for the top eight), so a driver can leave a Sprint round having scored twice. Over a long season those extra points add up, and a title fight has been decided by them before.',
+        },
+        {
+          type: 'callout',
+          tone: 'info',
           title: 'The fastest-lap point is gone',
           text: 'For many years a bonus point went to the driver who set the fastest lap (if they finished in the top ten). That bonus was scrapped, so today the only way to score is to finish in the top ten.',
         },
@@ -170,6 +207,7 @@ export const rulebook: LearnTopic = {
       takeaways: [
         'Points run 25-18-15-12-10-8-6-4-2-1 for the top ten.',
         'Drivers’ title = best individual; Constructors’ title = both cars combined.',
+        'Ties are broken by countback — most wins, then most second places, and so on.',
         'There is no longer a bonus point for fastest lap.',
       ],
     },
@@ -188,7 +226,13 @@ export const rulebook: LearnTopic = {
         },
         {
           type: 'paragraph',
-          text: 'A full stop changes all four wheels in around **two seconds** — roughly twenty people moving in choreographed unison. The risk is in the details: speeding in the pit lane, or an **unsafe release** into the path of another car, both earn time penalties. A stop is fast, but the lap or two spent driving in and out of the pits is the real cost, which is what makes *when* to stop such a decision.',
+          text: 'A full stop changes all four wheels in around **two seconds** — roughly twenty people moving in choreographed unison. Each corner has a three-person crew (one on the gun, one off with the old wheel, one on with the new), with others working the jacks front and rear while a “lollipop” or light system tells the driver when to launch. Modern F1 cars carry enough fuel for the whole race and refuelling is banned, so a stop is purely about tyres.',
+        },
+        {
+          type: 'callout',
+          tone: 'warning',
+          title: 'Where pit stops go wrong',
+          text: 'Speeding in the pit lane (the limit is usually 80 km/h) brings a fine or time penalty, and an **unsafe release** — sending a car out into another’s path or with a wheel not properly fitted — earns a penalty too. The lap or two spent driving in and out of the pits is the real cost, which is what makes *when* to stop such a decision.',
         },
         {
           type: 'callout',
@@ -199,8 +243,9 @@ export const rulebook: LearnTopic = {
       ],
       takeaways: [
         'A dry race requires at least two different slick compounds, forcing one stop.',
-        'A four-wheel pit stop takes around two seconds; the in/out laps are the real cost.',
+        'A four-wheel pit stop takes around two seconds; refuelling is banned.',
         'Pit-lane speeding and unsafe releases bring penalties.',
+        'In a declared-wet race the two-compound rule is waived.',
       ],
     },
     {
@@ -217,14 +262,19 @@ export const rulebook: LearnTopic = {
           text: 'Without this rule a team could bolt on a low-downforce, low-fuel special just for one qualifying lap, then rebuild the car for the race. Parc fermé closes that door. Break it — change a wing setting, swap to a wet setup that is not allowed — and the driver must start from the **pit lane** rather than their earned grid slot.',
         },
         {
+          type: 'paragraph',
+          text: 'A few changes are still allowed, because they are about safety or conditions rather than performance: teams can adjust the **front-wing flap angle**, change tyres and brakes, top up fluids, and make limited tweaks if the weather turns. Anything beyond that list needs the scrutineers’ sign-off, and doing it without permission is what triggers the pit-lane start.',
+        },
+        {
           type: 'callout',
           tone: 'info',
           title: 'The cars are scrutineered',
-          text: 'Throughout the weekend the FIA’s scrutineers check cars against the technical regulations — dimensions, weight, wing flexibility, fuel. A car that fails, even after a points finish, can be disqualified from the result.',
+          text: 'Throughout the weekend the FIA’s scrutineers check cars against the technical regulations — dimensions, weight, wing flexibility, fuel sample, plank wear under the floor. A car that fails, even after a points finish, can be **disqualified** from the result entirely.',
         },
       ],
       takeaways: [
         'Parc fermé locks the car’s setup from the start of qualifying.',
+        'Only a short list of changes (front-wing flap, tyres, brakes, fluids) is allowed.',
         'Breaking it means starting from the pit lane.',
         'Cars are checked against the technical rules and can be disqualified for failing.',
       ],
