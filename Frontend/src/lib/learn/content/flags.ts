@@ -29,14 +29,21 @@ export const flags: LearnTopic = {
           text: 'Flags are shown by **marshals** stationed at posts around the circuit, and each post covers one stretch — a “sector” of the lap. A yellow applies only to the zone it is shown in, so a driver lifts for that section and can be back at full speed moments later once past the incident. Because no one can spot a flag at 300 km/h with certainty, every signal is mirrored by lights on the car’s dashboard, so the driver always knows what is being shown ahead.',
         },
         {
+          type: 'callout',
+          tone: 'info',
+          title: 'Yellows in qualifying',
+          text: 'A yellow in qualifying is brutal on lap time: the driver must genuinely back off through the zone, which wrecks the lap, and any improvement set while ignoring it is deleted. Fail to slow convincingly and a grid penalty usually follows — so a late yellow can freeze the order and rob a faster car of pole.',
+        },
+        {
           type: 'paragraph',
-          text: 'The **green flag** is the all-clear: the hazard is gone and normal racing resumes. It is shown at the end of the yellow zone so a driver knows the exact point where they can race — and overtake — again.',
+          text: 'The **green flag** is the all-clear: the hazard is gone and normal racing resumes. It is shown at the end of the yellow zone so a driver knows the exact point where they can race — and overtake — again, and at the start of a session or formation lap to signal the track is open.',
         },
       ],
       takeaways: [
         'Single yellow: danger ahead, slow down, no overtaking.',
         'Double yellow: be ready to stop, track is blocked.',
         'Yellows apply only to the marshalling zone they are shown in.',
+        'A qualifying yellow forces a driver to back off and can decide the grid.',
         'Green: hazard cleared, racing resumes.',
       ],
     },
@@ -70,12 +77,17 @@ export const flags: LearnTopic = {
         },
         {
           type: 'paragraph',
-          text: 'The **restart** is its own drama. Before the Safety Car withdraws, lapped cars are usually waved past to unlap themselves so the leaders are nose-to-tail. The leader then controls the pace on the final lap behind the Safety Car and gets to choose the moment to accelerate away — but no one may overtake until they cross the line and the green is shown. A VSC ends differently: drivers get only a few seconds’ notice that the delta is lifting, so timing a clean restart is a skill of its own.',
+          text: 'Both systems work on a **delta time** the driver must not beat — under a VSC there is no physical car, just the delta; under a Safety Car the field also forms up behind the real car. While the Safety Car is out, drivers weave and brake to keep heat in cold tyres and brakes, knowing a restart on cold rubber is treacherous.',
+        },
+        {
+          type: 'paragraph',
+          text: 'The **restart** is its own drama. Before the Safety Car withdraws, lapped cars are usually waved past to unlap themselves so the leaders are nose-to-tail. The leader then controls the pace on the final lap behind the Safety Car and can deliberately “back up” the pack to get a jump — but no one may overtake until they cross the line and the green is shown. A VSC ends differently: drivers get only a few seconds’ notice that the delta is lifting, so timing a clean restart is a skill of its own.',
         },
       ],
       takeaways: [
         'The Safety Car physically leads and bunches the field at reduced speed.',
         'The VSC slows everyone via a delta time without closing the gaps.',
+        'Drivers weave and brake under neutralisation to keep tyres and brakes warm.',
         'At an SC restart, lapped cars unlap and the leader controls the pace.',
         'Stopping under a Safety Car is cheap, so it can transform strategy.',
       ],
@@ -91,13 +103,30 @@ export const flags: LearnTopic = {
         },
         {
           type: 'paragraph',
-          text: 'A red-flagged race can later be restarted, sometimes from a standing start on the grid and sometimes rolling behind the Safety Car. The order for that restart is taken from the **last completed lap** before the stoppage, not from the chaotic moment the flag flew. A red flag also hands teams a free opportunity to work on the cars — including, often, fitting fresh tyres without losing track position, which can completely reset the strategic picture.',
+          text: 'A red-flagged race can later be restarted, and the order for that restart is taken from the **last completed lap** before the stoppage, not from the chaotic moment the flag flew. A red flag also hands teams a free opportunity to work on the cars — including, often, fitting fresh tyres without losing track position, which can completely reset the strategic picture.',
+        },
+        {
+          type: 'subheading',
+          text: 'Two ways to go again',
+        },
+        {
+          type: 'terms',
+          items: [
+            {
+              term: 'Standing restart',
+              definition: 'Cars line up on the grid in the restart order and race away from a stationary start, just like the original start.',
+            },
+            {
+              term: 'Rolling restart',
+              definition: 'Cars form up behind the Safety Car and are released to race when the green flag flies, used when a standing start would be unsafe.',
+            },
+          ],
         },
         {
           type: 'callout',
           tone: 'info',
           title: 'A red flag can rewrite a race',
-          text: 'Because teams can change tyres during the stoppage, a driver who already pitted can be leapfrogged by rivals who hadn’t — a quirk that has decided several major races.',
+          text: 'Because teams can change tyres during the stoppage, a driver who already pitted can be leapfrogged by rivals who hadn’t — a quirk that has decided several major races. Note the two-compound rule still has to be met over the race as a whole.',
         },
         {
           type: 'paragraph',
@@ -106,9 +135,10 @@ export const flags: LearnTopic = {
       ],
       takeaways: [
         'A red flag halts the session for serious danger.',
-        'Cars return to the pits; the race may restart standing or rolling.',
-        'The restart order comes from the last completed lap before the stoppage.',
+        'Cars return to the pits; the restart order comes from the last completed lap.',
+        'Restarts are standing (from the grid) or rolling (behind the Safety Car).',
         'Free tyre changes during a stoppage can upend the strategic order.',
+        'If it cannot resume, the result stands, sometimes with reduced points.',
       ],
     },
     {
@@ -122,7 +152,7 @@ export const flags: LearnTopic = {
         },
         {
           type: 'paragraph',
-          text: 'Back-markers are expected not to interfere with the cars fighting for position at the front. Ignore the blue flags — typically three in a row — and the lapped driver risks a penalty for holding up the leaders.',
+          text: 'Back-markers are expected not to interfere with the cars fighting for position at the front. Ignore the blue flags — typically three in a row — and the lapped driver risks a penalty for holding up the leaders. The signal is shown both by the marshals and on the dashboard, so there is no excuse for missing it.',
         },
         {
           type: 'callout',
@@ -164,7 +194,7 @@ export const flags: LearnTopic = {
         },
         {
           type: 'paragraph',
-          text: 'The black flag and the black-and-orange “meatball” are always shown alongside the offending car’s **number**, so there is no doubt who they are for. They are deployed sparingly: the meatball protects the field from a car shedding parts, while a true black-flag disqualification mid-race is one of the rarest sights in the sport.',
+          text: 'The black flag and the black-and-orange “meatball” are always shown alongside the offending car’s **number**, so there is no doubt who they are for. They are deployed sparingly: the meatball protects the field from a car shedding parts, while a true black-flag disqualification mid-race is one of the rarest sights in the sport — most penalties are handled with time penalties instead, leaving the black flag for cases where a car simply must not continue.',
         },
         {
           type: 'callout',
@@ -177,6 +207,7 @@ export const flags: LearnTopic = {
         'Black-and-white = warning; black = disqualification.',
         'The “meatball” flag orders a damaged car to pit, shown with its number.',
         'Striped flag = slippery surface; white flag = slow vehicle ahead.',
+        'Black flags are rare; most offences are handled with time penalties.',
         'The chequered flag ends the session.',
       ],
     },

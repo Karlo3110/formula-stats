@@ -45,11 +45,17 @@ export const powerUnit: LearnTopic = {
           type: 'paragraph',
           text: 'The reason for the hybrid is efficiency. A 1.6-litre V6 sounds modest — smaller than many family-car engines — yet it produces enormous power because it is turbocharged, revs far higher than any road engine, and is paired with an electric system that reclaims energy a normal car simply throws away. That blend of small capacity and huge output is exactly the engineering challenge the rules set out to provoke, and it is why the technology is meant to be relevant to road cars, not just the track.',
         },
+        {
+          type: 'callout',
+          tone: 'info',
+          title: 'How a turbo wrings power from 1.6 litres',
+          text: 'A **turbocharger** is a fan driven by the engine’s exhaust gases that rams extra air into the cylinders. More air means more fuel can be burned in the same small engine, so a 1.6-litre V6 makes power a much larger naturally-aspirated engine once needed. The rev limit is set around 15,000 rpm, though in practice the fuel-flow rules mean the engines rarely need to scream all the way to it.',
+        },
       ],
       takeaways: [
         'A power unit = a 1.6L turbo V6 plus a powerful electric system.',
         'Combined output is around 1,000 hp, at remarkable efficiency.',
-        'The small turbo engine revs high and is paired with energy recovery.',
+        'A turbocharger force-feeds air so a tiny engine makes huge power.',
         'The cars run on fully sustainable fuel, with electric power near half the total.',
       ],
     },
@@ -87,12 +93,17 @@ export const powerUnit: LearnTopic = {
         },
         {
           type: 'paragraph',
+          text: 'The same idea sits in many road-going hybrids — it is called regenerative braking — but F1 does it at an extreme scale, recovering and redeploying large amounts of energy every single lap. The battery (the **Energy Store**) is deliberately limited in how much it can take in and give out, so the system is less about raw capacity and more about cycling energy rapidly: fill it on the brakes, empty it on the straight, over and over for the whole race.',
+        },
+        {
+          type: 'paragraph',
           text: 'Because the MGU-K does much of its harvesting *through* the rear brakes, the braking system is **brake-by-wire**: a computer blends the driver’s pedal pressure with the electrical harvesting so the car slows smoothly and predictably. Get that blend wrong and the brake feel changes from corner to corner — one reason braking consistency is such a prized driver skill in the hybrid era.',
         },
       ],
       takeaways: [
         'The MGU-K harvests braking energy and redeploys it for acceleration.',
         'Recovered energy is stored in the battery (Energy Store).',
+        'It is regenerative braking taken to an extreme, cycling energy every lap.',
         'Rear braking is blended electronically (brake-by-wire) with harvesting.',
         'The heat-recovery MGU-H has been dropped; the MGU-K is now much more powerful.',
       ],
@@ -111,6 +122,12 @@ export const powerUnit: LearnTopic = {
           text: 'The car follows energy **modes** and delta targets set by the team, and the deployment is mapped corner by corner. Run the battery flat too early and the car is left slow and exposed on the next straight; hoard it and you give away lap time you could have used.',
         },
         {
+          type: 'callout',
+          tone: 'warning',
+          title: 'Clipping: when the boost runs out',
+          text: 'On a very long straight a car can exhaust its deployment before the braking zone and the electric power simply stops — “**clipping**.” You can sometimes see it: a car that was pulling away suddenly stops accelerating near the end of the straight as the battery taps out. Managing the deployment map so clipping happens where it hurts least is part of the engineers’ job.',
+        },
+        {
           type: 'paragraph',
           text: 'This is why the same car can feel like two different machines. In **qualifying** the engineers unlock the most aggressive deployment for one explosive lap; in the **race** they manage the energy conservatively to last the distance, sometimes spending a lap deliberately under-deploying to bank charge — a “charging lap” — so the boost is there for an attack or a defence a few corners later.',
         },
@@ -124,6 +141,7 @@ export const powerUnit: LearnTopic = {
       takeaways: [
         'Electrical energy per lap is limited and must be managed corner by corner.',
         'Teams set energy modes and delta targets to place the boost where it matters.',
+        'Running out of deployment on a long straight is called “clipping”.',
         'Qualifying unlocks aggressive deployment; the race is managed to last.',
         'A chasing car can deploy extra “override” energy to help overtake.',
       ],
@@ -157,6 +175,12 @@ export const powerUnit: LearnTopic = {
           text: 'Because each element is counted separately, the penalties can stack: take a fresh ICE *and* a fresh turbo at the same race and the drops add up, which is why a driver who needs new parts will often take several at once and accept a single back-of-grid start rather than bleeding places over multiple weekends. Teams also nurse their hardware with conservative **engine modes** in practice and lower-stakes races, saving the most stressful settings for when points are truly on the line.',
         },
         {
+          type: 'callout',
+          tone: 'info',
+          title: 'Works teams and customers',
+          text: 'Only a few manufacturers build power units, and each supplies its own “works” team plus a number of **customer** teams. That is why several different cars on the grid can share the same engine — and why a manufacturer’s reliability problem can hit four or more cars at once, not just its own.',
+        },
+        {
           type: 'paragraph',
           text: 'This turns reliability into a strategic resource. A team nursing a fragile engine has to weigh protecting it (and driving more conservatively) against the near-certainty of a back-of-grid start later in the year when they finally need a fresh one.',
         },
@@ -165,6 +189,7 @@ export const powerUnit: LearnTopic = {
         'Each PU element has a fixed seasonal allowance per driver.',
         'Going over the allowance brings grid penalties, sometimes a back-row start.',
         'Penalties stack, so teams often take several fresh parts in one weekend.',
+        'A few manufacturers supply both works and customer teams across the grid.',
         'Reliability becomes a strategic resource to be managed across the season.',
       ],
     },
@@ -188,6 +213,12 @@ export const powerUnit: LearnTopic = {
         {
           type: 'callout',
           tone: 'info',
+          title: 'Why the fuel blend is so closely guarded',
+          text: 'Fuel and lubricants are a genuine performance differentiator, developed in partnership with oil companies and tested against the rules before each event. A blend that releases its energy slightly better, or lets the engine run a touch hotter safely, is worth real lap time — which is why fuel chemistry is one of the sport’s quieter arms races.',
+        },
+        {
+          type: 'callout',
+          tone: 'info',
           title: 'Among the most efficient engines on Earth',
           text: 'Thanks to the fuel-flow cap and the hybrid system, F1 engines convert an exceptionally high share of their fuel’s energy into motion — far more than a road car — which is exactly the engineering challenge the rules are designed to provoke.',
         },
@@ -196,6 +227,7 @@ export const powerUnit: LearnTopic = {
         'A fuel-flow limit caps power, forcing engineers to chase efficiency.',
         'A total fuel allowance makes fuel-saving (“lift and coast”) part of strategy.',
         'Cars run a fully sustainable fuel, with the gains relevant to road cars.',
+        'Fuel and lubricant chemistry is a genuine, closely-guarded performance edge.',
         'The result is one of the most thermally efficient engines ever built.',
       ],
     },
