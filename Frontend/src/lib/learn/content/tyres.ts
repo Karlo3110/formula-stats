@@ -39,6 +39,16 @@ export const tyres: LearnTopic = {
           text: 'Behind the three weekend labels sits Pirelli’s full numbered range — from the rock-hard **C0/C1** up to the ultra-soft **C6**. Which three numbered compounds get the Hard/Medium/Soft labels changes from track to track, so a “Hard” at one race can be softer than a “Medium” at another. Pirelli chooses the trio by studying how abrasive the asphalt is, how fast the corners are, and how much energy the layout puts through the rubber.',
         },
         {
+          type: 'callout',
+          tone: 'info',
+          title: 'Compound vs construction',
+          text: 'Two different things make up a tyre. The **construction** is the internal carcass — the casing, belts and shape — and it stays essentially the same all season. The **compound** is the rubber blend on the surface, and that is what changes between Hard, Medium and Soft. When people talk about “the tyres,” they usually mean the compound.',
+        },
+        {
+          type: 'paragraph',
+          text: 'The choice of trio quietly sets the tone for the race. A soft, aggressive selection means high grip but heavy wear, nudging teams toward two or even three stops; a conservative selection that barely degrades invites a one-stop and turns the race into a track-position chess match. Pirelli deliberately mixes it up across the year to keep strategies varied, and occasionally brings **prototype** tyres for teams to test in practice as it develops next year’s range.',
+        },
+        {
           type: 'paragraph',
           text: 'A driver does not have unlimited rubber to play with. Each one starts the weekend with a fixed **allocation** of sets and has to hand some back after each practice session, so every lap run in practice spends part of a finite budget. That is why teams sometimes sit in the garage while rivals circulate: they are saving a fresh set for when it counts on Sunday.',
         },
@@ -53,6 +63,7 @@ export const tyres: LearnTopic = {
         'Three dry compounds per weekend: Soft (red), Medium (yellow), Hard (white).',
         'Softer = more grip but shorter life; harder = less grip but longer life.',
         'The labels map onto Pirelli’s numbered C0–C6 range, chosen per circuit.',
+        'Construction (the carcass) stays fixed; the compound is the rubber that changes.',
         'Each driver has a limited allocation of sets, so practice running is a budget.',
       ],
     },
@@ -84,7 +95,17 @@ export const tyres: LearnTopic = {
         },
         {
           type: 'paragraph',
+          text: 'There are really two temperatures that matter: the **surface** temperature, which spikes and drops within a single corner, and the deeper **bulk** (carcass) temperature, which changes slowly and sets the baseline. A driver can flash the surface into the window for one lap, but if the bulk is cold the grip will not last; if the bulk is too hot, no amount of careful driving will cool it quickly.',
+        },
+        {
+          type: 'paragraph',
           text: 'The two ends of the car rarely sit in the window together. A circuit that is hard on traction overheats the **rears**, while a series of long, fast corners punishes the **front-left**. A car that is gentle on its tyres but cannot switch them on quickly will struggle in qualifying; one that switches on instantly but overheats will fade in the race. Engineers spend the weekend nudging setup and tyre pressures to balance the two.',
+        },
+        {
+          type: 'callout',
+          tone: 'warning',
+          title: 'The overheating spiral',
+          text: 'Overheating feeds on itself. A tyre that is too hot starts to slide; sliding generates yet more heat; the extra heat causes more sliding. Once a driver tips into that spiral the only way out is to back right off and let the rubber recover — which is why a frustrated chasing driver can suddenly drop away.',
         },
         {
           type: 'callout',
@@ -94,12 +115,13 @@ export const tyres: LearnTopic = {
         },
         {
           type: 'paragraph',
-          text: 'Warm-up is not only the driver’s job. Tyres are pre-heated in blankets to the top of their window before they are fitted, and on the out-lap the driver weaves to build heat through friction and brakes hard to warm the rubber from the wheel outward. On a cold, damp track that whole process can take most of a lap; on a baking afternoon the opposite problem appears, and the challenge becomes shedding heat rather than building it.',
+          text: 'Warm-up is not only the driver’s job. Tyres are pre-heated in blankets to the top of their window before they are fitted, Pirelli sets **minimum pressures** for safety, and on the out-lap the driver weaves to build heat through friction and brakes hard to warm the rubber from the wheel outward. On a cold, damp track that whole process can take most of a lap; on a baking afternoon the opposite problem appears, and the challenge becomes shedding heat rather than building it.',
         },
       ],
       takeaways: [
         'Tyres only grip inside a temperature window — too cold or too hot both fail.',
-        'Cold tyres can grain; overheated tyres can blister.',
+        'Surface temperature swings fast; the deeper bulk temperature sets the baseline.',
+        'Cold tyres can grain; overheated tyres can blister or enter a sliding spiral.',
         'Front and rear tyres rarely sit in the window together — balancing them is key.',
         'Nailing the warm-up is decisive, especially on a one-shot qualifying lap.',
       ],
@@ -132,7 +154,17 @@ export const tyres: LearnTopic = {
         },
         {
           type: 'paragraph',
+          text: 'How fast a tyre degrades is not fixed — it depends heavily on the conditions. A rough, abrasive surface chews rubber away; a hot track pushes tyres toward thermal deg; and a layout full of long corners loads the tyres for longer. The same compound can be a comfortable one-stop tyre at a cool, smooth circuit and a fragile two-stop tyre at a hot, abrasive one.',
+        },
+        {
+          type: 'paragraph',
           text: 'Teams measure deg carefully in Friday practice to predict how each compound will fade on Sunday. The result decides how many stops to make and when. A driver who can **manage** the tyres — being smooth, avoiding wheelspin and lockups, and using techniques like **lift-and-coast** (easing off before the braking zone to cut temperature) — can stretch a stint several laps longer than a driver who attacks every corner, and those extra laps are pure strategic freedom.',
+        },
+        {
+          type: 'callout',
+          tone: 'info',
+          title: 'Fuel masks deg early on',
+          text: 'A car burns through a lot of fuel over a race and gets lighter — and therefore faster — as it goes. Early in a stint that fuel effect partly hides the tyres fading; later, with the fuel gone, the deg shows up in full. It is one reason raw lap times can be misleading without knowing the fuel load.',
         },
         {
           type: 'callout',
@@ -150,8 +182,9 @@ export const tyres: LearnTopic = {
       takeaways: [
         'Degradation is the loss of grip and lap time as tyres wear and overheat.',
         'Thermal deg can be managed by cooling the tyre; wear deg is permanent.',
-        'Smooth driving and lift-and-coast can extend a stint by several laps.',
-        'Some compounds fall off a sudden “cliff” rather than fading gently.',
+        'Surface abrasiveness and temperature heavily change how fast a tyre fades.',
+        'Burning fuel lightens the car and masks early-stint degradation.',
+        'Smooth driving can extend a stint; some compounds fall off a sudden “cliff”.',
       ],
     },
     {
@@ -184,6 +217,10 @@ export const tyres: LearnTopic = {
         },
         {
           type: 'paragraph',
+          text: 'The undercut lives or dies on the **out-lap** — the single lap straight out of the pits on new tyres. If the driver can get heat into them instantly and bang in a near-qualifying lap, the move sticks; hesitate while the tyres warm and the advantage evaporates. Circuits with a **long pit lane** blunt the undercut, because the extra seconds spent driving slowly through the pits give the fresh tyres less to win back.',
+        },
+        {
+          type: 'paragraph',
           text: 'The undercut is so powerful that it shapes how drivers race. A leader will often defend not by going faster but by staying close enough to **cover** a rival — pitting the moment the car behind does, so it never gets the clear-air laps an undercut needs. When two team-mates pit on consecutive laps the crew performs a **double-stack**, servicing one car while the next is already on its way in, a stop with almost no margin for error.',
         },
         {
@@ -196,6 +233,7 @@ export const tyres: LearnTopic = {
       takeaways: [
         'The undercut: pit early and use fresh-tyre pace to jump ahead.',
         'The overcut: stay out while a rival struggles on cold new tyres.',
+        'The undercut depends on a perfect out-lap; a long pit lane weakens it.',
         'Leaders defend by covering the stop; team-mates may double-stack.',
         'Track temperature, warm-up behaviour, and traffic decide which works.',
       ],
@@ -223,8 +261,14 @@ export const tyres: LearnTopic = {
           text: 'That twenty seconds is the **pit loss** — the time lost driving the pit lane and stopping versus staying on track. An extra stop only pays if the fresher tyres can win back more than the pit loss before the flag. Strategists weigh it as a simple sum: the **time gained per lap** on newer rubber, multiplied by the laps remaining, against the cost of the stop itself.',
         },
         {
+          type: 'callout',
+          tone: 'info',
+          title: 'Tyre offset is a weapon',
+          text: 'Two cars on the same strategy can still differ in **offset** — the age and compound of their current tyres. A driver who saved a fresh set, or runs a softer compound at the same moment, has newer rubber than a rival and can attack or defend with it. Building a favourable offset is often the quiet goal of an early or late stop.',
+        },
+        {
           type: 'paragraph',
-          text: 'The right answer shifts with **degradation** (high deg pushes you toward more stops), the **chance of a Safety Car** (which makes a stop almost free), and how easy **overtaking** is at that circuit (if passing is hard, track position from a one-stop is gold). Teams will often split their two cars onto different strategies to cover both outcomes.',
+          text: 'The right answer shifts with **degradation** (high deg pushes you toward more stops), the **chance of a Safety Car** (which makes a stop almost free), and how easy **overtaking** is at that circuit (if passing is hard, track position from a one-stop is gold). Teams will often split their two cars onto different strategies to cover both outcomes — one aggressive, one conservative — so at least one is on the right call whatever the race throws up.',
         },
         {
           type: 'callout',
@@ -236,8 +280,9 @@ export const tyres: LearnTopic = {
       takeaways: [
         'Each stop costs ~20s but provides fresher, faster tyres.',
         'An extra stop only pays if new-tyre pace wins back more than the pit loss.',
+        'Tyre offset — running newer or softer rubber than a rival — is a key weapon.',
         'Degradation, Safety Car odds, and overtaking difficulty drive the choice.',
-        'A well-timed Safety Car can make an extra stop nearly free.',
+        'Teams often split their two cars across strategies to cover both outcomes.',
       ],
     },
     {
@@ -259,6 +304,10 @@ export const tyres: LearnTopic = {
           ],
         },
         {
+          type: 'paragraph',
+          text: '**Aquaplaning** is the danger the grooves exist to fight: above a certain speed a film of water lifts the tyre clear off the asphalt, and with no contact there is no grip, no braking and no steering at all. The grooves cut channels for that water to escape, which is why a wet tyre can keep working in conditions where a slick would simply skate straight on at the first corner.',
+        },
+        {
           type: 'callout',
           tone: 'key',
           title: 'The crossover is where races are won',
@@ -266,18 +315,19 @@ export const tyres: LearnTopic = {
         },
         {
           type: 'paragraph',
-          text: 'A drying track is the most treacherous: inters get faster and faster until, suddenly, slicks are quicker — but only if the line is dry enough to risk them. The first driver brave enough to switch can leap up the order, or spin off and lose everything.',
+          text: 'A drying track is the most treacherous: a **dry line** forms where the cars run most, getting quicker and quicker, until suddenly slicks are faster than inters — but only on that narrow strip, and only if you dare. The first driver brave enough to switch can leap up the order, or run wide onto the wet part and lose everything. The crossover window is often just a lap or two wide, so teams watch rivals’ sector times obsessively for the moment to jump.',
         },
         {
           type: 'paragraph',
-          text: 'Rain also brings a second enemy: **spray**. The wall of water thrown up by the cars ahead can blind a following driver completely, and it is often poor visibility — not a lack of grip — that forces officials to neutralise a race behind the Safety Car or stop it with a **red flag** until conditions improve. A wet race is therefore as much about patience and judgement as it is about car control.',
+          text: 'Rain also brings a second enemy: **spray**. The wall of water thrown up by the cars ahead can blind a following driver completely, and it is often poor visibility — not a lack of grip — that forces officials to neutralise a race behind the Safety Car or stop it with a **red flag** until conditions improve. For that reason the full wet is used less than you might expect: by the time the track is wet enough to need it, the spray is often too dangerous to race in at all, so most wet running happens on intermediates.',
         },
       ],
       takeaways: [
         'Slicks aquaplane in the wet; intermediates handle damp, full wets handle standing water.',
-        'Inters are green, full wets are blue.',
-        'The crossover timing between wet and dry tyres regularly decides wet races.',
+        'Grooves exist to clear the water film that causes aquaplaning.',
+        'On a drying track a dry line forms, and the slick crossover is a narrow window.',
         'Spray and visibility, not just grip, can trigger Safety Cars or red flags.',
+        'The crossover timing between wet and dry tyres regularly decides wet races.',
       ],
     },
   ],

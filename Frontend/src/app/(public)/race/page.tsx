@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import type { JSX } from 'react';
 
+import { RaceExplainer } from '@/components/race/RaceExplainer';
 import { RaceView } from '@/components/race/RaceView';
 import { buildPageMetadata } from '@/lib/seo/page-metadata';
 
@@ -26,10 +27,13 @@ export default async function RacePage({
 }: RacePageProps): Promise<JSX.Element> {
   const { season, round, session } = await searchParams;
   return (
-    <RaceView
-      season={toInt(season)}
-      round={toInt(round)}
-      session={session ?? 'R'}
-    />
+    <>
+      <RaceView
+        season={toInt(season)}
+        round={toInt(round)}
+        session={session ?? 'R'}
+      />
+      <RaceExplainer />
+    </>
   );
 }

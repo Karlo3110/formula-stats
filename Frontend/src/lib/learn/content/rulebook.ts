@@ -48,6 +48,10 @@ export const rulebook: LearnTopic = {
           text: 'Every car that runs lays down a thin film of rubber, and the racing line gradually “rubbers in,” adding grip. This **track evolution** means lap times tumble across the weekend even if no car changes — so the last runners in qualifying often have the fastest track.',
         },
         {
+          type: 'paragraph',
+          text: 'There are rules around the edges of all this running, too. An overnight **curfew** bars team personnel from working on the cars for set hours, to protect the crews from round-the-clock shifts. Teams must also hand one of their Friday practice sessions to a **rookie** a couple of times a season, giving young drivers real track time. Little of this scores points, but it all shapes who arrives on Sunday with the best-prepared car.',
+        },
+        {
           type: 'callout',
           tone: 'info',
           title: 'Why the race is ~305 km',
@@ -58,6 +62,7 @@ export const rulebook: LearnTopic = {
         'A weekend runs Friday practice → Saturday qualifying → Sunday race.',
         'Practice scores nothing but sets up the car and gathers tyre data.',
         'Teams split running into low-fuel qualifying sims and heavy-fuel long runs.',
+        'A curfew limits overnight work, and rookies must get some Friday running.',
         'Race distance is the laps needed to pass 305 km, capped at two hours.',
       ],
     },
@@ -90,16 +95,21 @@ export const rulebook: LearnTopic = {
         },
         {
           type: 'paragraph',
+          text: 'The format exists to pack more competitive action into a weekend: every day has a session that *matters*, which is better for spectators at the track and for television. It also shakes up the order, because the single practice hour leaves less time for the strongest teams to perfect their cars, occasionally handing an underdog a chance.',
+        },
+        {
+          type: 'paragraph',
           text: 'Sprint points go to the top eight finishers on a reduced scale (8-7-6-5-4-3-2-1). With only a single practice hour, teams have far less time to react to problems, which rewards getting the car right out of the box and punishes anyone chasing a setup all weekend.',
         },
         {
           type: 'paragraph',
-          text: 'The compressed format also changes how the Sprint itself is raced. It is short enough to run flat-out on a single set of tyres with no mandatory stop, so it becomes a pure sprint rather than a strategy puzzle. And because the car is locked under **parc fermé** from the start of Sprint Qualifying on Friday, a team that misjudges its setup is stuck with it for the entire weekend.',
+          text: 'The compressed format also changes how the Sprint itself is raced. It is short enough to run flat-out on a single set of tyres with no mandatory stop, so it becomes a pure sprint rather than a strategy puzzle. And because the car is locked under **parc fermé** from the start of Sprint Qualifying on Friday, a team that misjudges its setup is stuck with it for the entire weekend — and any damage or extra engine wear from the Saturday race carries straight into Sunday.',
         },
       ],
       takeaways: [
         'Sprint weekends have just one practice session.',
         'The Saturday Sprint is a short race that pays points to the top eight.',
+        'The format adds competitive action and can shake up the usual order.',
         'The Grand Prix grid still comes from normal qualifying, not the Sprint.',
         'The car is locked under parc fermé from Friday, so setup mistakes stick.',
       ],
@@ -140,6 +150,12 @@ export const rulebook: LearnTopic = {
         },
         {
           type: 'callout',
+          tone: 'info',
+          title: 'The banker lap',
+          text: 'In the knockout segments, drivers often set an early “banker” lap — a safe time in the bag — before risking everything on a final run. If a late yellow flag or rain spoils that final attempt, the banker can be the lap that survives into the next round. Spend too many fresh tyres on bankers, though, and you may have none left for Q3.',
+        },
+        {
+          type: 'callout',
           tone: 'warning',
           title: 'Track limits in qualifying',
           text: 'Run even slightly beyond the white lines at the exit of a corner and the lap is deleted instantly. Drivers regularly lose pole to a deleted lap for putting all four wheels off the track.',
@@ -155,6 +171,7 @@ export const rulebook: LearnTopic = {
         'Qualifying is three knockout segments: Q1, Q2, Q3.',
         'Five cars drop out after Q1 and Q2; the top ten contest pole in Q3.',
         'Only the single fastest lap counts, and exceeding track limits deletes it.',
+        'A “banker” lap is insurance against a spoiled final run.',
         'Timing the run and catching a tow can be worth crucial tenths.',
       ],
     },
@@ -199,16 +216,21 @@ export const rulebook: LearnTopic = {
         },
         {
           type: 'callout',
-          tone: 'info',
-          title: 'The fastest-lap point is gone',
-          text: 'For many years a bonus point went to the driver who set the fastest lap (if they finished in the top ten). That bonus was scrapped, so today the only way to score is to finish in the top ten.',
+          tone: 'warning',
+          title: 'Shortened races can pay reduced points',
+          text: 'If a race is stopped early and cannot resume, fewer than the full points may be awarded, scaled to how much of the distance was completed. A washed-out race is not always worth a full 25 for the winner — another reason every lap counts.',
+        },
+        {
+          type: 'paragraph',
+          text: 'The exact numbers have changed many times across the sport’s history — wins have been worth as little as 8 or 9 points in earlier eras — but the principle has held: reward winning above all, while still paying enough down the order that consistency matters. The current 25-point win exists precisely to make charging for victory worthwhile rather than settling for a safe finish.',
         },
       ],
       takeaways: [
         'Points run 25-18-15-12-10-8-6-4-2-1 for the top ten.',
         'Drivers’ title = best individual; Constructors’ title = both cars combined.',
         'Ties are broken by countback — most wins, then most second places, and so on.',
-        'There is no longer a bonus point for fastest lap.',
+        'Sprints add points; races stopped early can pay reduced points.',
+        'The scale rewards winning while still paying for consistency down the order.',
       ],
     },
     {
@@ -229,6 +251,10 @@ export const rulebook: LearnTopic = {
           text: 'A full stop changes all four wheels in around **two seconds** — roughly twenty people moving in choreographed unison. Each corner has a three-person crew (one on the gun, one off with the old wheel, one on with the new), with others working the jacks front and rear while a “lollipop” or light system tells the driver when to launch. Modern F1 cars carry enough fuel for the whole race and refuelling is banned, so a stop is purely about tyres.',
         },
         {
+          type: 'paragraph',
+          text: 'Two seconds sounds impossibly fast, and it is the product of relentless rehearsal: crews practise hundreds of stops, and the difference between a good stop and a great one — half a second — can be the difference between holding a position and losing it. A cross-threaded wheel nut or a gun that does not engage can turn that two seconds into ten and ruin a race that was going perfectly.',
+        },
+        {
           type: 'callout',
           tone: 'warning',
           title: 'Where pit stops go wrong',
@@ -244,6 +270,7 @@ export const rulebook: LearnTopic = {
       takeaways: [
         'A dry race requires at least two different slick compounds, forcing one stop.',
         'A four-wheel pit stop takes around two seconds; refuelling is banned.',
+        'Stops are the product of endless rehearsal; a fumbled nut can cost a race.',
         'Pit-lane speeding and unsafe releases bring penalties.',
         'In a declared-wet race the two-compound rule is waived.',
       ],
@@ -268,6 +295,12 @@ export const rulebook: LearnTopic = {
         {
           type: 'callout',
           tone: 'info',
+          title: 'Sometimes a pit-lane start is a choice',
+          text: 'Once a driver accepts a pit-lane start, parc fermé no longer binds them, so the team is free to change the setup completely. A team that qualified badly, or needs to fit fresh power-unit parts anyway, will sometimes *choose* to start from the pit lane precisely to bolt on a better race setup.',
+        },
+        {
+          type: 'callout',
+          tone: 'info',
           title: 'The cars are scrutineered',
           text: 'Throughout the weekend the FIA’s scrutineers check cars against the technical regulations — dimensions, weight, wing flexibility, fuel sample, plank wear under the floor. A car that fails, even after a points finish, can be **disqualified** from the result entirely.',
         },
@@ -276,6 +309,7 @@ export const rulebook: LearnTopic = {
         'Parc fermé locks the car’s setup from the start of qualifying.',
         'Only a short list of changes (front-wing flap, tyres, brakes, fluids) is allowed.',
         'Breaking it means starting from the pit lane.',
+        'A pit-lane start frees the setup, so teams sometimes take one deliberately.',
         'Cars are checked against the technical rules and can be disqualified for failing.',
       ],
     },

@@ -36,12 +36,19 @@ export const aerodynamics: LearnTopic = {
           type: 'paragraph',
           text: 'Three areas do most of the work: the **front wing** (which also points the airflow down the rest of the car), the **rear wing**, and the **floor and diffuser** underneath. Their balance front-to-rear sets the car’s handling: too much at the front and the rear goes light and slides (**oversteer**); too little and the nose washes out (**understeer**). Engineers chase not just *more* downforce but downforce that stays balanced as the car brakes, turns and accelerates.',
         },
+        {
+          type: 'callout',
+          tone: 'info',
+          title: 'The aero platform',
+          text: 'Because downforce is so sensitive to the car’s attitude — how it pitches under braking and rolls in corners — teams obsess over keeping a stable **platform**. Stiff suspension holds the floor at a consistent height so the aerodynamics behave predictably; the trade-off is a car that rides kerbs and bumps harshly. A car whose balance shifts unpredictably with speed is exhausting to drive and slow, even if its peak downforce is high.',
+        },
       ],
       takeaways: [
         'Wings and the floor deflect air up, pushing the car down.',
         'Downforce multiplies tyre grip, enabling later braking and faster corners.',
         'It scales with speed: lots in fast corners, little in slow ones.',
         'Front-to-rear balance of downforce sets understeer vs oversteer.',
+        'A stable, predictable aero platform matters as much as peak downforce.',
       ],
     },
     {
@@ -81,12 +88,19 @@ export const aerodynamics: LearnTopic = {
           type: 'paragraph',
           text: 'Drag is why a car’s top speed eventually stops climbing: it accelerates until the engine’s push exactly equals the air’s resistance, the **terminal speed** for that wing level. Trimming wing raises that ceiling but costs cornering grip — the central compromise of every setup sheet.',
         },
+        {
+          type: 'callout',
+          tone: 'info',
+          title: 'Aero development is rationed',
+          text: 'Teams refine these shapes in **wind tunnels** and in **CFD** (computer airflow simulation), but the rules now ration how much of each a team may do — and they hand *more* tunnel and computing time to teams lower in the championship. It is a deliberate brake on the richest teams simply out-developing everyone, and it makes every hour of aero work precious.',
+        },
       ],
       takeaways: [
         'Downforce always comes with drag, which limits top speed.',
         '“Aero efficiency” is maximising grip per unit of drag.',
         'Wing levels are tuned per circuit, from low-drag Monza to high-grip Monaco.',
         'A slipstream cuts drag for a following car, helping it close up.',
+        'Wind-tunnel and CFD time is capped, with more given to lower-placed teams.',
       ],
     },
     {
@@ -125,12 +139,19 @@ export const aerodynamics: LearnTopic = {
           type: 'paragraph',
           text: 'Ground effect is fierce but fussy: it strengthens the closer the floor runs to the road, so teams want to run the car as low as they dare. Run it too low and the airflow under the floor can stall and reconnect over and over, making the car bounce violently on the straights — the phenomenon nicknamed **porpoising**. There is also a hard limit: a wooden **plank** under the floor must not wear past a set thickness, proof the car was not run illegally low, and a worn plank means **disqualification**.',
         },
+        {
+          type: 'callout',
+          tone: 'info',
+          title: 'A second time around',
+          text: 'Ground effect is not new. It first transformed F1 in the late 1970s, was **banned** in the early 1980s when the cornering speeds grew alarming, and was deliberately brought back in the 2022 rules — this time tightly controlled — specifically because under-car downforce disturbs a following car less than big wings do. The whole point of its return was better racing.',
+        },
       ],
       takeaways: [
         'The floor is the dominant aerodynamic surface today.',
         'Venturi tunnels speed up underbody air, dropping pressure and sucking the car down.',
         'Ground effect makes grip with little drag, so floor gains help everywhere.',
         'Running too low risks porpoising and illegal plank wear (a disqualification).',
+        'Ground effect was used in the 1970s, banned, then reintroduced for closer racing.',
       ],
     },
     {
@@ -155,6 +176,10 @@ export const aerodynamics: LearnTopic = {
           ],
         },
         {
+          type: 'paragraph',
+          text: 'The leap from DRS is in two directions at once. DRS moved only the rear wing; active aero moves the **front as well**, so the car keeps its aerodynamic balance when it trims for the straight rather than going nose-heavy. And where DRS could only be used in marked zones when chasing, the new system flattens the wings for *everyone* on the straights as a matter of course — it is a normal part of every lap, not just an overtaking tool.',
+        },
+        {
           type: 'callout',
           tone: 'key',
           title: 'The overtaking aid is now a power boost',
@@ -167,6 +192,7 @@ export const aerodynamics: LearnTopic = {
       ],
       takeaways: [
         'Active aero lets the wings change shape between low-drag and high-downforce modes.',
+        'Unlike DRS, both the front and rear wings move, preserving balance.',
         'The car switches modes automatically between straights and corners.',
         'Wings must revert to high-downforce the moment the driver brakes, for safety.',
         'The overtaking aid is now an electrical power boost for the chasing car.',
@@ -192,6 +218,12 @@ export const aerodynamics: LearnTopic = {
           text: 'The effect is dramatic: a car running right behind another can lose a large share of its downforce, and the closer it gets, the worse it becomes — a vicious circle right in the braking zone where a move is launched. Because the floor relies on clean air feeding the tunnels, ground-effect cars are less sensitive to this than the wing-dominated cars that came before, but the penalty never disappears entirely.',
         },
         {
+          type: 'callout',
+          tone: 'key',
+          title: 'Two opposite effects on one straight',
+          text: 'Air does two contradictory things to a chasing car. In the corners the dirty-air **turbulence** robs it of downforce and grip; on the straight that follows, the **slipstream** cuts its drag and lets it close right up. Racing is the art of surviving the dirty-air corners well enough to be close at the exit, then using the tow down the straight to pounce.',
+        },
+        {
           type: 'paragraph',
           text: 'Following still costs grip, and pushing hard in dirty air also overheats the tyres faster. That is why a driver who is visibly quicker can sometimes sit stuck behind a slower car: staying close burns the tyres and erodes the grip needed to make the move.',
         },
@@ -199,6 +231,7 @@ export const aerodynamics: LearnTopic = {
       takeaways: [
         'Dirty air is the turbulent wake that robs a following car of downforce.',
         'The loss grows the closer you follow — worst exactly where you attack.',
+        'In corners turbulence hurts; on the straight the slipstream helps — racing exploits both.',
         'Modern rules push that wake upward to make following easier.',
         'Chasing in dirty air also overheats tyres, compounding the difficulty.',
       ],
@@ -221,6 +254,10 @@ export const aerodynamics: LearnTopic = {
           text: 'This is why **sidepod** and engine-cover shaping is such a battleground: a team that can cool the same power unit through smaller inlets gets tighter, more aerodynamic bodywork for free. The hot air still has to leave somewhere, so designers route it out where it does the least aerodynamic harm — and a beautifully packaged car is often a sign the cooling problem was solved elegantly.',
         },
         {
+          type: 'paragraph',
+          text: 'The brakes are their own cooling challenge. Carbon brake discs glow well past 1,000°C under heavy braking, fed by precisely shaped **brake ducts** — and like everything else, those ducts must be big enough to stop the brakes cooking but small enough not to bleed away lap time. Get brake cooling wrong and a driver faces either fading brakes or, at the other extreme, discs running too cold to bite.',
+        },
+        {
           type: 'callout',
           tone: 'warning',
           title: 'Cooling is a race-day variable',
@@ -231,6 +268,7 @@ export const aerodynamics: LearnTopic = {
         'Bodywork must feed cooling air to the engine, brakes and gearbox.',
         'Every cooling opening costs drag, so they are sized as small as possible.',
         'Cooling the same power unit through smaller inlets frees up tighter bodywork.',
+        'Brake ducts must balance discs that glow past 1,000°C against drag.',
         'Cooling is tuned to ambient conditions and can force drivers to back off.',
       ],
     },
