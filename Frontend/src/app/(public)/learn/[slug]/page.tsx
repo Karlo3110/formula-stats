@@ -4,6 +4,7 @@ import type { JSX } from 'react';
 
 import { TopicOverview } from '@/components/learn/TopicOverview';
 import { getTopic, LEARN_TOPICS } from '@/lib/learn/catalog';
+import { buildPageMetadata } from '@/lib/seo/page-metadata';
 
 export function generateStaticParams(): { slug: string }[] {
   return LEARN_TOPICS.map((topic) => ({ slug: topic.slug }));
@@ -19,12 +20,13 @@ export async function generateMetadata({
   const { slug } = await params;
   const topic = getTopic(slug);
   if (!topic) {
-    return { title: 'Not found — Formula Stats' };
+    return { title: 'Not found', robots: { index: false } };
   }
-  return {
+  return buildPageMetadata({
     title: `${topic.title} — Learning Center`,
     description: topic.description,
-  };
+    path: `/learn/${topic.slug}`,
+  });
 }
 
 export default async function TopicPage({

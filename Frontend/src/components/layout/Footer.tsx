@@ -11,7 +11,9 @@ const PRODUCT_LINKS: ReadonlyArray<{ href: string; label: string }> = [
 
 const COMPANY_LINKS: ReadonlyArray<{ href: string; label: string }> = [
   { href: '/about', label: 'About' },
+  { href: '/contact', label: 'Contact' },
   { href: '/privacy', label: 'Privacy Policy' },
+  { href: '/terms', label: 'Terms of Service' },
 ];
 
 export function Footer(): JSX.Element {

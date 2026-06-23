@@ -8,6 +8,7 @@ import {
   getChapter,
   LEARN_TOPICS,
 } from '@/lib/learn/catalog';
+import { buildPageMetadata } from '@/lib/seo/page-metadata';
 
 export function generateStaticParams(): { slug: string; chapter: string }[] {
   return LEARN_TOPICS.flatMap((topic) =>
@@ -28,12 +29,13 @@ export async function generateMetadata({
   const { slug, chapter } = await params;
   const location = getChapter(slug, chapter);
   if (!location) {
-    return { title: 'Not found — Formula Stats' };
+    return { title: 'Not found', robots: { index: false } };
   }
-  return {
+  return buildPageMetadata({
     title: `${location.chapter.title} — ${location.topic.title}`,
     description: location.chapter.summary,
-  };
+    path: `/learn/${location.topic.slug}/${location.chapter.slug}`,
+  });
 }
 
 export default async function ChapterPage({

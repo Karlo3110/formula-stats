@@ -2,12 +2,14 @@ import type { Metadata } from 'next';
 import type { JSX } from 'react';
 
 import { LegalPage } from '@/components/content/LegalPage';
+import { buildPageMetadata } from '@/lib/seo/page-metadata';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = buildPageMetadata({
   title: 'Privacy Policy',
   description:
     'How Formula Stats handles your data, cookies, and third-party advertising.',
-};
+  path: '/privacy',
+});
 
 export default function PrivacyPage(): JSX.Element {
   return (
@@ -90,7 +92,26 @@ export default function PrivacyPage(): JSX.Element {
             </a>
             .
           </li>
+          <li>
+            More detail on how Google uses data when you use our site is
+            available in{' '}
+            <a
+              href="https://policies.google.com/technologies/partner-sites"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Google’s partner-sites policy
+            </a>
+            .
+          </li>
         </ul>
+        <p>
+          When you first visit, we show a cookie notice so you can accept or
+          decline non-essential cookies. Visitors in the European Economic Area,
+          the UK, and Switzerland are additionally shown a consent message, as
+          required by law, before personalised ads are served; where consent is
+          declined, only non-personalised ads are shown.
+        </p>
       </section>
 
       <section>
@@ -105,6 +126,17 @@ export default function PrivacyPage(): JSX.Element {
       </section>
 
       <section>
+        <h2>Children’s privacy</h2>
+        <p>
+          Formula Stats is intended for a general audience and is not directed
+          to children under the age of 13 (or the minimum age required in your
+          country). We do not knowingly collect personal data from children. If
+          you believe a child has provided us with personal data, contact us and
+          we will delete it.
+        </p>
+      </section>
+
+      <section>
         <h2>Your rights</h2>
         <p>
           You may request access to, correction of, or deletion of your account
@@ -114,10 +146,20 @@ export default function PrivacyPage(): JSX.Element {
       </section>
 
       <section>
+        <h2>Changes to this policy</h2>
+        <p>
+          We may update this policy from time to time. When we do, we will
+          revise the “last updated” date above. Significant changes will be
+          highlighted on the site.
+        </p>
+      </section>
+
+      <section>
         <h2>Contact</h2>
         <p>
           Questions about this policy can be sent to{' '}
-          <a href="mailto:privacy@formula-stats.com">privacy@formula-stats.com</a>.
+          <a href="mailto:privacy@formula-stats.com">privacy@formula-stats.com</a>{' '}
+          or through our <a href="/contact">contact page</a>.
         </p>
       </section>
     </LegalPage>

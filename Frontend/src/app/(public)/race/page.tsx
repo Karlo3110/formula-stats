@@ -1,6 +1,15 @@
+import type { Metadata } from 'next';
 import type { JSX } from 'react';
 
 import { RaceView } from '@/components/race/RaceView';
+import { buildPageMetadata } from '@/lib/seo/page-metadata';
+
+export const metadata: Metadata = buildPageMetadata({
+  title: 'Live Race',
+  description:
+    'Replay Formula 1 Grand Prix sessions in 3D from real telemetry — follow any driver around the circuit and watch the order change lap by lap.',
+  path: '/race',
+});
 
 interface RacePageProps {
   searchParams: Promise<{ season?: string; round?: string; session?: string }>;

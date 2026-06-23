@@ -2,12 +2,14 @@ import type { Metadata } from 'next';
 import type { JSX } from 'react';
 
 import { LegalPage } from '@/components/content/LegalPage';
+import { buildPageMetadata } from '@/lib/seo/page-metadata';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = buildPageMetadata({
   title: 'About',
   description:
     'What Formula Stats is, who it is for, and where the data comes from.',
-};
+  path: '/about',
+});
 
 export default function AboutPage(): JSX.Element {
   return (
