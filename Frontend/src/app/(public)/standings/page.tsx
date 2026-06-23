@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import type { JSX } from 'react';
 
+import { StandingsExplainer } from '@/components/standings/StandingsExplainer';
 import { StandingsView } from '@/components/standings/StandingsView';
 import { buildPageMetadata } from '@/lib/seo/page-metadata';
 
@@ -12,5 +13,10 @@ export const metadata: Metadata = buildPageMetadata({
 });
 
 export default function StandingsPage(): JSX.Element {
-  return <StandingsView />;
+  return (
+    <>
+      <StandingsView />
+      <StandingsExplainer />
+    </>
+  );
 }

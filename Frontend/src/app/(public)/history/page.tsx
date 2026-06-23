@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import type { JSX } from 'react';
 
+import { HistoryExplainer } from '@/components/history/HistoryExplainer';
 import { HistoryView } from '@/components/history/HistoryView';
 import { buildPageMetadata } from '@/lib/seo/page-metadata';
 
@@ -12,5 +13,10 @@ export const metadata: Metadata = buildPageMetadata({
 });
 
 export default function HistoryPage(): JSX.Element {
-  return <HistoryView />;
+  return (
+    <>
+      <HistoryView />
+      <HistoryExplainer />
+    </>
+  );
 }
