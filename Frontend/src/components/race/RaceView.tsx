@@ -4,6 +4,7 @@ import dynamic from 'next/dynamic';
 import { useRef, type JSX } from 'react';
 
 import { Spinner } from '@/components/ui/Spinner';
+import { getApiErrorCode } from '@/lib/utils/api-error';
 import { cn } from '@/lib/utils/cn';
 import { useFullscreen } from '@/hooks/use-fullscreen';
 import { useLatestRace, useReplay } from '@/hooks/use-f1';
@@ -79,6 +80,9 @@ export function RaceView({
   });
   const isLoadingReplay =
     isResolvingRace || !hasTarget || replayQuery.isLoading;
+  const isReplayUnavailable =
+    replayQuery.isError &&
+    getApiErrorCode(replayQuery.error) === 'F1_DATA_NOT_FOUND';
   const trackPoints = replayQuery.data?.track ?? null;
   const replayDrivers = replayQuery.data?.drivers ?? null;
   const replayDuration = replayQuery.data?.durationSeconds ?? null;
@@ -123,6 +127,19 @@ export function RaceView({
           <p className="max-w-xs text-center text-xs text-foreground/45">
             Fetching official timing from the grid — the first load can take a
             moment.
+          </p>
+        </div>
+      ) : null}
+
+      {replayQuery.isError ? (
+        <div className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-3 bg-background/80 backdrop-blur-md">
+          <p className="text-sm uppercase tracking-[0.35em] text-foreground/80">
+            {isReplayUnavailable ? 'Replay not available yet' : 'Replay failed to load'}
+          </p>
+          <p className="max-w-xs text-center text-xs text-foreground/45">
+            {isReplayUnavailable
+              ? 'Position telemetry for this session has not been published yet. Check back shortly after the session ends.'
+              : 'Something went wrong while fetching the replay. Please try again in a moment.'}
           </p>
         </div>
       ) : null}

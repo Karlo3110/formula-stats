@@ -1,6 +1,7 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 
 from app.fastf1_client import (
+    SessionDataUnavailableError,
     get_event_schedule,
     get_replay,
     get_schedule,
@@ -53,7 +54,10 @@ def session_results(season: int, round_number: int, session: str) -> SessionResu
     response_model=TrackMap,
 )
 def track_map(season: int, round_number: int, session: str) -> TrackMap:
-    return get_track_map(season, round_number, session)
+    try:
+        return get_track_map(season, round_number, session)
+    except SessionDataUnavailableError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
 @router.get(
@@ -61,4 +65,7 @@ def track_map(season: int, round_number: int, session: str) -> TrackMap:
     response_model=ReplaySession,
 )
 def replay(season: int, round_number: int, session: str) -> ReplaySession:
-    return get_replay(season, round_number, session)
+    try:
+        return get_replay(season, round_number, session)
+    except SessionDataUnavailableError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc

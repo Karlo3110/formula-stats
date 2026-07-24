@@ -73,3 +73,13 @@ export class DataServiceUnavailableException extends DomainException {
     super(message, 'DATA_SERVICE_UNAVAILABLE', 502);
   }
 }
+
+export class F1DataNotFoundException extends DomainException {
+  constructor() {
+    super(
+      'F1 data for the requested session is not available yet.',
+      'F1_DATA_NOT_FOUND',
+      404,
+    );
+  }
+}

@@ -2,7 +2,11 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import type { ZodType } from 'zod';
 
-import { DataServiceUnavailableException } from '@/common/exceptions/domain.exception';
+import {
+  DataServiceUnavailableException,
+  DomainException,
+  F1DataNotFoundException,
+} from '@/common/exceptions/domain.exception';
 
 import {
   ReplaySessionSchema,
@@ -98,6 +102,9 @@ export class DataServiceClient {
         headers: this.buildHeaders(),
         signal: controller.signal,
       });
+      if (response.status === 404) {
+        throw new F1DataNotFoundException();
+      }
       if (!response.ok) {
         throw new DataServiceUnavailableException(
           `Data service responded ${response.status}.`,
@@ -105,7 +112,7 @@ export class DataServiceClient {
       }
       return schema.parse(await response.json());
     } catch (error) {
-      if (error instanceof DataServiceUnavailableException) {
+      if (error instanceof DomainException) {
         throw error;
       }
       this.logger.error(

@@ -60,6 +60,33 @@ def _is_missing(value: object) -> bool:
     return value is None or (isinstance(value, float) and pd.isna(value))
 
 
+class SessionDataUnavailableError(Exception):
+    """FastF1 has no lap/position data for the requested session (yet)."""
+
+
+def _fastest_lap_pos(loaded: object) -> "pd.DataFrame":
+    """Position samples of the session's fastest lap.
+
+    FastF1's ``load()`` keeps going when telemetry/position data cannot be
+    fetched (common for very recent or unpublished sessions) and only raises
+    ``DataNotLoadedError`` on access — translate that into our typed error so
+    routers can answer 404 instead of crashing with a 500.
+    """
+    from fastf1.core import DataNotLoadedError
+
+    try:
+        fastest = loaded.laps.pick_fastest()  # type: ignore[attr-defined]
+        if fastest is None:
+            raise SessionDataUnavailableError(
+                "No lap data is available for this session yet."
+            )
+        return fastest.get_pos_data()
+    except DataNotLoadedError as exc:
+        raise SessionDataUnavailableError(
+            "Position data is not available for this session yet."
+        ) from exc
+
+
 def get_event_schedule(season: int) -> list[EventSummary]:
     _ensure_cache()
     import fastf1
@@ -185,8 +212,7 @@ def get_track_map(season: int, round_number: int, session: str) -> TrackMap:
     loaded = fastf1.get_session(season, round_number, session)
     loaded.load(laps=True, telemetry=True, weather=False, messages=False)
 
-    fastest = loaded.laps.pick_fastest()
-    pos = fastest.get_pos_data()
+    pos = _fastest_lap_pos(loaded)
 
     track = _build_outline(
         pos["X"].to_numpy(dtype=float),
@@ -440,8 +466,7 @@ def get_replay(season: int, round_number: int, session: str) -> ReplaySession:
     loaded = fastf1.get_session(season, round_number, session)
     loaded.load(laps=True, telemetry=True, weather=False, messages=True)
 
-    fastest = loaded.laps.pick_fastest()
-    fpos = fastest.get_pos_data()
+    fpos = _fastest_lap_pos(loaded)
     track, cx, cy, cz, scale = _outline_with_norm(
         fpos["X"].to_numpy(dtype=float),
         fpos["Y"].to_numpy(dtype=float),
