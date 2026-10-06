@@ -2,45 +2,22 @@
 
 import { useEffect, useState } from 'react';
 
-export interface Countdown {
-  days: number;
-  hours: number;
-  minutes: number;
-  seconds: number;
-  isPast: boolean;
-}
+import { computeCountdown, type Countdown } from '@/lib/utils/countdown';
 
-const SECOND = 1000;
-const MINUTE = 60 * SECOND;
-const HOUR = 60 * MINUTE;
-const DAY = 24 * HOUR;
+const TICK_MS = 1000;
 
-function compute(target: Date | null): Countdown {
-  if (!target) {
-    return { days: 0, hours: 0, minutes: 0, seconds: 0, isPast: true };
-  }
-  const diff = target.getTime() - Date.now();
-  if (diff <= 0) {
-    return { days: 0, hours: 0, minutes: 0, seconds: 0, isPast: true };
-  }
-  return {
-    days: Math.floor(diff / DAY),
-    hours: Math.floor((diff % DAY) / HOUR),
-    minutes: Math.floor((diff % HOUR) / MINUTE),
-    seconds: Math.floor((diff % MINUTE) / SECOND),
-    isPast: false,
-  };
-}
-
-/** Live countdown to a target date, ticking every second. */
+/**
+ * Live countdown to a target date, ticking every second. Derived during render
+ * from a ticking clock, so a caller passing a fresh-but-equal Date each render
+ * cannot trigger an update loop.
+ */
 export function useCountdown(target: Date | null): Countdown {
-  const [countdown, setCountdown] = useState<Countdown>(() => compute(target));
+  const [now, setNow] = useState<number>(() => Date.now());
 
   useEffect(() => {
-    setCountdown(compute(target));
-    const id = setInterval(() => setCountdown(compute(target)), SECOND);
+    const id = setInterval(() => setNow(Date.now()), TICK_MS);
     return () => clearInterval(id);
-  }, [target]);
+  }, []);
 
-  return countdown;
+  return computeCountdown(target?.getTime() ?? null, now);
 }
