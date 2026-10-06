@@ -8,7 +8,7 @@ import { useCurrentWeekend } from '@/hooks/use-f1';
 
 import { ChampionshipTeaser } from './ChampionshipTeaser';
 import { CountdownHero } from './CountdownHero';
-import { LiveRaceCard } from './LiveRaceCard';
+import { LatestRaceCard } from './LatestRaceCard';
 import { SessionScheduleCard } from './SessionScheduleCard';
 
 export function HomeView(): JSX.Element {
@@ -39,7 +39,7 @@ export function HomeView(): JSX.Element {
       {event ? (
         <section className="mt-16 grid gap-x-16 gap-y-10 lg:grid-cols-[1.5fr_1fr]">
           <SessionScheduleCard event={event} />
-          <LiveRaceCard />
+          <LatestRaceCard />
         </section>
       ) : null}
 
