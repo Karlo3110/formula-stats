@@ -147,11 +147,10 @@ function setFilter(status: string): void {
 - Target wrapper divs with class selectors, not individual interactive components
 
 ### Theme
-- Dark pit-wall / telemetry aesthetic: near-black neutral surfaces, flat hairline-bordered panels, no blurred glow blobs
-- Primary: `oklch(0.62 0.22 25)` (racing red) — interaction, live state, the racing line
-- Accent: `oklch(0.87 0.17 95)` (signal yellow) — reserved for headline figures (leader, P1, key stats)
-- **JetBrains Mono** (`font-mono`) for telemetry readouts and instrument labels (`Eyebrow`)
-- All tokens live in `src/app/globals.css`; components never use raw color literals except team/flag colors
+- Dark esports aesthetic with blue accent (oklch hue 260)
+- All shadcn components use dark theme defaults
+- Primary: `oklch(0.623 0.214 259)` (bright blue)
+- Flat, hairline-bordered panels; no background grids or blurred glow blobs
 
 ### Component Patterns
 - Extract reusable components: PageHeader, EmptyState, StatCard, DashboardCard

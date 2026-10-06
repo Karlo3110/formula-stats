@@ -2,35 +2,34 @@
 
 /*
  * Design tokens — single source of truth for color, type, radius.
- * Pit-wall telemetry aesthetic: near-black neutral surfaces, racing-red
- * primary for interaction and live state, signal-yellow accent reserved for
- * headline figures. Components reference semantic tokens (bg-background,
- * text-muted, text-primary), never literals.
+ * Dark telemetry aesthetic with a bright blue primary and a racing-red
+ * accent. Components reference semantic tokens (bg-background, text-muted,
+ * text-primary), never literals.
  */
 @theme {
   --font-sans: var(--font-inter), system-ui, sans-serif;
   --font-display: var(--font-bebas), var(--font-inter), sans-serif;
   --font-mono: var(--font-jetbrains), ui-monospace, monospace;
 
-  --color-background: oklch(0.12 0.004 20);
-  --color-surface: oklch(0.16 0.005 20);
-  --color-elevated: oklch(0.2 0.006 20);
-  --color-border: oklch(0.27 0.008 20);
-  --color-input: oklch(0.24 0.008 20);
+  --color-background: oklch(0.13 0.012 264);
+  --color-surface: oklch(0.17 0.014 264);
+  --color-elevated: oklch(0.21 0.018 264);
+  --color-border: oklch(0.3 0.02 264);
+  --color-input: oklch(0.28 0.02 264);
 
-  --color-foreground: oklch(0.96 0.003 20);
-  --color-muted: oklch(0.68 0.01 20);
-  --color-heading: oklch(0.99 0.002 20);
+  --color-foreground: oklch(0.98 0.008 264);
+  --color-muted: oklch(0.72 0.02 264);
+  --color-heading: oklch(0.99 0.005 264);
 
-  --color-primary: oklch(0.62 0.22 25);
-  --color-primary-foreground: oklch(0.99 0 0);
-  --color-accent: oklch(0.87 0.17 95);
-  --color-accent-foreground: oklch(0.18 0.02 95);
-  --color-destructive: oklch(0.62 0.22 25);
+  --color-primary: oklch(0.62 0.2 262);
+  --color-primary-foreground: oklch(0.99 0.005 264);
+  --color-accent: oklch(0.62 0.23 25);
+  --color-accent-foreground: oklch(0.99 0 0);
+  --color-destructive: oklch(0.62 0.23 25);
   --color-destructive-foreground: oklch(0.98 0 0);
-  --color-success: oklch(0.78 0.17 150);
+  --color-success: oklch(0.78 0.15 150);
   --color-warning: oklch(0.82 0.15 80);
-  --color-ring: oklch(0.62 0.22 25);
+  --color-ring: oklch(0.62 0.2 262);
 
   --radius-sm: 0.375rem;
   --radius-md: 0.5rem;
@@ -131,14 +130,6 @@
 
 .glass-pill:hover {
   border-color: rgba(255, 255, 255, 0.18);
-}
-
-/* Fine measurement grid used behind data surfaces (timing-screen texture). */
-.bg-telemetry-grid {
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
-  background-size: 48px 48px;
 }
 
 /* Thin custom range input for the replay scrubber. */
