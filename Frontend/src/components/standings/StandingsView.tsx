@@ -6,6 +6,7 @@ import { AdSlot } from '@/components/ads/AdSlot';
 import { Spinner } from '@/components/ui/Spinner';
 import { Text } from '@/components/ui/Typography';
 import { useLatestStandings } from '@/hooks/use-f1';
+import { useSeasonDrivers } from '@/hooks/use-season-drivers';
 
 import { StandingsTables } from './StandingsTables';
 
@@ -13,6 +14,7 @@ const STANDINGS_AD_SLOT = '0000000000';
 
 export function StandingsView(): JSX.Element {
   const { data, season, isLoading, isError } = useLatestStandings();
+  const drivers = useSeasonDrivers(season);
 
   return (
     <div className="mx-auto max-w-[80rem] px-2 sm:px-6">
@@ -38,7 +40,7 @@ export function StandingsView(): JSX.Element {
         </Text>
       ) : (
         <div className="mt-12">
-          <StandingsTables data={data} />
+          <StandingsTables data={data} drivers={drivers} />
         </div>
       )}
 

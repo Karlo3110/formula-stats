@@ -45,3 +45,50 @@ export function splitDriverName(fullName: string): { given: string; family: stri
   const [given = '', ...rest] = fullName.trim().split(/\s+/);
   return rest.length > 0 ? { given, family: rest.join(' ') } : { given: '', family: given };
 }
+
+const SECONDS_PER_HOUR = 3600;
+const SECONDS_PER_MINUTE = 60;
+const PIT_LANE_GRID = 0;
+
+function pad(value: number, length: number): string {
+  return value.toString().padStart(length, '0');
+}
+
+/** 5504.742 → "1:31:44.742" (race duration). */
+export function formatRaceDuration(totalSeconds: number): string {
+  const hours = Math.floor(totalSeconds / SECONDS_PER_HOUR);
+  const minutes = Math.floor((totalSeconds % SECONDS_PER_HOUR) / SECONDS_PER_MINUTE);
+  const seconds = totalSeconds % SECONDS_PER_MINUTE;
+  const secondsText = seconds.toFixed(3).padStart(6, '0');
+  return hours > 0 ? `${hours}:${pad(minutes, 2)}:${secondsText}` : `${minutes}:${secondsText}`;
+}
+
+/**
+ * What the timing screen shows per row: the winner's race time, the gap for
+ * cars on the lead lap, otherwise the status ("+1 Lap", "Retired", …).
+ */
+export function timeOrGapLabel(result: DriverResult, winner: DriverResult | undefined): string {
+  if (result.timeSeconds === null) return result.status;
+  if (!winner || winner.timeSeconds === null || result === winner) {
+    return formatRaceDuration(result.timeSeconds);
+  }
+  return `+${(result.timeSeconds - winner.timeSeconds).toFixed(3)}s`;
+}
+
+/** Grid places gained (positive) or lost; null for pit-lane starts or no data. */
+export function positionsGained(result: DriverResult): number | null {
+  const { gridPosition, position } = result;
+  if (gridPosition === null || position === null || gridPosition === PIT_LANE_GRID) {
+    return null;
+  }
+  return gridPosition - position;
+}
+
+const PIT_LANE_LABEL = 'PL';
+const NO_DATA_LABEL = '–';
+
+/** Starting slot for display: the grid number, "PL" for a pit-lane start. */
+export function gridLabel(result: DriverResult): string {
+  if (result.gridPosition === null) return NO_DATA_LABEL;
+  return result.gridPosition === PIT_LANE_GRID ? PIT_LANE_LABEL : String(result.gridPosition);
+}

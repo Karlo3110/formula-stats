@@ -3,8 +3,10 @@
 import Link from 'next/link';
 import type { JSX } from 'react';
 
+import { CountryFlag } from '@/components/f1/CountryFlag';
 import { Spinner } from '@/components/ui/Spinner';
 import { useSchedule } from '@/hooks/use-f1';
+import { eventCountryIso2 } from '@/lib/f1/countries';
 import { SessionCode, completedRounds, hasSession } from '@/lib/f1/race-archive';
 import { raceReplayHref } from '@/lib/f1/routes';
 import { formatDayMonth } from '@/lib/utils/date';
@@ -55,7 +57,10 @@ export function RacePickerRounds({ season, activeSeason, activeRound, onNavigate
             >
               <span className="font-mono text-xs tabular-nums text-muted">R{event.roundNumber}</span>
               <span className="min-w-0">
-                <span className="block truncate text-sm font-medium text-foreground">{event.eventName}</span>
+                <span className="flex items-center gap-2 truncate text-sm font-medium text-foreground">
+                  <CountryFlag iso2={eventCountryIso2(event.country)} label={event.country} />
+                  {event.eventName}
+                </span>
                 <span className="block truncate text-xs text-muted">
                   {event.location}
                   {hasSession(event, SessionCode.Sprint) ? ' · Sprint weekend' : ''}

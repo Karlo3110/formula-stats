@@ -7,6 +7,7 @@ import { getApiErrorCode } from '@/lib/utils/api-error';
 import { useFullscreen } from '@/hooks/use-fullscreen';
 import { useReplay } from '@/hooks/use-f1';
 import { useRaceTarget, type RaceRequest } from '@/hooks/use-race-target';
+import { useSeasonDrivers } from '@/hooks/use-season-drivers';
 import { useRaceStore } from '@/stores/use-race-store';
 
 import { DriverFocusPanel } from './DriverFocusPanel';
@@ -36,6 +37,7 @@ export function RaceView(request: RaceRequest): JSX.Element {
   const resetForNewRace = useRaceStore((state) => state.resetForNewRace);
   const resolved = useRaceTarget(request);
   const { target } = resolved;
+  const drivers = useSeasonDrivers(target?.season ?? null);
 
   const replayQuery = useReplay(target?.season ?? 0, target?.round ?? 0, target?.session ?? SessionCode.Race, {
     enabled: target !== null,
@@ -76,7 +78,7 @@ export function RaceView(request: RaceRequest): JSX.Element {
         </div>
         <aside className="order-3 grid min-h-0 gap-3 sm:grid-cols-2 lg:order-none lg:grid-cols-1 lg:grid-rows-[auto_auto_minmax(0,1fr)]">
           <TrackMap outline={replay?.track ?? null} />
-          <DriverFocusPanel isReady={isReady} />
+          <DriverFocusPanel isReady={isReady} drivers={drivers} />
           <div className="h-72 min-h-0 sm:col-span-2 lg:col-span-1 lg:h-auto">
             <RaceControlLog messages={replay?.messages ?? []} />
           </div>

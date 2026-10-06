@@ -1,22 +1,28 @@
 import type { JSX } from 'react';
 
-import { teamColor } from '@/lib/f1/team-colors';
+import { CountryFlag } from '@/components/f1/CountryFlag';
+import { DriverAvatar } from '@/components/f1/DriverAvatar';
+import type { DriverDirectory } from '@/hooks/use-season-drivers';
+import { nationalityIso2 } from '@/lib/f1/countries';
+import { resolveTeamColor, teamColor } from '@/lib/f1/team-colors';
 import { cn } from '@/lib/utils/cn';
 import type {
   ConstructorStandingRow,
+  DriverProfile,
   DriverStandingRow,
   SeasonStandings,
 } from '@/lib/validation/f1-schemas';
 
-function DriverRow({
-  row,
-  leader,
-}: {
+interface DriverRowProps {
   row: DriverStandingRow;
   leader: number;
-}): JSX.Element {
+  profile: DriverProfile | undefined;
+}
+
+function DriverRow({ row, leader, profile }: DriverRowProps): JSX.Element {
   const isLeader = row.position === 1;
-  const color = teamColor(row.team);
+  const color = resolveTeamColor(profile?.teamColor, row.team);
+  const fullName = `${row.givenName} ${row.familyName}`;
 
   return (
     <li className="grid grid-cols-[2.5rem_1fr_auto] items-center gap-4 border-b border-white/10 py-4 sm:grid-cols-[3rem_1fr_8rem_5rem_5rem]">
@@ -29,14 +35,11 @@ function DriverRow({
         {row.position}
       </span>
       <span className="flex items-center gap-3">
-        <span
-          aria-hidden
-          className="h-8 w-1 shrink-0 rounded-full"
-          style={{ background: color }}
-        />
+        <DriverAvatar name={fullName} headshotUrl={profile?.headshotUrl} teamColor={color} />
         <span className="min-w-0">
-          <span className="block truncate text-base font-semibold text-foreground sm:text-lg">
-            {row.givenName} {row.familyName}
+          <span className="flex items-center gap-2">
+            <span className="truncate text-base font-semibold text-foreground sm:text-lg">{fullName}</span>
+            <CountryFlag iso2={nationalityIso2(profile?.countryCode)} label={profile?.countryCode ?? ''} />
           </span>
           <span className="block truncate text-xs uppercase tracking-wider text-muted">
             {row.team}
@@ -84,11 +87,13 @@ function ConstructorRow({ row }: { row: ConstructorStandingRow }): JSX.Element {
   );
 }
 
-export function StandingsTables({
-  data,
-}: {
+interface StandingsTablesProps {
   data: SeasonStandings;
-}): JSX.Element {
+  /** Headshots and nationalities; rows fall back to initials without them. */
+  drivers: DriverDirectory;
+}
+
+export function StandingsTables({ data, drivers }: StandingsTablesProps): JSX.Element {
   const leaderPoints = data.drivers[0]?.points ?? 0;
 
   return (
@@ -99,7 +104,7 @@ export function StandingsTables({
         </p>
         <ul className="mt-5 border-t border-white/10">
           {data.drivers.map((row) => (
-            <DriverRow key={row.position} row={row} leader={leaderPoints} />
+            <DriverRow key={row.position} row={row} leader={leaderPoints} profile={drivers.get(row.code)} />
           ))}
         </ul>
       </div>

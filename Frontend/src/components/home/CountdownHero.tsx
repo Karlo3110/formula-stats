@@ -2,7 +2,9 @@
 
 import type { JSX } from 'react';
 
+import { CountryFlag } from '@/components/f1/CountryFlag';
 import { ButtonLink } from '@/components/ui/ButtonLink';
+import { eventCountryIso2 } from '@/lib/f1/countries';
 import { useCountdown } from '@/hooks/use-countdown';
 import type { UpcomingSession } from '@/lib/race-weekend';
 import type { WeekendEvent } from '@/lib/validation/f1-schemas';
@@ -56,7 +58,8 @@ export function CountdownHero({ event, next }: CountdownHeroProps): JSX.Element 
         {event.eventName}
       </h1>
 
-      <p className="mt-3 text-xs uppercase tracking-[0.25em] text-muted sm:text-sm sm:tracking-[0.3em]">
+      <p className="mt-3 flex items-center gap-3 text-xs uppercase tracking-[0.25em] text-muted sm:text-sm sm:tracking-[0.3em]">
+        <CountryFlag iso2={eventCountryIso2(event.country)} label={event.country} size="md" />
         {event.location}, {event.country}
       </p>
 

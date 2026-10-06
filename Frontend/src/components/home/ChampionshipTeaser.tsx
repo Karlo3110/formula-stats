@@ -3,14 +3,18 @@
 import Link from 'next/link';
 import type { JSX } from 'react';
 
+import { DriverAvatar } from '@/components/f1/DriverAvatar';
 import { Spinner } from '@/components/ui/Spinner';
 import { useLatestStandings } from '@/hooks/use-f1';
+import { useSeasonDrivers } from '@/hooks/use-season-drivers';
+import { resolveTeamColor } from '@/lib/f1/team-colors';
 
 const TOP_DRIVERS = 5;
 const TOP_TEAMS = 3;
 
 export function ChampionshipTeaser(): JSX.Element | null {
   const { data, season, isLoading, isError } = useLatestStandings();
+  const drivers = useSeasonDrivers(season);
 
   if (isError || (!isLoading && !data?.drivers.length)) {
     return null;
@@ -54,6 +58,12 @@ export function ChampionshipTeaser(): JSX.Element | null {
                   <span className="w-6 font-display text-xl tabular-nums text-muted">
                     {d.position}
                   </span>
+                  <DriverAvatar
+                    name={`${d.givenName} ${d.familyName}`}
+                    headshotUrl={drivers.get(d.code)?.headshotUrl}
+                    teamColor={resolveTeamColor(drivers.get(d.code)?.teamColor, d.team)}
+                    size="sm"
+                  />
                   <span className="font-semibold text-foreground">
                     {d.givenName} {d.familyName}
                   </span>

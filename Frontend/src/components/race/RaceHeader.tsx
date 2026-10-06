@@ -2,7 +2,9 @@ import Link from 'next/link';
 import type { JSX } from 'react';
 
 import { Eyebrow } from '@/components/ui/Typography';
+import { CountryFlag } from '@/components/f1/CountryFlag';
 import { SessionSwitch } from '@/components/f1/SessionSwitch';
+import { eventCountryIso2 } from '@/lib/f1/countries';
 import type { SessionCode } from '@/lib/f1/race-archive';
 import { raceReplayHref, raceResultHref } from '@/lib/f1/routes';
 import type { WeekendEvent } from '@/lib/validation/f1-schemas';
@@ -28,7 +30,10 @@ export function RaceHeader({ season, event, sessions, activeSession }: RaceHeade
       <div className="min-w-0">
         {season !== null && event ? (
           <>
-            <Eyebrow>{eventMeta(season, event)}</Eyebrow>
+            <Eyebrow className="flex items-center gap-2">
+              <CountryFlag iso2={eventCountryIso2(event.country)} label={event.country} />
+              {eventMeta(season, event)}
+            </Eyebrow>
             <h1 className="mt-2 truncate font-display text-4xl uppercase leading-none text-heading sm:text-5xl">
               {event.eventName}
             </h1>

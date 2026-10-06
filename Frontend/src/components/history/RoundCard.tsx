@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import type { JSX } from 'react';
 
+import { CountryFlag } from '@/components/f1/CountryFlag';
+import { eventCountryIso2 } from '@/lib/f1/countries';
 import { cn } from '@/lib/utils/cn';
 import type { ArchiveEntry } from '@/lib/f1/race-archive';
 import { raceResultHref } from '@/lib/f1/routes';
@@ -28,7 +30,10 @@ function CardBody({ entry }: { entry: ArchiveEntry }): JSX.Element {
         <span className="font-mono text-xs text-muted">{raceStart ? formatDayMonth(raceStart) : 'TBC'}</span>
       </div>
       <div className="mt-6 min-w-0">
-        <p className="truncate font-mono text-[0.65rem] uppercase tracking-[0.16em] text-muted">{event.country}</p>
+        <p className="flex items-center gap-2 truncate font-mono text-[0.65rem] uppercase tracking-[0.16em] text-muted">
+          <CountryFlag iso2={eventCountryIso2(event.country)} label={event.country} />
+          {event.country}
+        </p>
         <p className="mt-1 truncate text-base font-semibold text-heading">{event.eventName}</p>
       </div>
       <p

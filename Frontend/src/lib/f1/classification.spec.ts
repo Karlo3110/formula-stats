@@ -3,11 +3,15 @@ import { describe, expect, it } from 'vitest';
 import type { DriverResult } from '@/lib/validation/f1-schemas';
 
 import {
+  formatRaceDuration,
+  gridLabel,
   isClassifiedFinish,
   podiumOf,
+  positionsGained,
   sortByPosition,
   splitDriverName,
   summarizeClassification,
+  timeOrGapLabel,
 } from './classification';
 
 function createResult(overrides: Partial<DriverResult> = {}): DriverResult {
@@ -19,6 +23,12 @@ function createResult(overrides: Partial<DriverResult> = {}): DriverResult {
     teamName: 'McLaren',
     points: 25,
     status: 'Finished',
+    gridPosition: 2,
+    laps: 57,
+    timeSeconds: 5504.742,
+    teamColor: '#ff8000',
+    headshotUrl: null,
+    countryCode: 'GBR',
     ...overrides,
   };
 }
@@ -76,5 +86,59 @@ describe('splitDriverName', () => {
 
   it('treats a single name as the family name', () => {
     expect(splitDriverName('Zhou')).toEqual({ given: '', family: 'Zhou' });
+  });
+});
+
+describe('formatRaceDuration', () => {
+  it('formats hours, minutes and milliseconds', () => {
+    expect(formatRaceDuration(5504.742)).toBe('1:31:44.742');
+  });
+
+  it('omits hours for sprint-length times', () => {
+    expect(formatRaceDuration(1832.05)).toBe('30:32.050');
+  });
+});
+
+describe('timeOrGapLabel', () => {
+  const winner = createResult();
+
+  it('shows the total race time for the winner', () => {
+    expect(timeOrGapLabel(winner, winner)).toBe('1:31:44.742');
+  });
+
+  it('shows the gap to the winner for cars on the lead lap', () => {
+    expect(timeOrGapLabel(createResult({ position: 2, timeSeconds: 5510 }), winner)).toBe('+5.258s');
+  });
+
+  it('falls back to the status for lapped or retired cars', () => {
+    expect(timeOrGapLabel(createResult({ timeSeconds: null, status: '+1 Lap' }), winner)).toBe('+1 Lap');
+  });
+});
+
+describe('positionsGained', () => {
+  it('counts places gained from the grid', () => {
+    expect(positionsGained(createResult({ gridPosition: 8, position: 3 }))).toBe(5);
+  });
+
+  it('reports places lost as negative', () => {
+    expect(positionsGained(createResult({ gridPosition: 1, position: 4 }))).toBe(-3);
+  });
+
+  it('ignores pit-lane starts and missing data', () => {
+    expect([
+      positionsGained(createResult({ gridPosition: 0, position: 10 })),
+      positionsGained(createResult({ gridPosition: null })),
+      positionsGained(createResult({ position: null })),
+    ]).toEqual([null, null, null]);
+  });
+});
+
+describe('gridLabel', () => {
+  it('labels grid slots, pit-lane starts and missing data', () => {
+    expect([
+      gridLabel(createResult({ gridPosition: 7 })),
+      gridLabel(createResult({ gridPosition: 0 })),
+      gridLabel(createResult({ gridPosition: null })),
+    ]).toEqual(['7', 'PL', '–']);
   });
 });

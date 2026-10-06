@@ -21,7 +21,34 @@ export const DriverResultSchema = z.object({
   teamName: z.string(),
   points: z.number(),
   status: z.string(),
+  gridPosition: z.number().int().nullable().default(null),
+  laps: z.number().int().nullable().default(null),
+  /** Total race time in seconds; only for cars on the lead lap. */
+  timeSeconds: z.number().nullable().default(null),
+  teamColor: z.string().nullable().default(null),
+  headshotUrl: z.string().nullable().default(null),
+  /** Driver nationality, three-letter code (ISO or IOC/FIA). */
+  countryCode: z.string().nullable().default(null),
 });
+
+export const DriverProfileSchema = z.object({
+  code: z.string(),
+  number: z.string().nullable(),
+  fullName: z.string(),
+  teamName: z.string().nullable(),
+  teamColor: z.string().nullable(),
+  headshotUrl: z.string().nullable(),
+  countryCode: z.string().nullable(),
+});
+
+export const SeasonDriversSchema = z.object({
+  season: z.number().int(),
+  roundNumber: z.number().int().nullable(),
+  drivers: z.array(DriverProfileSchema),
+});
+
+export type DriverProfile = z.infer<typeof DriverProfileSchema>;
+export type SeasonDrivers = z.infer<typeof SeasonDriversSchema>;
 
 export const SessionResultsSchema = z.object({
   season: z.number().int(),

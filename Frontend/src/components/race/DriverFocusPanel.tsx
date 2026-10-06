@@ -2,12 +2,17 @@
 
 import type { JSX } from 'react';
 
+import { CountryFlag } from '@/components/f1/CountryFlag';
+import { DriverAvatar } from '@/components/f1/DriverAvatar';
 import { Panel } from '@/components/ui/Panel';
 import { Eyebrow } from '@/components/ui/Typography';
 import { cn } from '@/lib/utils/cn';
+import type { DriverDirectory } from '@/hooks/use-season-drivers';
 import { useStandings } from '@/hooks/use-standings';
+import { nationalityIso2 } from '@/lib/f1/countries';
 import { useRaceStore } from '@/stores/use-race-store';
 import type { DriverStanding } from '@/lib/race/types';
+import type { DriverProfile } from '@/lib/validation/f1-schemas';
 
 import { SpeedGauge } from './SpeedGauge';
 
@@ -44,15 +49,27 @@ function FocusEmpty(): JSX.Element {
   );
 }
 
-function FocusBody({ standing }: { standing: DriverStanding }): JSX.Element {
+interface FocusBodyProps {
+  standing: DriverStanding;
+  profile: DriverProfile | undefined;
+}
+
+function FocusBody({ standing, profile }: FocusBodyProps): JSX.Element {
   const { driver } = standing;
+  const name = profile?.fullName ?? driver.code;
   return (
     <div className="space-y-4 p-4">
       <div className="flex items-start gap-3">
-        <span aria-hidden className="mt-1 h-10 w-1 rounded-sm" style={{ backgroundColor: driver.color }} />
+        <DriverAvatar name={name} headshotUrl={profile?.headshotUrl} teamColor={driver.color} size="lg" />
         <div className="min-w-0">
-          <p className="font-display text-3xl uppercase leading-none text-heading">{driver.code}</p>
-          <p className="mt-1 truncate text-xs text-muted">{driver.team}</p>
+          <p className="flex items-center gap-2 font-display text-3xl uppercase leading-none text-heading">
+            {driver.code}
+            {profile?.number ? <span className="font-mono text-sm text-muted">#{profile.number}</span> : null}
+          </p>
+          <p className="mt-1 flex items-center gap-1.5 truncate text-xs text-muted">
+            <CountryFlag iso2={nationalityIso2(profile?.countryCode)} label={profile?.countryCode ?? ''} />
+            <span className="truncate">{profile ? name : driver.team}</span>
+          </p>
         </div>
         <p className="ml-auto font-display text-3xl leading-none text-accent">P{standing.position}</p>
       </div>
@@ -73,7 +90,12 @@ function FocusBody({ standing }: { standing: DriverStanding }): JSX.Element {
 }
 
 /** Telemetry for the followed driver: position, speed, gap and track status. */
-export function DriverFocusPanel({ isReady }: { isReady: boolean }): JSX.Element {
+interface DriverFocusPanelProps {
+  isReady: boolean;
+  drivers: DriverDirectory;
+}
+
+export function DriverFocusPanel({ isReady, drivers }: DriverFocusPanelProps): JSX.Element {
   const standings = useStandings();
   const selectedDriverId = useRaceStore((state) => state.selectedDriverId);
   const clearSelection = useRaceStore((state) => state.clearSelection);
@@ -91,7 +113,7 @@ export function DriverFocusPanel({ isReady }: { isReady: boolean }): JSX.Element
 
   return (
     <Panel title="Driver" aside={aside}>
-      {standing ? <FocusBody standing={standing} /> : <FocusEmpty />}
+      {standing ? <FocusBody standing={standing} profile={drivers.get(standing.driver.code)} /> : <FocusEmpty />}
     </Panel>
   );
 }

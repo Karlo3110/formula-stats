@@ -1,38 +1,16 @@
 import type { JSX } from 'react';
 
 import { Eyebrow } from '@/components/ui/Typography';
-import { isClassifiedFinish, sortByPosition } from '@/lib/f1/classification';
-import { teamColor } from '@/lib/f1/team-colors';
-import { cn } from '@/lib/utils/cn';
+import { sortByPosition } from '@/lib/f1/classification';
 import type { DriverResult } from '@/lib/validation/f1-schemas';
 
-const NOT_CLASSIFIED = 'NC';
+import { ClassificationRow } from './ClassificationRow';
 
-function ClassificationRow({ result }: { result: DriverResult }): JSX.Element {
-  const isFinisher = isClassifiedFinish(result);
-  return (
-    <tr className="border-b border-white/[0.06] last:border-b-0">
-      <td className="py-3 pl-4 pr-2 font-mono text-sm tabular-nums text-muted">{result.position ?? NOT_CLASSIFIED}</td>
-      <td className="py-3 pr-3">
-        <span className="flex items-center gap-3">
-          <span aria-hidden className="h-6 w-1 shrink-0 rounded-sm" style={{ backgroundColor: teamColor(result.teamName) }} />
-          <span className="min-w-0">
-            <span className="block truncate text-sm font-semibold text-heading">{result.fullName}</span>
-            <span className="block truncate text-xs text-muted sm:hidden">{result.teamName}</span>
-          </span>
-        </span>
-      </td>
-      <td className="hidden py-3 pr-3 text-sm text-muted sm:table-cell">{result.teamName}</td>
-      <td className={cn('py-3 pr-3 font-mono text-xs', isFinisher ? 'text-muted' : 'text-warning')}>{result.status}</td>
-      <td className="py-3 pr-4 text-right font-mono text-sm tabular-nums text-heading">
-        {result.points > 0 ? result.points : '–'}
-      </td>
-    </tr>
-  );
-}
-
-/** Full finishing order with status and points. */
+/** Full finishing order with grid movement, time/gap and points. */
 export function ClassificationTable({ results }: { results: ReadonlyArray<DriverResult> }): JSX.Element {
+  const ordered = sortByPosition(results);
+  const winner = ordered.find((result) => result.position === 1);
+
   return (
     <section aria-labelledby="classification-heading">
       <Eyebrow>
@@ -45,13 +23,14 @@ export function ClassificationTable({ results }: { results: ReadonlyArray<Driver
               <th scope="col" className="w-14 py-3 pl-4 font-medium">Pos</th>
               <th scope="col" className="py-3 font-medium">Driver</th>
               <th scope="col" className="hidden py-3 font-medium sm:table-cell">Team</th>
-              <th scope="col" className="w-24 py-3 font-medium sm:w-32">Status</th>
-              <th scope="col" className="w-16 py-3 pr-4 text-right font-medium">Pts</th>
+              <th scope="col" className="hidden w-24 py-3 font-medium md:table-cell">Grid</th>
+              <th scope="col" className="w-28 py-3 font-medium sm:w-36">Time / Gap</th>
+              <th scope="col" className="w-14 py-3 pr-4 text-right font-medium">Pts</th>
             </tr>
           </thead>
           <tbody>
-            {sortByPosition(results).map((result) => (
-              <ClassificationRow key={result.abbreviation} result={result} />
+            {ordered.map((result) => (
+              <ClassificationRow key={result.abbreviation} result={result} winner={winner} />
             ))}
           </tbody>
         </table>

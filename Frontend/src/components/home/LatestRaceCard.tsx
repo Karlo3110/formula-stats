@@ -3,12 +3,16 @@
 import { useMemo, type JSX } from 'react';
 
 import { CircuitOutline } from '@/components/f1/CircuitOutline';
+import { CountryFlag } from '@/components/f1/CountryFlag';
+import { DriverAvatar } from '@/components/f1/DriverAvatar';
 import { ButtonLink } from '@/components/ui/ButtonLink';
 import { Eyebrow } from '@/components/ui/Typography';
 import { useLatestRace, useSchedule, useSessionResults, useTrackMap } from '@/hooks/use-f1';
 import { podiumOf } from '@/lib/f1/classification';
+import { eventCountryIso2 } from '@/lib/f1/countries';
 import { SessionCode, findEvent } from '@/lib/f1/race-archive';
 import { raceReplayHref, raceResultHref } from '@/lib/f1/routes';
+import { resolveTeamColor } from '@/lib/f1/team-colors';
 import { projectTrack } from '@/lib/race/track-projection';
 
 const VIEW_SIZE = 220;
@@ -40,12 +44,23 @@ export function LatestRaceCard(): JSX.Element | null {
         <div className="min-w-0">
           <Eyebrow>Latest race · Round {event.roundNumber}</Eyebrow>
           <h2 className="mt-2 truncate font-display text-4xl uppercase leading-none text-heading">{event.eventName}</h2>
-          <p className="mt-1 text-sm text-muted">{event.location}</p>
+          <p className="mt-1 flex items-center gap-2 text-sm text-muted">
+            <CountryFlag iso2={eventCountryIso2(event.country)} label={event.country} />
+            {event.location}
+          </p>
         </div>
         {winner ? (
-          <div className="shrink-0 text-right">
-            <Eyebrow>Winner</Eyebrow>
-            <p className="mt-1 font-display text-3xl leading-none text-accent">{winner.abbreviation}</p>
+          <div className="flex shrink-0 items-center gap-3 text-right">
+            <div>
+              <Eyebrow>Winner</Eyebrow>
+              <p className="mt-1 font-display text-3xl leading-none text-accent">{winner.abbreviation}</p>
+            </div>
+            <DriverAvatar
+              name={winner.fullName}
+              headshotUrl={winner.headshotUrl}
+              teamColor={resolveTeamColor(winner.teamColor, winner.teamName)}
+              size="lg"
+            />
           </div>
         ) : null}
       </div>

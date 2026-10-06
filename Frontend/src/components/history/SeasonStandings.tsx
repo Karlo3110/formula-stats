@@ -6,6 +6,7 @@ import { StandingsTables } from '@/components/standings/StandingsTables';
 import { Spinner } from '@/components/ui/Spinner';
 import { Text } from '@/components/ui/Typography';
 import { useSeasonStandings } from '@/hooks/use-f1';
+import { useSeasonDrivers } from '@/hooks/use-season-drivers';
 import { getCurrentSeason } from '@/lib/f1/seasons';
 
 // Completed seasons never change, so their standings can be cached forever.
@@ -18,6 +19,7 @@ export function SeasonStandings({ season }: { season: number }): JSX.Element {
     season,
     isPastSeason ? { staleTime: IMMUTABLE } : {},
   );
+  const drivers = useSeasonDrivers(season);
 
   return (
     <section aria-labelledby="standings-heading" className="mt-20">
@@ -32,7 +34,7 @@ export function SeasonStandings({ season }: { season: number }): JSX.Element {
         ) : isError || !data || data.drivers.length === 0 ? (
           <Text variant="muted">Standings for {season} aren’t available right now.</Text>
         ) : (
-          <StandingsTables data={data} />
+          <StandingsTables data={data} drivers={drivers} />
         )}
       </div>
     </section>

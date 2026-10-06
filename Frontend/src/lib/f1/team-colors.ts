@@ -24,3 +24,10 @@ export function teamColor(team: string): string {
   const lower = team.toLowerCase();
   return TEAM_COLORS.find((t) => lower.includes(t.match))?.color ?? FALLBACK;
 }
+
+const HEX_COLOR = /^#[0-9a-f]{6}$/i;
+
+/** The official colour from the API when valid, else the name-based fallback. */
+export function resolveTeamColor(apiColor: string | null | undefined, team: string): string {
+  return apiColor && HEX_COLOR.test(apiColor) ? apiColor : teamColor(team);
+}
