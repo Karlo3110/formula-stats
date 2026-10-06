@@ -19,12 +19,13 @@ export interface StandingDriver {
 export interface DriverStanding {
   driver: StandingDriver;
   position: number;
-  lap: number;
   /** Gap to the leader in seconds. */
   gapSeconds: number;
   speedKmh: number;
   /** Fractional position around the lap, 0..1. */
   trackT: number;
+  /** Whether the car is on the track (vs run-off) at this moment. */
+  onTrack: boolean;
 }
 
 export interface DriverPose {
@@ -43,12 +44,17 @@ export interface RaceTiming {
   /** When the lights go out within the window, seconds (0 = no countdown). */
   lightsOut: number;
   durationSeconds: number;
+  /** Playback reached the end of the replay window. */
+  ended: boolean;
 }
 
 /** Drives the 3D scene; implemented by the official-replay and mock sources. */
 export interface RaceSource {
   readonly drivers: StandingDriver[];
+  /** Advances playback by `dt` seconds of replay time. */
   tick(dt: number): void;
+  /** Jumps playback to an absolute replay time, seconds. */
+  seek(seconds: number): void;
   pose(driverId: string): DriverPose | null;
   standings(): DriverStanding[];
   timing(): RaceTiming | null;

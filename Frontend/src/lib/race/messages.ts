@@ -1,10 +1,5 @@
 import type { ReplayMessage } from '@/lib/validation/f1-schemas';
 
-/** How long a race-control message stays in the bottom-right feed, seconds. */
-export const FEED_VISIBLE_SECONDS = 7;
-/** Max messages shown in the feed at once. */
-export const FEED_MAX = 4;
-
 const HAZARD_FLAGS = new Set(['YELLOW', 'DOUBLE YELLOW', 'RED']);
 
 export interface ActiveFlag {
@@ -34,19 +29,4 @@ export function activeFlag(
     }
   }
   return current;
-}
-
-/** Messages that should currently be visible in the feed, newest first. */
-export function visibleFeed(
-  messages: ReadonlyArray<ReplayMessage>,
-  clock: number,
-): ReplayMessage[] {
-  const visible: ReplayMessage[] = [];
-  for (const msg of messages) {
-    const age = clock - msg.time;
-    if (age >= 0 && age <= FEED_VISIBLE_SECONDS) {
-      visible.push(msg);
-    }
-  }
-  return visible.slice(-FEED_MAX).reverse();
 }

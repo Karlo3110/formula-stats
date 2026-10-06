@@ -45,8 +45,8 @@ export function StartLights(): JSX.Element | null {
   const isGo = phase.kind === 'go';
 
   return (
-    <div className="pointer-events-none absolute left-1/2 top-6 z-20 -translate-x-1/2">
-      <div className="glass-panel flex items-center gap-2 rounded-2xl px-4 py-3">
+    <div role="status" aria-label={isGo ? 'Lights out' : `${phase.kind === 'countdown' ? phase.lit : 0} of ${LIGHT_COUNT} start lights on`}>
+      <div className="glass-panel flex items-center gap-2 rounded-xl px-4 py-3">
         {Array.from({ length: LIGHT_COUNT }, (_, index) => {
           const on = !isGo && phase.kind === 'countdown' && index < phase.lit;
           return (

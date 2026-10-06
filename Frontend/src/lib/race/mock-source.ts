@@ -29,6 +29,10 @@ export class MockSource implements RaceSource {
     raceEngine.tick(dt);
   }
 
+  seek(): void {
+    // The synthetic race runs continuously; there is no timeline to seek.
+  }
+
   pose(driverId: string): DriverPose | null {
     const t = raceEngine.trackT(driverId);
     this.curve.getPointAt(t, this.point);

@@ -58,10 +58,10 @@ class RaceEngine {
       return {
         driver: entry.driver,
         position: position + 1,
-        lap: Math.max(1, Math.floor(entry.value) + 1),
         gapSeconds: (leaderValue - entry.value) * entry.driver.baseLapSeconds,
         speedKmh: Math.round(BASE_SPEED_KMH * wave),
         trackT: ((entry.value % 1) + 1) % 1,
+        onTrack: true,
       };
     });
   }

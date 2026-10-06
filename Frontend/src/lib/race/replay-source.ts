@@ -1,5 +1,7 @@
 import type { ReplayDriver } from '@/lib/validation/f1-schemas';
 
+import { clampClock } from './playback';
+
 import type {
   DriverPose,
   DriverStanding,
@@ -26,7 +28,8 @@ interface ReplayCar {
 }
 
 /** Plays all drivers on one shared race clock from official telemetry.
- *  Order and gaps come from the position/progress computed server-side. */
+ *  Order and gaps come from the position/progress computed server-side.
+ *  The clock runs from 0 to the window duration and holds at the end. */
 export class ReplaySource implements RaceSource {
   readonly drivers: StandingDriver[];
   private readonly cars: ReplayCar[];
@@ -61,7 +64,11 @@ export class ReplaySource implements RaceSource {
   }
 
   tick(dt: number): void {
-    this.elapsed += dt;
+    this.elapsed = clampClock(this.elapsed + dt, this.duration);
+  }
+
+  seek(seconds: number): void {
+    this.elapsed = clampClock(seconds, this.duration);
   }
 
   pose(driverId: string): DriverPose | null {
@@ -101,11 +108,11 @@ export class ReplaySource implements RaceSource {
     return rows.map((row) => ({
       driver: row.car.driver,
       position: row.position,
-      lap: 1,
       gapSeconds:
         avgSpeedMps > 0 ? Math.max(0, (leaderProgress - row.progress) / avgSpeedMps) : 0,
       speedKmh: Math.round(this.field(row.car, SPEED)),
       trackT: row.car.maxProgress > 0 ? row.progress / row.car.maxProgress : 0,
+      onTrack: this.current(row.car, ON_TRACK) > 0.5,
     }));
   }
 
@@ -114,11 +121,12 @@ export class ReplaySource implements RaceSource {
       clock: this.clock(),
       lightsOut: this.lightsOut,
       durationSeconds: this.duration,
+      ended: this.elapsed >= this.duration,
     };
   }
 
   private clock(): number {
-    return this.elapsed % this.duration;
+    return this.elapsed;
   }
 
   private locate(car: ReplayCar): {

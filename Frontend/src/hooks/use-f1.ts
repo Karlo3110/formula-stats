@@ -1,8 +1,10 @@
 'use client';
 
+import { useCallback } from 'react';
 import {
   keepPreviousData,
   useQuery,
+  useQueryClient,
   type UseQueryResult,
 } from '@tanstack/react-query';
 
@@ -51,11 +53,13 @@ export function useSessionResults(
   season: number,
   round: number,
   session: string,
+  options: QueryOptions = {},
 ): UseQueryResult<SessionResults> {
   return useQuery({
     queryKey: f1Keys.sessionResults(season, round, session),
     queryFn: () => f1Service.getSessionResults(season, round, session),
     staleTime: ONE_HOUR_MS,
+    enabled: options.enabled ?? true,
   });
 }
 
@@ -69,6 +73,21 @@ export function useSchedule(
     staleTime: ONE_HOUR_MS,
     enabled: options.enabled ?? true,
   });
+}
+
+/** Returns a function that warms the schedule cache for a season (hover/focus). */
+export function usePrefetchSchedule(): (season: number) => void {
+  const queryClient = useQueryClient();
+  return useCallback(
+    (season: number): void => {
+      void queryClient.prefetchQuery({
+        queryKey: f1Keys.schedule(season),
+        queryFn: () => f1Service.getSchedule(season),
+        staleTime: ONE_HOUR_MS,
+      });
+    },
+    [queryClient],
+  );
 }
 
 export function useSeasonStandings(
@@ -88,12 +107,14 @@ export function useTrackMap(
   season: number,
   round: number,
   session: string,
+  options: QueryOptions = {},
 ): UseQueryResult<TrackMap> {
   return useQuery({
     queryKey: f1Keys.trackMap(season, round, session),
     queryFn: () => f1Service.getTrackMap(season, round, session),
     staleTime: ONE_DAY_MS,
     retry: 1,
+    enabled: options.enabled ?? true,
   });
 }
 

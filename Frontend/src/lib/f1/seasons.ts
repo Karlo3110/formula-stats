@@ -11,3 +11,15 @@ export function getPastSeasons(now: Date = new Date()): number[] {
   const count = Math.max(current - EARLIEST_SEASON, 0);
   return Array.from({ length: count }, (_, index) => current - 1 - index);
 }
+
+/** Seasons browsable in the race archive (current included), newest first. */
+export function getArchiveSeasons(now: Date = new Date()): number[] {
+  const current = getCurrentSeason(now);
+  const count = Math.max(current - EARLIEST_SEASON + 1, 0);
+  return Array.from({ length: count }, (_, index) => current - index);
+}
+
+/** Whether a season is inside the browsable archive range. */
+export function isArchiveSeason(season: number, now: Date = new Date()): boolean {
+  return Number.isInteger(season) && season >= EARLIEST_SEASON && season <= getCurrentSeason(now);
+}

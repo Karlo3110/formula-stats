@@ -48,7 +48,10 @@ export function findFeaturedEvent(
 
 const RACE_SESSION_NAME = 'Race';
 
-/** The most recent event whose Race session has already started (newest first). */
+/**
+ * The most recent event whose Race session has finished. A race still inside
+ * its live window is skipped: its telemetry is not published yet.
+ */
 export function findLatestCompletedRace(
   schedule: WeekendSchedule,
   now: Date,
@@ -61,7 +64,8 @@ export function findLatestCompletedRace(
     );
     if (!race?.startUtc) continue;
     const start = new Date(race.startUtc).getTime();
-    if (start <= now.getTime() && start > bestStart) {
+    const isFinished = sessionStatus(new Date(start), now) === 'done';
+    if (isFinished && start > bestStart) {
       bestStart = start;
       best = event;
     }

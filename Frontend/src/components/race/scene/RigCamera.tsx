@@ -97,6 +97,10 @@ export function RigCamera({ source, curve, trackWidth }: RigCameraProps): null {
       s.hold = CUT_INTERVAL; // force an immediate cut on selection change
     }
 
+    // Without a followed driver the TV camera tracks the race leader.
+    if (!selectedDriverId && !s.leaderId) {
+      s.leaderId = source.standings()[0]?.driver.id ?? null;
+    }
     const focusId = selectedDriverId ?? s.leaderId;
     const pose = focusId ? source.pose(focusId) : null;
 
