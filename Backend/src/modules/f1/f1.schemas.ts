@@ -26,6 +26,12 @@ export const DriverResultSchema = z.object({
   team_name: z.string(),
   points: z.number(),
   status: z.string(),
+  grid_position: z.number().int().nullable().default(null),
+  laps: z.number().int().nullable().default(null),
+  time_seconds: z.number().nullable().default(null),
+  team_color: z.string().nullable().default(null),
+  headshot_url: z.string().url().nullable().default(null),
+  country_code: z.string().nullable().default(null),
 });
 
 export const SessionResultsSchema = z.object({
@@ -34,6 +40,24 @@ export const SessionResultsSchema = z.object({
   session: z.string(),
   results: z.array(DriverResultSchema),
 });
+
+export const DriverProfileSchema = z.object({
+  code: z.string(),
+  number: z.string().nullable(),
+  full_name: z.string(),
+  team_name: z.string().nullable(),
+  team_color: z.string().nullable(),
+  headshot_url: z.string().url().nullable(),
+  country_code: z.string().nullable(),
+});
+
+export const SeasonDriversSchema = z.object({
+  season: z.number().int(),
+  round_number: z.number().int().nullable(),
+  drivers: z.array(DriverProfileSchema),
+});
+
+export type SeasonDriversPayload = z.infer<typeof SeasonDriversSchema>;
 
 export const TrackMapSchema = z.object({
   season: z.number().int(),

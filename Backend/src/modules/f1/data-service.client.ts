@@ -10,12 +10,14 @@ import {
 
 import {
   ReplaySessionSchema,
+  SeasonDriversSchema,
   SeasonScheduleSchema,
   SeasonStandingsSchema,
   SessionResultsSchema,
   TrackMapSchema,
   WeekendScheduleSchema,
   type ReplaySessionPayload,
+  type SeasonDriversPayload,
   type SeasonSchedulePayload,
   type SeasonStandingsPayload,
   type SessionResultsPayload,
@@ -36,18 +38,25 @@ export class DataServiceClient {
   constructor(private readonly config: ConfigService) {}
 
   getSeasonEvents(season: number): Promise<SeasonSchedulePayload> {
-    return this.get(
-      `/api/v1/seasons/${season}/events`,
-      SeasonScheduleSchema,
-    );
+    return this.get(`/api/v1/seasons/${season}/events`, SeasonScheduleSchema);
   }
 
   getSchedule(season: number): Promise<WeekendSchedulePayload> {
-    return this.get(`/api/v1/seasons/${season}/schedule`, WeekendScheduleSchema);
+    return this.get(
+      `/api/v1/seasons/${season}/schedule`,
+      WeekendScheduleSchema,
+    );
   }
 
   getStandings(season: number): Promise<SeasonStandingsPayload> {
-    return this.get(`/api/v1/seasons/${season}/standings`, SeasonStandingsSchema);
+    return this.get(
+      `/api/v1/seasons/${season}/standings`,
+      SeasonStandingsSchema,
+    );
+  }
+
+  getSeasonDrivers(season: number): Promise<SeasonDriversPayload> {
+    return this.get(`/api/v1/seasons/${season}/drivers`, SeasonDriversSchema);
   }
 
   getSessionResults(

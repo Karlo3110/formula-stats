@@ -6,20 +6,28 @@ import { DataServiceClient } from './data-service.client';
 import { F1Repository } from './f1.repository';
 import {
   eventsToSeasonScheduleDto,
-  resultsToSessionResultsDto,
   toReplaySessionDto,
   toSeasonScheduleDto,
   toSeasonStandingsDto,
-  toSessionResultsDto,
   toTrackMapDto,
   toWeekendScheduleDto,
   type ReplaySessionDto,
   type SeasonScheduleDto,
   type SeasonStandingsDto,
-  type SessionResultsDto,
   type TrackMapDto,
   type WeekendScheduleDto,
 } from './dto/f1-response.dto';
+import {
+  toSeasonDriversDto,
+  type SeasonDriversDto,
+} from './dto/season-drivers.dto';
+import {
+  RESULTS_DETAIL_VERSION,
+  areStoredResultsCurrent,
+  resultsToSessionResultsDto,
+  toSessionResultsDto,
+  type SessionResultsDto,
+} from './dto/session-results.dto';
 
 const SCHEDULE_TTL_SECONDS = 3600;
 const WEEKEND_TTL_SECONDS = 3600;
@@ -27,6 +35,8 @@ const WEEKEND_VERSION = 'v1';
 const STANDINGS_TTL_SECONDS = 3600;
 const STANDINGS_VERSION = 'v1';
 const RESULTS_TTL_SECONDS = 86_400;
+const DRIVERS_TTL_SECONDS = 21_600;
+const DRIVERS_VERSION = 'v1';
 const TRACK_MAP_TTL_SECONDS = 604_800;
 const REPLAY_TTL_SECONDS = 604_800;
 // Bump when the derived geometry algorithms change, to invalidate caches.
@@ -57,10 +67,16 @@ export class F1Service {
 
     const stored = await this.repository.findEventsBySeason(season);
     if (stored.length > 0) {
-      return this.cacheAndReturn(key, eventsToSeasonScheduleDto(season, stored), SCHEDULE_TTL_SECONDS);
+      return this.cacheAndReturn(
+        key,
+        eventsToSeasonScheduleDto(season, stored),
+        SCHEDULE_TTL_SECONDS,
+      );
     }
 
-    const dto = toSeasonScheduleDto(await this.dataService.getSeasonEvents(season));
+    const dto = toSeasonScheduleDto(
+      await this.dataService.getSeasonEvents(season),
+    );
     await this.repository.replaceEvents(
       season,
       dto.events.map((event) => ({
@@ -79,14 +95,14 @@ export class F1Service {
     round: number,
     session: string,
   ): Promise<SessionResultsDto> {
-    const key = `f1:results:${season}:${round}:${session}`;
+    const key = `f1:results:v${RESULTS_DETAIL_VERSION}:${season}:${round}:${session}`;
     const cached = await this.cache.get<SessionResultsDto>(key);
     if (cached) {
       return cached;
     }
 
     const stored = await this.repository.findResults(season, round, session);
-    if (stored.length > 0) {
+    if (areStoredResultsCurrent(stored)) {
       return this.cacheAndReturn(
         key,
         resultsToSessionResultsDto(season, round, session, stored),
@@ -97,8 +113,27 @@ export class F1Service {
     const dto = toSessionResultsDto(
       await this.dataService.getSessionResults(season, round, session),
     );
-    await this.repository.replaceResults(season, round, session, dto.results);
+    await this.repository.replaceResults(
+      season,
+      round,
+      session,
+      dto.results,
+      RESULTS_DETAIL_VERSION,
+    );
     return this.cacheAndReturn(key, dto, RESULTS_TTL_SECONDS);
+  }
+
+  /** Headshots, numbers and nationalities of the season's drivers. */
+  async getSeasonDrivers(season: number): Promise<SeasonDriversDto> {
+    const key = `f1:drivers:${DRIVERS_VERSION}:${season}`;
+    const cached = await this.cache.get<SeasonDriversDto>(key);
+    if (cached) {
+      return cached;
+    }
+    const dto = toSeasonDriversDto(
+      await this.dataService.getSeasonDrivers(season),
+    );
+    return this.cacheAndReturn(key, dto, DRIVERS_TTL_SECONDS);
   }
 
   async getTrackMap(
@@ -126,7 +161,9 @@ export class F1Service {
     if (cached) {
       return cached;
     }
-    const dto = toWeekendScheduleDto(await this.dataService.getSchedule(season));
+    const dto = toWeekendScheduleDto(
+      await this.dataService.getSchedule(season),
+    );
     return this.cacheAndReturn(key, dto, WEEKEND_TTL_SECONDS);
   }
 
@@ -136,7 +173,9 @@ export class F1Service {
     if (cached) {
       return cached;
     }
-    const dto = toSeasonStandingsDto(await this.dataService.getStandings(season));
+    const dto = toSeasonStandingsDto(
+      await this.dataService.getStandings(season),
+    );
     return this.cacheAndReturn(key, dto, STANDINGS_TTL_SECONDS);
   }
 

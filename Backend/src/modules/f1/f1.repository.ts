@@ -19,6 +19,12 @@ interface ResultInput {
   teamName: string;
   points: number;
   status: string;
+  gridPosition: number | null;
+  laps: number | null;
+  timeSeconds: number | null;
+  teamColor: string | null;
+  headshotUrl: string | null;
+  countryCode: string | null;
 }
 
 @Injectable()
@@ -57,6 +63,7 @@ export class F1Repository {
     roundNumber: number,
     session: string,
     results: ResultInput[],
+    detailVersion: number,
   ): Promise<void> {
     await this.prisma.$transaction([
       this.prisma.f1SessionResult.deleteMany({
@@ -67,6 +74,7 @@ export class F1Repository {
           season,
           roundNumber,
           session,
+          detailVersion,
           ...result,
         })),
       }),

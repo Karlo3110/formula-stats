@@ -65,19 +65,27 @@ model F1Event {
 }
 
 model F1SessionResult {
-  id           String   @id @default(uuid(7)) @db.Uuid
-  season       Int
-  roundNumber  Int      @map("round_number")
-  session      String
-  position     Int?
-  driverNumber String   @map("driver_number")
-  abbreviation String
-  fullName     String   @map("full_name")
-  teamName     String   @map("team_name")
-  points       Float
-  status       String
-  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz
+  id            String   @id @default(uuid(7)) @db.Uuid
+  season        Int
+  roundNumber   Int      @map("round_number")
+  session       String
+  position      Int?
+  driverNumber  String   @map("driver_number")
+  abbreviation  String
+  fullName      String   @map("full_name")
+  teamName      String   @map("team_name")
+  points        Float
+  status        String
+  gridPosition  Int?     @map("grid_position")
+  laps          Int?
+  timeSeconds   Float?   @map("time_seconds")
+  teamColor     String?  @map("team_color")
+  headshotUrl   String?  @map("headshot_url")
+  countryCode   String?  @map("country_code")
+  /// Shape version of the stored row (see RESULTS_DETAIL_VERSION).
+  detailVersion Int      @default(0) @map("detail_version")
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz
 
   @@unique([season, roundNumber, session, driverNumber])
   @@index([season, roundNumber, session])

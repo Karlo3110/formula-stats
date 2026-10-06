@@ -7,10 +7,11 @@ import type {
   ReplaySessionDto,
   SeasonScheduleDto,
   SeasonStandingsDto,
-  SessionResultsDto,
   TrackMapDto,
   WeekendScheduleDto,
 } from './dto/f1-response.dto';
+import type { SeasonDriversDto } from './dto/season-drivers.dto';
+import type { SessionResultsDto } from './dto/session-results.dto';
 
 /**
  * F1 read endpoints. Public — F1 data is not user-specific, so the anonymous
@@ -41,6 +42,13 @@ export class F1Controller {
     @Param('season', ParseIntPipe) season: number,
   ): Promise<SeasonStandingsDto> {
     return this.f1Service.getStandings(season);
+  }
+
+  @Get('seasons/:season/drivers')
+  getSeasonDrivers(
+    @Param('season', ParseIntPipe) season: number,
+  ): Promise<SeasonDriversDto> {
+    return this.f1Service.getSeasonDrivers(season);
   }
 
   @Get('seasons/:season/rounds/:round/sessions/:session/results')

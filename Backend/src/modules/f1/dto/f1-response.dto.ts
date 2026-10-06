@@ -1,10 +1,9 @@
-import type { F1Event, F1SessionResult, F1TrackMap } from '@prisma/client';
+import type { F1Event, F1TrackMap } from '@prisma/client';
 
 import type {
   ReplaySessionPayload,
   SeasonSchedulePayload,
   SeasonStandingsPayload,
-  SessionResultsPayload,
   TrackMapPayload,
   WeekendSchedulePayload,
 } from '../f1.schemas';
@@ -20,23 +19,6 @@ export interface EventSummaryDto {
 export interface SeasonScheduleDto {
   season: number;
   events: EventSummaryDto[];
-}
-
-export interface DriverResultDto {
-  position: number | null;
-  driverNumber: string;
-  abbreviation: string;
-  fullName: string;
-  teamName: string;
-  points: number;
-  status: string;
-}
-
-export interface SessionResultsDto {
-  season: number;
-  roundNumber: number;
-  session: string;
-  results: DriverResultDto[];
 }
 
 export function toSeasonScheduleDto(
@@ -213,28 +195,6 @@ export function eventsToSeasonScheduleDto(
   };
 }
 
-export function resultsToSessionResultsDto(
-  season: number,
-  roundNumber: number,
-  session: string,
-  rows: F1SessionResult[],
-): SessionResultsDto {
-  return {
-    season,
-    roundNumber,
-    session,
-    results: rows.map((row) => ({
-      position: row.position,
-      driverNumber: row.driverNumber,
-      abbreviation: row.abbreviation,
-      fullName: row.fullName,
-      teamName: row.teamName,
-      points: row.points,
-      status: row.status,
-    })),
-  };
-}
-
 export function trackMapRowToDto(row: F1TrackMap): TrackMapDto {
   return {
     season: row.season,
@@ -252,23 +212,4 @@ function toNumberMatrix(value: unknown): number[][] {
     (row): row is number[] =>
       Array.isArray(row) && row.every((n) => typeof n === 'number'),
   );
-}
-
-export function toSessionResultsDto(
-  payload: SessionResultsPayload,
-): SessionResultsDto {
-  return {
-    season: payload.season,
-    roundNumber: payload.round_number,
-    session: payload.session,
-    results: payload.results.map((result) => ({
-      position: result.position,
-      driverNumber: result.driver_number,
-      abbreviation: result.abbreviation,
-      fullName: result.full_name,
-      teamName: result.team_name,
-      points: result.points,
-      status: result.status,
-    })),
-  };
 }
