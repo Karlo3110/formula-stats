@@ -72,7 +72,7 @@ def _fastest_lap_pos(loaded: object) -> "pd.DataFrame":
     ``DataNotLoadedError`` on access — translate that into our typed error so
     routers can answer 404 instead of crashing with a 500.
     """
-    from fastf1.core import DataNotLoadedError
+    from fastf1.exceptions import DataNotLoadedError
 
     try:
         fastest = loaded.laps.pick_fastest()  # type: ignore[attr-defined]
