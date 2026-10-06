@@ -11,12 +11,14 @@ from app.fastf1_client import (
 )
 from app.models import (
     ReplaySession,
+    SeasonDrivers,
     SeasonSchedule,
     SeasonStandings,
     SessionResults,
     TrackMap,
     WeekendSchedule,
 )
+from app.season_drivers import get_season_drivers
 from app.security import require_internal_key
 
 router = APIRouter(
@@ -39,6 +41,11 @@ def schedule(season: int) -> WeekendSchedule:
 @router.get("/seasons/{season}/standings", response_model=SeasonStandings)
 def standings(season: int) -> SeasonStandings:
     return get_standings(season)
+
+
+@router.get("/seasons/{season}/drivers", response_model=SeasonDrivers)
+def season_drivers(season: int) -> SeasonDrivers:
+    return get_season_drivers(season)
 
 
 @router.get(

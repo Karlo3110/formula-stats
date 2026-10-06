@@ -14,7 +14,6 @@ from typing import TYPE_CHECKING
 from app.config import get_settings
 from app.models import (
     ConstructorStandingRow,
-    DriverResult,
     DriverStandingRow,
     EventSummary,
     ReplayDriver,
@@ -27,6 +26,7 @@ from app.models import (
     WeekendSchedule,
     WeekendSession,
 )
+from app.result_mapping import map_driver_result
 
 if TYPE_CHECKING:
     import numpy as np
@@ -42,7 +42,7 @@ REPLAY_RACE_SECONDS = 90.0
 REPLAY_PRESTART_SECONDS = 6.0
 
 
-def _ensure_cache() -> None:
+def ensure_cache() -> None:
     global _cache_enabled
     if _cache_enabled:
         return
@@ -88,7 +88,7 @@ def _fastest_lap_pos(loaded: object) -> "pd.DataFrame":
 
 
 def get_event_schedule(season: int) -> list[EventSummary]:
-    _ensure_cache()
+    ensure_cache()
     import fastf1
 
     schedule = fastf1.get_event_schedule(season, include_testing=False)
@@ -110,7 +110,7 @@ def get_event_schedule(season: int) -> list[EventSummary]:
 
 def get_schedule(season: int) -> WeekendSchedule:
     """Full season schedule with each event's sessions and UTC start times."""
-    _ensure_cache()
+    ensure_cache()
     import fastf1
     import pandas as pd
 
@@ -176,26 +176,13 @@ def get_standings(season: int) -> SeasonStandings:
 
 
 def get_session_results(season: int, round_number: int, session: str) -> SessionResults:
-    _ensure_cache()
+    ensure_cache()
     import fastf1
 
     loaded = fastf1.get_session(season, round_number, session)
     loaded.load(laps=False, telemetry=False, weather=False, messages=False)
 
-    results: list[DriverResult] = []
-    for _, row in loaded.results.iterrows():
-        position = row.get("Position")
-        results.append(
-            DriverResult(
-                position=int(position) if not _is_missing(position) else None,
-                driver_number=str(row.get("DriverNumber", "")),
-                abbreviation=str(row.get("Abbreviation", "")),
-                full_name=str(row.get("FullName", "")),
-                team_name=str(row.get("TeamName", "")),
-                points=float(row.get("Points", 0) or 0),
-                status=str(row.get("Status", "")),
-            )
-        )
+    results = [map_driver_result(row) for _, row in loaded.results.iterrows()]
 
     return SessionResults(
         season=season,
@@ -206,7 +193,7 @@ def get_session_results(season: int, round_number: int, session: str) -> Session
 
 
 def get_track_map(season: int, round_number: int, session: str) -> TrackMap:
-    _ensure_cache()
+    ensure_cache()
     import fastf1
 
     loaded = fastf1.get_session(season, round_number, session)
@@ -459,7 +446,7 @@ def _race_control_messages(
 
 def get_replay(season: int, round_number: int, session: str) -> ReplaySession:
     """Session-time-aligned position replay (real wheel-to-wheel racing)."""
-    _ensure_cache()
+    ensure_cache()
     import fastf1
     import numpy as np
 

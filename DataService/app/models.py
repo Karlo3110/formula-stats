@@ -26,6 +26,14 @@ class DriverResult(BaseModel):
     team_name: str
     points: float
     status: str
+    grid_position: int | None = None
+    laps: int | None = None
+    # Total race time; only set for cars on the lead lap.
+    time_seconds: float | None = None
+    team_color: str | None = None
+    headshot_url: str | None = None
+    # Driver nationality, ISO 3166-1 alpha-3 (e.g. "GBR").
+    country_code: str | None = None
 
 
 class SessionResults(BaseModel):
@@ -33,6 +41,23 @@ class SessionResults(BaseModel):
     round_number: int
     session: str
     results: list[DriverResult]
+
+
+class DriverProfile(BaseModel):
+    code: str
+    number: str | None
+    full_name: str
+    team_name: str | None
+    team_color: str | None
+    headshot_url: str | None
+    country_code: str | None
+
+
+class SeasonDrivers(BaseModel):
+    season: int
+    # Race the profiles were taken from (latest finished race of the season).
+    round_number: int | None
+    drivers: list[DriverProfile]
 
 
 class TrackMap(BaseModel):
