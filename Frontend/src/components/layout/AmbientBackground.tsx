@@ -1,30 +1,21 @@
 import type { JSX } from 'react';
 
-/** Subtle, composed backdrop — soft brand glows and an edge vignette. */
+const TOP_LIGHT =
+  'radial-gradient(60% 45% at 50% -10%, color-mix(in oklab, var(--color-primary) 14%, transparent), transparent 70%)';
+const GRID_FADE = 'linear-gradient(180deg, #000 0%, transparent 55%)';
+
+/**
+ * Restrained backdrop: a faint red pit-lane light from above over a fine
+ * measurement grid that fades out down the page.
+ */
 export function AmbientBackground(): JSX.Element {
   return (
     <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 bg-background">
       <div
-        className="absolute left-1/2 top-[-30%] h-[55rem] w-[80rem] -translate-x-1/2 rounded-full opacity-[0.16] blur-[180px]"
-        style={{
-          background:
-            'radial-gradient(closest-side, var(--color-primary), transparent)',
-        }}
+        className="bg-telemetry-grid absolute inset-0"
+        style={{ maskImage: GRID_FADE, WebkitMaskImage: GRID_FADE }}
       />
-      <div
-        className="absolute bottom-[-35%] right-[-15%] h-[45rem] w-[45rem] rounded-full opacity-[0.1] blur-[180px]"
-        style={{
-          background:
-            'radial-gradient(closest-side, var(--color-accent), transparent)',
-        }}
-      />
-      <div
-        className="absolute inset-0"
-        style={{
-          background:
-            'radial-gradient(125% 125% at 50% 0%, transparent 55%, rgba(0,0,0,0.55) 100%)',
-        }}
-      />
+      <div className="absolute inset-0" style={{ background: TOP_LIGHT }} />
     </div>
   );
 }

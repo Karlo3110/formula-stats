@@ -1,9 +1,8 @@
 'use client';
 
-import Link from 'next/link';
 import type { JSX } from 'react';
 
-import { Button } from '@/components/ui/Button';
+import { ButtonLink } from '@/components/ui/ButtonLink';
 import { useCountdown } from '@/hooks/use-countdown';
 import type { UpcomingSession } from '@/lib/race-weekend';
 import type { WeekendEvent } from '@/lib/validation/f1-schemas';
@@ -75,21 +74,17 @@ export function CountdownHero({ event, next }: CountdownHeroProps): JSX.Element 
         </div>
       ) : (
         <p className="mt-10 text-sm uppercase tracking-[0.3em] text-muted sm:mt-14">
-          Season complete — relive it in History
+          Season complete — relive it in the race archive
         </p>
       )}
 
       <div className="mt-10 flex flex-col gap-3 sm:mt-14 sm:flex-row sm:flex-wrap">
-        <Link href="/race" className="w-full sm:w-auto">
-          <Button size="lg" className="w-full sm:w-auto">
-            Watch live race
-          </Button>
-        </Link>
-        <Link href="/learn" className="w-full sm:w-auto">
-          <Button size="lg" variant="secondary" className="w-full sm:w-auto">
-            Learn the sport
-          </Button>
-        </Link>
+        <ButtonLink href="/race" size="lg" className="w-full sm:w-auto">
+          Open race center
+        </ButtonLink>
+        <ButtonLink href="/history" size="lg" variant="secondary" className="w-full sm:w-auto">
+          Browse past races
+        </ButtonLink>
       </div>
     </section>
   );

@@ -72,7 +72,7 @@ export function MobileMenu({
         className="pointer-events-none absolute inset-0"
         style={{
           background:
-            'radial-gradient(90% 60% at 100% 0%, hsl(var(--color-primary) / 0.16), transparent 60%), radial-gradient(90% 60% at 0% 100%, hsl(var(--color-accent) / 0.12), transparent 55%)',
+            'radial-gradient(90% 60% at 100% 0%, color-mix(in oklab, var(--color-primary) 16%, transparent), transparent 60%)',
         }}
       />
 
@@ -83,7 +83,7 @@ export function MobileMenu({
             onClick={onClose}
             className="flex items-center gap-2"
           >
-            <span className="h-5 w-1.5 rounded-full bg-primary" />
+            <span aria-hidden className="h-5 w-1 -skew-x-12 bg-primary" />
             <span className="font-display text-2xl uppercase tracking-wider text-heading">
               Formula <span className="text-primary">Stats</span>
             </span>

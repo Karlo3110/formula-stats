@@ -4,8 +4,8 @@ import { cn } from '@/lib/utils/cn';
 
 import { Spinner } from './Spinner';
 
-type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'destructive';
-type ButtonSize = 'sm' | 'md' | 'lg';
+export type ButtonVariant = 'primary' | 'secondary' | 'inverse' | 'ghost' | 'destructive';
+export type ButtonSize = 'sm' | 'md' | 'lg';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
@@ -16,6 +16,7 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 const VARIANT_STYLES: Record<ButtonVariant, string> = {
   primary: 'bg-primary text-primary-foreground hover:opacity-90',
   secondary: 'bg-surface text-foreground border border-border hover:bg-elevated',
+  inverse: 'bg-heading text-background hover:bg-white',
   ghost: 'text-foreground hover:bg-surface',
   destructive: 'bg-destructive text-destructive-foreground hover:opacity-90',
 };
@@ -25,6 +26,14 @@ const SIZE_STYLES: Record<ButtonSize, string> = {
   md: 'h-10 px-4 text-base',
   lg: 'h-12 px-6 text-lg',
 };
+
+const BASE_STYLES =
+  'inline-flex items-center justify-center gap-2 rounded-md font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50 disabled:pointer-events-none';
+
+/** Shared class list so links styled as buttons match real buttons. */
+export function buttonStyles(variant: ButtonVariant, size: ButtonSize): string {
+  return cn(BASE_STYLES, VARIANT_STYLES[variant], SIZE_STYLES[size]);
+}
 
 export function Button({
   variant = 'primary',
@@ -40,12 +49,7 @@ export function Button({
     <button
       type={type}
       disabled={disabled ?? isLoading}
-      className={cn(
-        'inline-flex items-center justify-center gap-2 rounded-md font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50 disabled:pointer-events-none',
-        VARIANT_STYLES[variant],
-        SIZE_STYLES[size],
-        className,
-      )}
+      className={cn(buttonStyles(variant, size), className)}
       {...rest}
     >
       {isLoading ? <Spinner size="sm" /> : null}

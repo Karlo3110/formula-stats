@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import type { JSX, ReactNode } from 'react';
-import { Bebas_Neue, Inter } from 'next/font/google';
+import { Bebas_Neue, Inter, JetBrains_Mono } from 'next/font/google';
 
 import { AdSenseScript } from '@/components/ads/AdSenseScript';
 import { CookieConsent } from '@/components/ads/CookieConsent';
@@ -12,6 +12,11 @@ import './globals.css';
 
 const inter = Inter({
   variable: '--font-inter',
+  subsets: ['latin'],
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  variable: '--font-jetbrains',
   subsets: ['latin'],
 });
 
@@ -90,7 +95,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${bebasNeue.variable} h-full antialiased`}
+      className={`${inter.variable} ${bebasNeue.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <StructuredData />

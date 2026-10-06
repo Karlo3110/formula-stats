@@ -60,3 +60,22 @@ export function Text({
 }: TextProps): JSX.Element {
   return <p className={cn(TEXT_STYLES[variant], className)}>{children}</p>;
 }
+
+interface EyebrowProps {
+  children: ReactNode;
+  className?: string;
+}
+
+/** Small monospaced instrument label (panel titles, stat captions). */
+export function Eyebrow({ children, className }: EyebrowProps): JSX.Element {
+  return (
+    <p
+      className={cn(
+        'font-mono text-[0.65rem] font-medium uppercase tracking-[0.18em] text-muted',
+        className,
+      )}
+    >
+      {children}
+    </p>
+  );
+}

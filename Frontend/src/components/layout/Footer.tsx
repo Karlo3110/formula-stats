@@ -3,7 +3,7 @@ import type { JSX } from 'react';
 
 const PRODUCT_LINKS: ReadonlyArray<{ href: string; label: string }> = [
   { href: '/', label: 'Dashboard' },
-  { href: '/race', label: 'Live Race' },
+  { href: '/race', label: 'Race Center' },
   { href: '/standings', label: 'Standings' },
   { href: '/history', label: 'History' },
   { href: '/learn', label: 'Learn' },
@@ -25,7 +25,7 @@ export function Footer(): JSX.Element {
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr]">
           <div>
             <div className="flex items-center gap-2">
-              <span className="h-5 w-1.5 rounded-full bg-primary" />
+              <span aria-hidden className="h-5 w-1 -skew-x-12 bg-primary" />
               <span className="font-display text-2xl uppercase tracking-wider text-heading">
                 Formula <span className="text-primary">Stats</span>
               </span>
