@@ -1,3 +1,5 @@
+from typing import Literal
+
 from pydantic import BaseModel
 
 
@@ -71,16 +73,30 @@ class TrackMap(BaseModel):
 
 class ReplayDriver(BaseModel):
     code: str
+    number: str
     team: str
     color: str | None
-    # [t, x, y, elevation, speed, position, progress, onTrack] where t is seconds
-    # from the window start (shared race clock); x/y/elevation are normalized
-    # world coords; onTrack is 1.0 (OnTrack) or 0.0 (OffTrack).
-    samples: list[list[float]]
+    # One value per replay sample (sampleInterval seconds apart):
+    # progress - distance driven along the circuit centre-line (world units,
+    #            cumulative across laps; modulo lapLength gives the position);
+    # lateral  - signed offset from the centre-line along its normal
+    #            (tangent rotated +90 deg in the x/y plane), world units;
+    # speed    - km/h; position - running order (1 = leader);
+    # gap      - race: seconds behind the leader; qualifying/practice:
+    #            seconds off the fastest lap so far; null when not applicable;
+    # status   - 0 running, 1 in pit lane / garage, 2 out of the session.
+    progress: list[float]
+    lateral: list[float]
+    speed: list[int]
+    position: list[int]
+    gap: list[float | None]
+    status: list[int]
+    # Completed laps: [lap end on the replay clock, lap time or null].
+    laps: list[list[float | None]]
 
 
 class ReplayMessage(BaseModel):
-    # Seconds on the shared replay clock (same axis as ReplayDriver sample t).
+    # Seconds on the shared replay clock.
     time: float
     category: str
     message: str
@@ -94,10 +110,16 @@ class ReplaySession(BaseModel):
     season: int
     round_number: int
     session: str
+    sessionName: str
+    sessionKind: Literal["race", "qualifying", "practice"]
     durationSeconds: float
-    lightsOutSeconds: float
+    sampleInterval: float
+    # Lights out on the replay clock (races only).
+    lightsOutSeconds: float | None
+    totalLaps: int | None
     trackWidth: float
-    carScale: float
+    lapLength: float
+    # Centre-line [x, elevation, y], index 0 on the start/finish line.
     track: list[list[float]]
     drivers: list[ReplayDriver]
     messages: list[ReplayMessage]
