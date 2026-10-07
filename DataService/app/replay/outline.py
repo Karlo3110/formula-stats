@@ -93,7 +93,7 @@ def build_outline(xs: np.ndarray, ys: np.ndarray, zs: np.ndarray | None = None) 
         raise ValueError("Not enough position samples to build a circuit outline.")
     try:
         rx, ry, rz = _closed_spline(xs, ys, zs, OUTLINE_POINTS)
-    except Exception:
+    except (ValueError, np.linalg.LinAlgError):
         # A degenerate trace can defeat the spline fit; even spacing still works.
         rx, ry, rz = _even_resample(xs, ys, zs, OUTLINE_POINTS)
 

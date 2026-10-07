@@ -2,22 +2,47 @@ import numpy as np
 import pytest
 
 from app.replay.status import IN_PIT, OUT, RUNNING, pit_windows, status_track
-from app.replay.timing import best_lap_order, best_lap_so_far, race_gaps, race_positions
+from app.replay.timing import (
+    best_lap_order,
+    best_lap_so_far,
+    freeze_after_finish,
+    race_gaps,
+    race_order_keys,
+    race_positions,
+)
 from app.replay.window import RACE_PRESTART_SECONDS, replay_window, session_kind
 
 TIMES = np.arange(0.0, 11.0)
 
 
 class TestRaceOrderAndGaps:
-    def test_furthest_car_leads(self) -> None:
-        progress = np.array([TIMES * 10.0, TIMES * 10.0 + 5.0])
+    def order(self, progress: np.ndarray, finish_times: list[float | None] | None = None) -> list[int]:
+        finish = finish_times or [None] * len(progress)
+        return race_positions(race_order_keys(progress, TIMES, finish, lap_length=50.0))[:, -1].tolist()
 
-        assert race_positions(progress)[:, -1].tolist() == [2, 1]
+    def test_furthest_car_leads(self) -> None:
+        assert self.order(np.array([TIMES * 10.0, TIMES * 10.0 + 5.0])) == [2, 1]
 
     def test_backward_gps_wobble_does_not_cost_places(self) -> None:
-        progress = np.array([[0.0, 10.0, 9.0], [0.0, 9.5, 9.6]])
+        progress = np.array([TIMES * 1.0, TIMES * 1.0 - 1.5])
+        progress[0, -1] = progress[0, -2] - 1.0  # leader matched backwards
 
-        assert race_positions(progress)[:, -1].tolist() == [1, 2]
+        assert self.order(progress) == [1, 2]
+
+    def test_finishers_are_classified_by_who_crossed_the_line_first(self) -> None:
+        # Both take the flag after 2 crossings (progress 100); the first to
+        # finish then stops early, the second rolls further on its cool-down.
+        first = np.minimum(TIMES * 20.0, 100.0)
+        second = np.minimum(TIMES * 14.0, 140.0)
+
+        assert self.order(np.array([first, second]), finish_times=[5.0, 7.15]) == [1, 2]
+
+    def test_finish_gap_is_held_through_the_cool_down_lap(self) -> None:
+        gaps = np.array([[0.0] * 11, np.arange(11.0)])
+
+        frozen = freeze_after_finish(gaps, TIMES, [None, 6.0])
+
+        assert frozen[1, -1] == 6.0
 
     def test_gap_is_time_since_the_leader_passed_the_same_point(self) -> None:
         leader = TIMES * 10.0
@@ -81,7 +106,9 @@ class TestWindow:
     def test_practice_covers_first_run_to_last_lap(self) -> None:
         window = replay_window("practice", np.array([500.0, 900.0]), np.array([3600.0]), race_start=None)
 
-        assert window.lights_out is None and window.start < 500.0 < 3600.0 < window.end
+        assert window.lights_out is None
+        assert window.start < 500.0
+        assert window.end > 3600.0
 
     def test_very_long_sessions_are_sampled_more_sparsely(self) -> None:
         window = replay_window("race", np.array([0.0]), np.array([3 * 3600 * 2.0]), race_start=0.0)

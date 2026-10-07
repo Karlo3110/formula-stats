@@ -16,14 +16,54 @@ def _ranks(keys: np.ndarray) -> np.ndarray:
     return ranks
 
 
-def race_positions(progress: np.ndarray) -> np.ndarray:
-    """Race order: furthest along the race distance leads.
+# Finish-time tie-break: much smaller than a lap, enough to separate cars.
+FINISH_TIE_BREAK = 1e-4
 
-    Progress is made non-decreasing per driver first, so a car briefly
-    matched backwards (GPS noise, pit lane) does not lose places.
+
+def _first_sample_at(times: np.ndarray, moment: float) -> int:
+    return int(np.searchsorted(times, moment, side="left"))
+
+
+def race_order_keys(
+    progress: np.ndarray,
+    times: np.ndarray,
+    finish_times: list[float | None],
+    lap_length: float,
+) -> np.ndarray:
+    """Ordering key per car and sample; larger is further ahead.
+
+    While racing: distance covered, made non-decreasing so a car briefly
+    matched backwards (GPS noise, pit lane) does not lose places. Once a car
+    takes the flag its key freezes to (line crossings, earlier finish first),
+    exactly how a race is classified, so cool-down laps change nothing.
     """
-    reached = np.maximum.accumulate(progress, axis=1)
-    return _ranks(-reached)
+    keys = np.maximum.accumulate(progress, axis=1)
+    for driver, finished_at in enumerate(finish_times):
+        if finished_at is None:
+            continue
+        start = _first_sample_at(times, finished_at)
+        if start >= len(times):
+            continue
+        crossings = round(keys[driver, start] / lap_length)
+        keys[driver, start:] = crossings * lap_length - finished_at * FINISH_TIE_BREAK
+    return keys
+
+
+def race_positions(keys: np.ndarray) -> np.ndarray:
+    """Race order from `race_order_keys` (1 = leader)."""
+    return _ranks(-keys)
+
+
+def freeze_after_finish(gaps: np.ndarray, times: np.ndarray, finish_times: list[float | None]) -> np.ndarray:
+    """Hold each finisher's gap at its value when they took the flag."""
+    frozen = gaps.copy()
+    for driver, finished_at in enumerate(finish_times):
+        if finished_at is None:
+            continue
+        start = _first_sample_at(times, finished_at)
+        if start < len(times):
+            frozen[driver, start:] = gaps[driver, start]
+    return frozen
 
 
 def race_gaps(progress: np.ndarray, times: np.ndarray, start_index: int) -> np.ndarray:

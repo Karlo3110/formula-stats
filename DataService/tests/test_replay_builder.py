@@ -45,7 +45,7 @@ class TestRaceReplay:
         _, replay = race
         winner = driver(replay, "1")
 
-        assert winner.progress[-1] == pytest.approx(3 * replay.lapLength, rel=0.02)
+        assert winner.progress[-1] - winner.progress[0] == pytest.approx(3 * replay.lapLength, rel=0.02)
 
     def test_fastest_car_wins_and_retiree_ends_last(self, race) -> None:
         session, replay = race

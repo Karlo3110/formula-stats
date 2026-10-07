@@ -86,7 +86,9 @@ def make_race(drivers: int = 6, laps: int = 3, name: str = "Race") -> FakeSessio
                     speed = float(_speed(np.array([distance / 10]), length / 10, pace)[0])
                     before = distance
                     distance += speed * dt * 10
-                    if np.floor(before / length) < np.floor(distance / length):
+                    # The grid sits behind the line: crossing it at the start
+                    # begins lap 1; each later crossing completes a lap.
+                    if np.floor(distance / length) > completed and np.floor(before / length) < np.floor(distance / length):
                         completed += 1
                         row = {"DriverNumber": number, "LapNumber": completed, "LapStartTime": lap_start, "Time": t,
                                "PitInTime": np.nan, "PitOutTime": np.nan}

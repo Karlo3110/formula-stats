@@ -18,7 +18,14 @@ from app.replay.sources import (
     speed_at,
 )
 from app.replay.status import OUT, RUNNING, pit_windows, status_track
-from app.replay.timing import best_lap_order, best_lap_so_far, race_gaps, race_positions
+from app.replay.timing import (
+    best_lap_order,
+    best_lap_so_far,
+    freeze_after_finish,
+    race_gaps,
+    race_order_keys,
+    race_positions,
+)
 from app.replay.window import ReplayWindow, SessionKind, replay_window, session_kind
 
 # Real circuits are ~12-15 m wide; FastF1 X/Y are 1/10 m.
@@ -39,6 +46,8 @@ class CarTrack:
     speed: np.ndarray
     status: np.ndarray
     laps: DriverLaps
+    # Race only: when a classified finisher took the chequered flag.
+    finished_at: float | None
 
 
 def _is_finisher(status: str) -> bool:
@@ -46,15 +55,20 @@ def _is_finisher(status: str) -> bool:
     return status in FINISHED_STATUSES or status.startswith("+")
 
 
-def _retired_after(loaded: Any, number: str, laps: DriverLaps, kind: SessionKind) -> float | None:
-    """Race only: a non-finisher is out once their last lap has ended."""
-    if kind != "race" or laps.ends.size == 0:
-        return None
+def _classified_status(loaded: Any, number: str) -> str | None:
     try:
-        status = str(loaded.results.loc[number, "Status"])
+        return str(loaded.results.loc[number, "Status"])
     except (KeyError, AttributeError):
         return None
-    return None if _is_finisher(status) else float(np.nanmax(laps.ends))
+
+
+def _race_end(loaded: Any, number: str, laps: DriverLaps, kind: SessionKind) -> tuple[float | None, float | None]:
+    """(retired at, finished at): races only, both at the car's last lap end."""
+    status = _classified_status(loaded, number)
+    if kind != "race" or laps.ends.size == 0 or status is None:
+        return None, None
+    last_lap_end = float(np.nanmax(laps.ends))
+    return (None, last_lap_end) if _is_finisher(status) else (last_lap_end, None)
 
 
 def _clamp_lateral(lateral: np.ndarray, status: np.ndarray, track_width: float) -> np.ndarray:
@@ -74,12 +88,8 @@ def _build_car(
     wx, wy = outline.to_world(np.interp(times, stream.times, stream.x), np.interp(times, stream.times, stream.y))
     max_step = MAX_SPEED_MPS * outline.scale * 10 * window.interval
     progress, lateral = match_track(outline, wx, wy, max_step, track_width)
-    status = status_track(
-        times,
-        pit_windows(laps.pit_in, laps.pit_out),
-        off_track_at(stream, times),
-        _retired_after(loaded, number, laps, kind),
-    )
+    retired_at, finished_at = _race_end(loaded, number, laps, kind)
+    status = status_track(times, pit_windows(laps.pit_in, laps.pit_out), off_track_at(stream, times), retired_at)
     return CarTrack(
         number=number,
         progress=progress,
@@ -87,17 +97,22 @@ def _build_car(
         speed=speed_at(loaded, number, times),
         status=status,
         laps=laps,
+        finished_at=finished_at,
     )
 
 
-def _order_and_gaps(cars: list[CarTrack], window: ReplayWindow, kind: SessionKind) -> tuple[np.ndarray, np.ndarray]:
+def _order_and_gaps(
+    cars: list[CarTrack], window: ReplayWindow, kind: SessionKind, lap_length: float
+) -> tuple[np.ndarray, np.ndarray]:
     times = window.sample_times()
     if kind == "race":
         progress = np.vstack([car.progress for car in cars])
+        finish_times = [car.finished_at for car in cars]
+        keys = race_order_keys(progress, times, finish_times, lap_length)
         start_index = int(np.searchsorted(times, window.lights_out or times[0]))
-        gaps = race_gaps(progress, times, start_index)
+        gaps = freeze_after_finish(race_gaps(progress, times, start_index), times, finish_times)
         statuses = np.vstack([car.status for car in cars])
-        return race_positions(progress), np.where(statuses == OUT, np.nan, gaps)
+        return race_positions(keys), np.where(statuses == OUT, np.nan, gaps)
     best = np.vstack([best_lap_so_far(car.laps.ends, car.laps.times, times) for car in cars])
     return best_lap_order(best)
 
@@ -152,7 +167,7 @@ def build_replay(loaded: Any, season: int, round_number: int, session: str, fast
     cars = [car for number in loaded.drivers if (car := _build_car(loaded, number, outline, window, kind, track_width))]
     if not cars:
         return None
-    positions, gaps = _order_and_gaps(cars, window, kind)
+    positions, gaps = _order_and_gaps(cars, window, kind, outline.lap_length)
     total_laps = getattr(loaded, "total_laps", None) if kind == "race" else None
     return ReplaySession(
         season=season,

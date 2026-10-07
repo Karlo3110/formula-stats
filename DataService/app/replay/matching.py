@@ -43,7 +43,7 @@ def _project(outline: Outline, j: int, px: float, py: float) -> tuple[float, flo
     n = outline.size
     before = _segment_projection(outline, (j - 1) % n, px, py)
     after = _segment_projection(outline, j, px, py)
-    d2, s, lateral = before if before[0] < after[0] else after
+    _, s, lateral = before if before[0] < after[0] else after
     # The segment before vertex 0 sits at the end of the lap: express it as a
     # small negative distance so progress stays continuous across the line.
     if j == 0 and before[0] < after[0]:
