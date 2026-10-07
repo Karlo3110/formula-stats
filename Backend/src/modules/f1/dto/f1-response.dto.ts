@@ -1,7 +1,6 @@
 import type { F1Event, F1TrackMap } from '@prisma/client';
 
 import type {
-  ReplaySessionPayload,
   SeasonSchedulePayload,
   SeasonStandingsPayload,
   TrackMapPayload,
@@ -50,34 +49,6 @@ export function toTrackMapDto(payload: TrackMapPayload): TrackMapDto {
     session: payload.session,
     track: payload.track,
   };
-}
-
-export interface ReplayDriverDto {
-  code: string;
-  team: string;
-  color: string | null;
-  samples: number[][];
-}
-
-export interface ReplayMessageDto {
-  time: number;
-  category: string;
-  message: string;
-  flag: string | null;
-  scope: string | null;
-}
-
-export interface ReplaySessionDto {
-  season: number;
-  roundNumber: number;
-  session: string;
-  durationSeconds: number;
-  lightsOutSeconds: number;
-  trackWidth: number;
-  carScale: number;
-  track: number[][];
-  drivers: ReplayDriverDto[];
-  messages: ReplayMessageDto[];
 }
 
 export interface WeekendSessionDto {
@@ -159,23 +130,6 @@ export function toWeekendScheduleDto(
         startUtc: s.start_utc,
       })),
     })),
-  };
-}
-
-export function toReplaySessionDto(
-  payload: ReplaySessionPayload,
-): ReplaySessionDto {
-  return {
-    season: payload.season,
-    roundNumber: payload.round_number,
-    session: payload.session,
-    durationSeconds: payload.durationSeconds,
-    lightsOutSeconds: payload.lightsOutSeconds,
-    trackWidth: payload.trackWidth,
-    carScale: payload.carScale,
-    track: payload.track,
-    drivers: payload.drivers,
-    messages: payload.messages,
   };
 }
 

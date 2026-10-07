@@ -66,11 +66,19 @@ export const TrackMapSchema = z.object({
   track: z.array(z.array(z.number())),
 });
 
+/** Per-sample columns: one entry per replay sample (see the data service model). */
 export const ReplayDriverSchema = z.object({
   code: z.string(),
+  number: z.string(),
   team: z.string(),
   color: z.string().nullable(),
-  samples: z.array(z.array(z.number())),
+  progress: z.array(z.number()),
+  lateral: z.array(z.number()),
+  speed: z.array(z.number()),
+  position: z.array(z.number()),
+  gap: z.array(z.number().nullable()),
+  status: z.array(z.number()),
+  laps: z.array(z.tuple([z.number(), z.number().nullable()])),
 });
 
 export const ReplayMessageSchema = z.object({
@@ -85,10 +93,14 @@ export const ReplaySessionSchema = z.object({
   season: z.number().int(),
   round_number: z.number().int(),
   session: z.string(),
+  sessionName: z.string(),
+  sessionKind: z.enum(['race', 'qualifying', 'practice']),
   durationSeconds: z.number(),
-  lightsOutSeconds: z.number(),
+  sampleInterval: z.number().positive(),
+  lightsOutSeconds: z.number().nullable(),
+  totalLaps: z.number().int().nullable(),
   trackWidth: z.number(),
-  carScale: z.number(),
+  lapLength: z.number().positive(),
   track: z.array(z.array(z.number())),
   drivers: z.array(ReplayDriverSchema),
   messages: z.array(ReplayMessageSchema).default([]),

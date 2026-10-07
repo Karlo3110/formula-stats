@@ -86,13 +86,21 @@ export class DataServiceClient {
     round: number,
     session: string,
   ): Promise<ReplaySessionPayload> {
+    // A first build downloads and processes a whole session's telemetry.
     return this.get(
       `/api/v1/seasons/${season}/rounds/${round}/sessions/${encodeURIComponent(session)}/replay`,
       ReplaySessionSchema,
+      this.config.getOrThrow<number>('DATA_SERVICE_REPLAY_TIMEOUT_MS'),
     );
   }
 
-  private async get<T>(path: string, schema: ZodType<T>): Promise<T> {
+  private async get<T>(
+    path: string,
+    schema: ZodType<T>,
+    timeoutMs: number = this.config.getOrThrow<number>(
+      'DATA_SERVICE_TIMEOUT_MS',
+    ),
+  ): Promise<T> {
     const baseUrl = this.config.get<string>('DATA_SERVICE_URL');
     if (!baseUrl) {
       throw new DataServiceUnavailableException(
@@ -101,10 +109,7 @@ export class DataServiceClient {
     }
 
     const controller = new AbortController();
-    const timeout = setTimeout(
-      () => controller.abort(),
-      this.config.getOrThrow<number>('DATA_SERVICE_TIMEOUT_MS'),
-    );
+    const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
     try {
       const response = await fetch(`${baseUrl}${path}`, {

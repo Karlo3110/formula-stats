@@ -4,12 +4,12 @@ import { Public } from '@/common/decorators/public.decorator';
 
 import { F1Service } from './f1.service';
 import type {
-  ReplaySessionDto,
   SeasonScheduleDto,
   SeasonStandingsDto,
   TrackMapDto,
   WeekendScheduleDto,
 } from './dto/f1-response.dto';
+import type { ReplaySessionDto } from './dto/replay-session.dto';
 import type { SeasonDriversDto } from './dto/season-drivers.dto';
 import type { SessionResultsDto } from './dto/session-results.dto';
 

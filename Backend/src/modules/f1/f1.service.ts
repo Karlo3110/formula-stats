@@ -6,17 +6,19 @@ import { DataServiceClient } from './data-service.client';
 import { F1Repository } from './f1.repository';
 import {
   eventsToSeasonScheduleDto,
-  toReplaySessionDto,
   toSeasonScheduleDto,
   toSeasonStandingsDto,
   toTrackMapDto,
   toWeekendScheduleDto,
-  type ReplaySessionDto,
   type SeasonScheduleDto,
   type SeasonStandingsDto,
   type TrackMapDto,
   type WeekendScheduleDto,
 } from './dto/f1-response.dto';
+import {
+  toReplaySessionDto,
+  type ReplaySessionDto,
+} from './dto/replay-session.dto';
 import {
   toSeasonDriversDto,
   type SeasonDriversDto,
@@ -42,8 +44,9 @@ const REPLAY_TTL_SECONDS = 604_800;
 // Bump when the derived geometry algorithms change, to invalidate caches.
 // v3/v8: track + car samples now carry Z elevation and an on-track flag.
 // v9: replay now carries race-control messages (flags / radio feed).
-const TRACK_MAP_VERSION = 'v3';
-const REPLAY_VERSION = 'v9';
+// v4/v10: spline outline; whole-session, map-matched columnar replays.
+const TRACK_MAP_VERSION = 'v4';
+const REPLAY_VERSION = 'v10';
 
 /**
  * Serves F1 data through three tiers so clients never hit FastF1 directly:

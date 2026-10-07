@@ -34,6 +34,12 @@ export const EnvSchema = z.object({
   DATA_SERVICE_URL: z.string().optional(),
   DATA_SERVICE_INTERNAL_KEY: z.string().optional(),
   DATA_SERVICE_TIMEOUT_MS: z.coerce.number().int().positive().default(30000),
+  // Replays process a whole session's telemetry on first build.
+  DATA_SERVICE_REPLAY_TIMEOUT_MS: z.coerce
+    .number()
+    .int()
+    .positive()
+    .default(180000),
 
   // Optional cookie domain for the refresh-token cookie (e.g. .formula-stats.app).
   COOKIE_DOMAIN: z.string().optional(),
@@ -44,7 +50,9 @@ export type Env = z.infer<typeof EnvSchema>;
 export function validateEnv(raw: Record<string, unknown>): Env {
   const parsed = EnvSchema.safeParse(raw);
   if (!parsed.success) {
-    throw new Error(`Invalid environment configuration:\n${parsed.error.message}`);
+    throw new Error(
+      `Invalid environment configuration:\n${parsed.error.message}`,
+    );
   }
   return parsed.data;
 }

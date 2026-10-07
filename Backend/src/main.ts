@@ -1,6 +1,7 @@
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
+import compression from 'compression';
 import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 
@@ -15,6 +16,8 @@ async function bootstrap(): Promise<void> {
 
   app.setGlobalPrefix(API_PREFIX);
   app.use(helmet());
+  // Whole-session replays are several MB of JSON numbers (~5x smaller gzipped).
+  app.use(compression());
   app.use(cookieParser());
 
   app.enableCors({
