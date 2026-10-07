@@ -3,6 +3,7 @@ import { Controller, Get, Param, ParseIntPipe } from '@nestjs/common';
 import { Public } from '@/common/decorators/public.decorator';
 
 import { F1Service } from './f1.service';
+import { ParseSessionPipe, type SessionCode } from './parse-session.pipe';
 import type {
   SeasonScheduleDto,
   SeasonStandingsDto,
@@ -55,7 +56,7 @@ export class F1Controller {
   getSessionResults(
     @Param('season', ParseIntPipe) season: number,
     @Param('round', ParseIntPipe) round: number,
-    @Param('session') session: string,
+    @Param('session', ParseSessionPipe) session: SessionCode,
   ): Promise<SessionResultsDto> {
     return this.f1Service.getSessionResults(season, round, session);
   }
@@ -64,7 +65,7 @@ export class F1Controller {
   getTrackMap(
     @Param('season', ParseIntPipe) season: number,
     @Param('round', ParseIntPipe) round: number,
-    @Param('session') session: string,
+    @Param('session', ParseSessionPipe) session: SessionCode,
   ): Promise<TrackMapDto> {
     return this.f1Service.getTrackMap(season, round, session);
   }
@@ -73,7 +74,7 @@ export class F1Controller {
   getReplay(
     @Param('season', ParseIntPipe) season: number,
     @Param('round', ParseIntPipe) round: number,
-    @Param('session') session: string,
+    @Param('session', ParseSessionPipe) session: SessionCode,
   ): Promise<ReplaySessionDto> {
     return this.f1Service.getReplay(season, round, session);
   }
