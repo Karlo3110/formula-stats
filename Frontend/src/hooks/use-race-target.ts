@@ -2,9 +2,12 @@
 
 import { useLatestRace, useSchedule } from '@/hooks/use-f1';
 import {
-  SessionCode,
+  defaultSession,
   findEvent,
   finishedSessions,
+  weekendSessions,
+  type SessionCode,
+  type WeekendSessionEntry,
 } from '@/lib/f1/race-archive';
 import type { WeekendEvent } from '@/lib/validation/f1-schemas';
 
@@ -29,6 +32,8 @@ export interface ResolvedRace {
   event: WeekendEvent | null;
   /** Sessions of this event that have finished and can be replayed. */
   sessions: SessionCode[];
+  /** Every session of the weekend in running order, finished or not. */
+  weekend: WeekendSessionEntry[];
   isExplicit: boolean;
   isResolving: boolean;
   blocker: RaceBlocker | null;
@@ -36,13 +41,14 @@ export interface ResolvedRace {
 
 function pickSession(requested: SessionCode, available: SessionCode[]): SessionCode {
   if (available.length === 0 || available.includes(requested)) return requested;
-  return available[0] ?? SessionCode.Race;
+  return defaultSession(available);
 }
 
 /**
  * Resolves which race the race center shows: the one in the URL, or the most
  * recent finished Grand Prix. The session is checked against the weekend's
- * schedule first, so a Sprint is never requested on a non-sprint weekend.
+ * schedule first, so a Sprint is never requested on a non-sprint weekend and
+ * an unavailable session falls back to the race (or the latest one run).
  */
 export function useRaceTarget(request: RaceRequest): ResolvedRace {
   const isExplicit = request.season !== undefined && request.round !== undefined;
@@ -52,7 +58,9 @@ export function useRaceTarget(request: RaceRequest): ResolvedRace {
 
   const scheduleQuery = useSchedule(season ?? 0, { enabled: season !== undefined });
   const event = round !== undefined ? findEvent(scheduleQuery.data, round) : null;
-  const sessions = event ? finishedSessions(event, new Date()) : [];
+  const now = new Date();
+  const sessions = event ? finishedSessions(event, now) : [];
+  const weekend = event ? weekendSessions(event, now) : [];
   const isScheduleSettled = scheduleQuery.isSuccess || scheduleQuery.isError;
   const blocker = findBlocker({
     hasRace: season !== undefined && round !== undefined,
@@ -71,6 +79,7 @@ export function useRaceTarget(request: RaceRequest): ResolvedRace {
     target,
     event,
     sessions,
+    weekend,
     isExplicit,
     isResolving: target === null && !blocker,
     blocker,

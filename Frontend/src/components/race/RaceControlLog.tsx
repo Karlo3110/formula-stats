@@ -13,11 +13,11 @@ interface RaceControlLogProps {
   messages: ReadonlyArray<ReplayMessage>;
 }
 
-function LogRow({ message, lightsOut }: { message: ReplayMessage; lightsOut: number }): JSX.Element {
+function LogRow({ message, origin }: { message: ReplayMessage; origin: number }): JSX.Element {
   return (
     <li className="animate-overlay-rise grid grid-cols-[3.25rem_0.5rem_1fr] items-baseline gap-2 border-b border-white/[0.05] px-4 py-2.5 last:border-b-0">
       <span className="font-mono text-[0.7rem] tabular-nums text-muted">
-        {formatRaceClock(message.time, lightsOut)}
+        {formatRaceClock(message.time, origin)}
       </span>
       <span
         aria-hidden
@@ -41,7 +41,7 @@ export function RaceControlLog({ messages }: RaceControlLogProps): JSX.Element {
       {log.length > 0 && timing ? (
         <ol aria-live="polite" className="h-full overflow-y-auto">
           {log.map((message) => (
-            <LogRow key={`${message.time}:${message.message}`} message={message} lightsOut={timing.lightsOut} />
+            <LogRow key={`${message.time}:${message.message}`} message={message} origin={timing.lightsOut ?? 0} />
           ))}
         </ol>
       ) : (

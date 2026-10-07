@@ -8,6 +8,7 @@ import type { ReplaySession } from '@/lib/validation/f1-schemas';
 import { FlagOverlay } from './FlagOverlay';
 import { PlaybackBar } from './PlaybackBar';
 import { StageControls } from './StageControls';
+import { SessionPill } from './SessionPill';
 import { StageNotice } from './StageNotice';
 import { StartLights } from './StartLights';
 import type { StageNoticeContent } from './stage-notice-content';
@@ -17,7 +18,7 @@ const RaceScene = dynamic(() => import('./RaceScene').then((mod) => mod.RaceScen
   loading: () => <div className="h-full w-full bg-black" />,
 });
 
-const VIGNETTE = 'radial-gradient(120% 120% at 50% 40%, transparent 55%, rgba(0,0,0,0.6) 100%)';
+const VIGNETTE = 'radial-gradient(120% 120% at 50% 40%, transparent 65%, rgba(0,0,0,0.45) 100%)';
 const NO_MESSAGES: ReplaySession['messages'] = [];
 
 interface RaceStageProps {
@@ -34,23 +35,15 @@ export function RaceStage({ replay, notice, isFullscreen, onToggleFullscreen }: 
   return (
     <div className="relative h-full min-h-[22rem] overflow-hidden rounded-xl border border-white/[0.08] bg-black">
       <div className="absolute inset-0">
-        <RaceScene
-          trackPoints={replay?.track ?? null}
-          replayDrivers={replay?.drivers ?? null}
-          replayDuration={replay?.durationSeconds ?? null}
-          replayLightsOut={replay?.lightsOutSeconds ?? null}
-          trackWidth={replay?.trackWidth ?? 4}
-          carScale={replay?.carScale ?? 1.5}
-        />
+        <RaceScene replay={replay} />
       </div>
       <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: VIGNETTE }} />
 
-      <div className="pointer-events-none absolute left-3 top-3 z-20 hidden sm:block">
-        <span className="glass-pill inline-flex items-center gap-2 rounded-full px-3 py-1 font-mono text-[0.65rem] uppercase tracking-[0.14em] text-muted">
-          <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-primary" />
-          Replay · race start
-        </span>
-      </div>
+      {replay ? (
+        <div className="pointer-events-none absolute left-3 top-3 z-20 hidden sm:block">
+          <SessionPill sessionName={replay.sessionName} />
+        </div>
+      ) : null}
 
       <div className="pointer-events-none absolute inset-x-0 top-14 z-20 flex flex-col items-center gap-2 sm:top-3">
         <StartLights />

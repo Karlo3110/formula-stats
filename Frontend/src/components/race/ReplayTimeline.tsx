@@ -9,7 +9,7 @@ import type { ReplayMessage } from '@/lib/validation/f1-schemas';
 interface ReplayTimelineProps {
   clock: number;
   duration: number;
-  lightsOut: number;
+  lightsOut: number | null;
   messages: ReadonlyArray<ReplayMessage>;
   step: number;
   onSeek: (seconds: number) => void;
@@ -41,7 +41,7 @@ export function ReplayTimeline({
     <div className={cn('relative flex h-6 min-w-0 flex-1 items-center', className)}>
       <div aria-hidden className="absolute inset-x-0 h-1 rounded-full bg-white/10">
         <div className="h-full rounded-full bg-primary" style={{ width: `${progress}%` }} />
-        {lightsOut > 0 ? (
+        {lightsOut !== null && lightsOut > 0 ? (
           <span className="absolute top-1/2 h-3 w-px -translate-y-1/2 bg-white/60" style={{ left: `${toPercent(lightsOut, duration)}%` }} />
         ) : null}
         {markers.map((marker) => (

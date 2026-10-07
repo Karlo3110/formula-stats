@@ -1,4 +1,4 @@
-import type { DriverStanding, RaceDriver } from './types';
+import { CarStatus, type DriverStanding, type RaceDriver } from './types';
 
 /**
  * Lightweight client-side race simulation standing in for live FastF1 position
@@ -60,8 +60,10 @@ class RaceEngine {
         position: position + 1,
         gapSeconds: (leaderValue - entry.value) * entry.driver.baseLapSeconds,
         speedKmh: Math.round(BASE_SPEED_KMH * wave),
-        trackT: ((entry.value % 1) + 1) % 1,
-        onTrack: true,
+        lap: Math.max(1, Math.floor(entry.value) + 1),
+        lastLapSeconds: null,
+        bestLapSeconds: null,
+        status: CarStatus.Running,
       };
     });
   }

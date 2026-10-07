@@ -33,7 +33,7 @@ export async function generateMetadata({ params }: RaceResultPageProps): Promise
   if (!route) return {};
   return buildPageMetadata({
     title: `${route.season} Round ${route.round} Results`,
-    description: `Race classification, podium and circuit for round ${route.round} of the ${route.season} Formula 1 season, with a 3D replay of the start.`,
+    description: `Race classification, podium and circuit for round ${route.round} of the ${route.season} Formula 1 season, with a full 3D replay of the race.`,
     path: raceResultHref(route.season, route.round),
   });
 }

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { clampClock, formatRaceClock } from './playback';
+import { clampClock, formatLapTime, formatRaceClock } from './playback';
 
 describe('clampClock', () => {
   it('keeps a position inside the window unchanged', () => {
@@ -27,5 +27,21 @@ describe('formatRaceClock', () => {
 
   it('reads zero exactly at lights out', () => {
     expect(formatRaceClock(6, 6)).toBe('00:00');
+  });
+});
+
+describe('formatRaceClock for long sessions', () => {
+  it('adds hours past the hour mark', () => {
+    expect(formatRaceClock(10 + 3725, 10)).toBe('1:02:05');
+  });
+});
+
+describe('formatLapTime', () => {
+  it('formats laps over and under a minute', () => {
+    expect([formatLapTime(83.4561), formatLapTime(62.05), formatLapTime(58.1234)]).toEqual([
+      '1:23.456',
+      '1:02.050',
+      '58.123',
+    ]);
   });
 });

@@ -13,7 +13,7 @@ type Phase = { kind: 'countdown'; lit: number } | { kind: 'go' } | { kind: 'hidd
 
 function computePhase(): Phase {
   const timing = readTiming();
-  if (!timing || timing.lightsOut <= 0) {
+  if (!timing || timing.lightsOut === null || timing.lightsOut <= 0) {
     return { kind: 'hidden' };
   }
   const { clock, lightsOut } = timing;

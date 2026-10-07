@@ -45,6 +45,7 @@ export function RaceView(request: RaceRequest): JSX.Element {
   const replayStatus = replayStatusOf(replayQuery, target !== null);
   const replay = replayStatus === 'ready' ? (replayQuery.data ?? null) : null;
   const isReady = replay !== null && replay.drivers.length > 0;
+  const sessionKind = replay?.sessionKind ?? 'race';
   const targetKey = target ? `${target.season}:${target.round}:${target.session}` : null;
 
   useEffect(() => {
@@ -64,21 +65,21 @@ export function RaceView(request: RaceRequest): JSX.Element {
   return (
     <div ref={containerRef} className="mx-auto flex max-w-[110rem] flex-col gap-4 bg-background lg:h-[calc(100dvh-7rem)] lg:min-h-[42rem]">
       <RaceHeader
-        season={target?.season ?? null}
+        season={target?.season ?? request.season ?? null}
         event={resolved.event}
-        sessions={resolved.sessions}
+        weekend={resolved.weekend}
         activeSession={target?.session ?? request.session}
       />
       <div className="grid min-h-0 flex-1 gap-3 lg:grid-cols-[14rem_minmax(0,1fr)_19rem] lg:grid-rows-[minmax(0,1fr)]">
         <div className="order-2 h-[26rem] min-h-0 lg:order-none lg:h-auto">
-          <TimingTower isReady={isReady} />
+          <TimingTower isReady={isReady} kind={sessionKind} />
         </div>
         <div className="order-1 h-[62vh] min-h-0 lg:order-none lg:h-auto">
           <RaceStage replay={replay} notice={notice} isFullscreen={isFullscreen} onToggleFullscreen={toggle} />
         </div>
         <aside className="order-3 grid min-h-0 gap-3 sm:grid-cols-2 lg:order-none lg:grid-cols-1 lg:grid-rows-[auto_auto_minmax(0,1fr)]">
           <TrackMap outline={replay?.track ?? null} />
-          <DriverFocusPanel isReady={isReady} drivers={drivers} />
+          <DriverFocusPanel isReady={isReady} drivers={drivers} kind={sessionKind} />
           <div className="h-72 min-h-0 sm:col-span-2 lg:col-span-1 lg:h-auto">
             <RaceControlLog messages={replay?.messages ?? []} />
           </div>

@@ -69,10 +69,24 @@ export const TrackMapSchema = z.object({
 
 export const ReplayDriverSchema = z.object({
   code: z.string(),
+  number: z.string(),
   team: z.string(),
   color: z.string().nullable(),
-  samples: z.array(z.array(z.number())),
+  /** Distance along the centre-line, cumulative over laps (world units). */
+  progress: z.array(z.number()),
+  /** Signed offset from the centre-line along its left normal (world units). */
+  lateral: z.array(z.number()),
+  speed: z.array(z.number()),
+  position: z.array(z.number()),
+  /** Race: seconds behind the leader. Qualifying/practice: off the fastest lap. */
+  gap: z.array(z.number().nullable()),
+  /** 0 running, 1 pit lane / garage, 2 out. */
+  status: z.array(z.number().int()),
+  /** Completed laps: [end on the replay clock, lap time or null]. */
+  laps: z.array(z.tuple([z.number(), z.number().nullable()])),
 });
+
+export const SessionKindSchema = z.enum(['race', 'qualifying', 'practice']);
 
 export const ReplayMessageSchema = z.object({
   /** Seconds on the shared replay clock (same axis as a driver sample's t). */
@@ -87,16 +101,23 @@ export const ReplaySessionSchema = z.object({
   season: z.number().int(),
   roundNumber: z.number().int(),
   session: z.string(),
-  durationSeconds: z.number(),
-  lightsOutSeconds: z.number(),
-  trackWidth: z.number(),
-  carScale: z.number(),
+  sessionName: z.string(),
+  sessionKind: SessionKindSchema,
+  durationSeconds: z.number().positive(),
+  /** Seconds between consecutive per-driver samples. */
+  sampleInterval: z.number().positive(),
+  /** Race start on the replay clock; null for sessions without a standing start. */
+  lightsOutSeconds: z.number().nullable(),
+  totalLaps: z.number().int().nullable(),
+  trackWidth: z.number().positive(),
+  lapLength: z.number().positive(),
   track: TrackOutlineSchema,
   drivers: z.array(ReplayDriverSchema),
   messages: z.array(ReplayMessageSchema).default([]),
 });
 
 export type ReplayDriver = z.infer<typeof ReplayDriverSchema>;
+export type SessionKind = z.infer<typeof SessionKindSchema>;
 export type ReplayMessage = z.infer<typeof ReplayMessageSchema>;
 export type ReplaySession = z.infer<typeof ReplaySessionSchema>;
 

@@ -10,7 +10,7 @@ import type { ReplayMessage } from '@/lib/validation/f1-schemas';
 import { PlayPauseIcon } from './PlaybackIcons';
 import { ReplayTimeline } from './ReplayTimeline';
 
-const SCRUB_STEP_SECONDS = 0.1;
+const SCRUB_STEP_SECONDS = 1;
 
 interface PlaybackBarProps {
   messages: ReadonlyArray<ReplayMessage>;
@@ -24,6 +24,7 @@ export function PlaybackBar({ messages }: PlaybackBarProps): JSX.Element | null 
   }
 
   const { clock, lightsOut, durationSeconds } = timing;
+  const origin = lightsOut ?? 0;
 
   return (
     <div className="glass-panel flex flex-wrap items-center gap-x-4 gap-y-2 rounded-xl px-3 py-2.5 sm:flex-nowrap">
@@ -36,9 +37,9 @@ export function PlaybackBar({ messages }: PlaybackBarProps): JSX.Element | null 
         <PlayPauseIcon isPlaying={isPlaying} />
       </button>
 
-      <span className="w-[6.5rem] shrink-0 font-mono text-xs tabular-nums text-foreground">
-        {formatRaceClock(clock, lightsOut)}
-        <span className="text-muted"> / {formatRaceClock(durationSeconds, lightsOut)}</span>
+      <span className="w-[8.5rem] shrink-0 font-mono text-xs tabular-nums text-foreground">
+        {formatRaceClock(clock, origin)}
+        <span className="text-muted"> / {formatRaceClock(durationSeconds, origin)}</span>
       </span>
 
       <ReplayTimeline

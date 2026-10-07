@@ -77,7 +77,7 @@ export function LatestRaceCard(): JSX.Element | null {
 
       <div className="grid grid-cols-2 gap-2">
         <ButtonLink href={raceReplayHref({ season, round })} size="md" className="text-sm">
-          Replay the start
+          Replay the race
         </ButtonLink>
         <ButtonLink href={raceResultHref(season, round)} size="md" variant="secondary" className="text-sm">
           Full results

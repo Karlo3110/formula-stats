@@ -2,7 +2,8 @@ import { create } from 'zustand';
 
 import type { PlaybackRate } from '@/lib/race/playback';
 
-export type CameraMode = 'cinematic' | 'orbit';
+/** tv: trackside broadcast cameras; chase: behind the car; heli: overhead follow; orbit: free. */
+export type CameraMode = 'tv' | 'chase' | 'heli' | 'orbit';
 
 interface RaceState {
   selectedDriverId: string | null;
@@ -23,7 +24,7 @@ const DEFAULT_RATE: PlaybackRate = 1;
 
 export const useRaceStore = create<RaceState>((set) => ({
   selectedDriverId: null,
-  cameraMode: 'cinematic',
+  cameraMode: 'tv',
   isPlaying: true,
   playbackRate: DEFAULT_RATE,
   selectDriver: (driverId): void => set({ selectedDriverId: driverId }),

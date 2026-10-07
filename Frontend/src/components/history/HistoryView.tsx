@@ -37,7 +37,7 @@ export function HistoryView({ season }: HistoryViewProps): JSX.Element {
         </h1>
         <p className="mt-4 max-w-xl text-base text-muted sm:text-lg">
           Every round of the season. Open a finished Grand Prix for its full classification, or
-          replay the start in 3D.
+          replay any session in 3D.
         </p>
         <SeasonTabs
           seasons={seasons}

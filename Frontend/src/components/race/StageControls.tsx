@@ -6,7 +6,9 @@ import { cn } from '@/lib/utils/cn';
 import { useRaceStore, type CameraMode } from '@/stores/use-race-store';
 
 const CAMERA_MODES: ReadonlyArray<{ mode: CameraMode; label: string }> = [
-  { mode: 'cinematic', label: 'TV cam' },
+  { mode: 'tv', label: 'TV' },
+  { mode: 'chase', label: 'Chase' },
+  { mode: 'heli', label: 'Heli' },
   { mode: 'orbit', label: 'Free' },
 ];
 
@@ -42,7 +44,7 @@ export function StageControls({ isFullscreen, onToggleFullscreen }: StageControl
             onClick={() => setCameraMode(mode)}
             aria-pressed={cameraMode === mode}
             className={cn(
-              'rounded-full px-3 py-1 font-mono text-[0.65rem] uppercase tracking-[0.12em] transition',
+              'rounded-full px-2.5 py-1 font-mono text-[0.65rem] uppercase tracking-[0.12em] transition',
               cameraMode === mode ? 'bg-white/15 text-heading' : 'text-muted hover:text-foreground',
             )}
           >

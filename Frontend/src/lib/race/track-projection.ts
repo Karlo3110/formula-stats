@@ -1,3 +1,5 @@
+import { toScenePoint } from './scene-coords';
+
 export interface TrackProjection {
   /** SVG path data for the closed circuit outline. */
   path: string;
@@ -16,10 +18,8 @@ interface Bounds {
   maxZ: number;
 }
 
-// Outline points are [x, elevation, y]; legacy points are [x, y].
 function planar(point: ReadonlyArray<number>): { x: number; z: number } {
-  const x = point[0] ?? 0;
-  const z = point.length >= 3 ? (point[2] ?? 0) : (point[1] ?? 0);
+  const { x, z } = toScenePoint(point);
   return { x, z };
 }
 

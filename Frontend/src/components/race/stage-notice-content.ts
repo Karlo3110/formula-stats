@@ -32,7 +32,7 @@ function blockerNotice(input: StageNoticeInput, blocker: RaceBlocker): StageNoti
     case 'unknown-round':
       return { title: 'Race not found', body: `Round ${input.round ?? '?'} is not on the ${input.season ?? ''} calendar.`, isLoading: false, actions: fallback };
     case 'not-run-yet':
-      return { title: 'Not raced yet', body: 'Replays become available after the chequered flag.', isLoading: false, actions: fallback };
+      return { title: 'Not run yet', body: 'Replays become available once a session of this weekend has finished.', isLoading: false, actions: fallback };
   }
 }
 
@@ -42,7 +42,7 @@ export function stageNoticeFor(input: StageNoticeInput): StageNoticeContent | nu
   if (input.isResolving || input.replayStatus === 'loading' || input.replayStatus === 'idle') {
     return {
       title: 'Loading telemetry',
-      body: 'Fetching official timing and position data. The first load of a session can take up to a minute.',
+      body: 'Fetching official timing and position data. The first load of a session can take a couple of minutes while every lap is processed.',
       isLoading: true,
       actions: [],
     };

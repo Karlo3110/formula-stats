@@ -11,8 +11,9 @@ import type { DriverDirectory } from '@/hooks/use-season-drivers';
 import { useStandings } from '@/hooks/use-standings';
 import { nationalityIso2 } from '@/lib/f1/countries';
 import { useRaceStore } from '@/stores/use-race-store';
-import type { DriverStanding } from '@/lib/race/types';
-import type { DriverProfile } from '@/lib/validation/f1-schemas';
+import { focusGapLabel, lapTimeLabel, statusLabel } from '@/lib/race/standing-labels';
+import { CarStatus, type DriverStanding } from '@/lib/race/types';
+import type { DriverProfile, SessionKind } from '@/lib/validation/f1-schemas';
 
 import { SpeedGauge } from './SpeedGauge';
 
@@ -52,9 +53,10 @@ function FocusEmpty(): JSX.Element {
 interface FocusBodyProps {
   standing: DriverStanding;
   profile: DriverProfile | undefined;
+  kind: SessionKind;
 }
 
-function FocusBody({ standing, profile }: FocusBodyProps): JSX.Element {
+function FocusBody({ standing, profile, kind }: FocusBodyProps): JSX.Element {
   const { driver } = standing;
   const name = profile?.fullName ?? driver.code;
   return (
@@ -74,28 +76,29 @@ function FocusBody({ standing, profile }: FocusBodyProps): JSX.Element {
         <p className="ml-auto font-display text-3xl leading-none text-accent">P{standing.position}</p>
       </div>
       <SpeedGauge speedKmh={standing.speedKmh} />
-      <div className="grid grid-cols-2 gap-3 border-t border-white/[0.06] pt-3">
-        <FocusStat
-          label="Gap to leader"
-          value={standing.position === 1 ? 'Leader' : `+${standing.gapSeconds.toFixed(2)} s`}
-        />
+      <div className="grid grid-cols-3 gap-3 border-t border-white/[0.06] pt-3">
+        <FocusStat label={kind === 'race' ? 'Gap to leader' : 'Gap to fastest'} value={focusGapLabel(standing, kind)} />
+        <FocusStat label="Lap" value={String(standing.lap)} />
         <FocusStat
           label="Status"
-          value={standing.onTrack ? 'On track' : 'Run-off'}
-          tone={standing.onTrack ? 'default' : 'warning'}
+          value={statusLabel(standing.status)}
+          tone={standing.status === CarStatus.Running ? 'default' : 'warning'}
         />
+        <FocusStat label="Last lap" value={lapTimeLabel(standing.lastLapSeconds)} />
+        <FocusStat label="Best lap" value={lapTimeLabel(standing.bestLapSeconds)} />
       </div>
     </div>
   );
 }
 
-/** Telemetry for the followed driver: position, speed, gap and track status. */
 interface DriverFocusPanelProps {
   isReady: boolean;
   drivers: DriverDirectory;
+  kind: SessionKind;
 }
 
-export function DriverFocusPanel({ isReady, drivers }: DriverFocusPanelProps): JSX.Element {
+/** Telemetry for the followed driver: position, speed, gap, laps and status. */
+export function DriverFocusPanel({ isReady, drivers, kind }: DriverFocusPanelProps): JSX.Element {
   const standings = useStandings();
   const selectedDriverId = useRaceStore((state) => state.selectedDriverId);
   const clearSelection = useRaceStore((state) => state.clearSelection);
@@ -113,7 +116,7 @@ export function DriverFocusPanel({ isReady, drivers }: DriverFocusPanelProps): J
 
   return (
     <Panel title="Driver" aside={aside}>
-      {standing ? <FocusBody standing={standing} profile={drivers.get(standing.driver.code)} /> : <FocusEmpty />}
+      {standing ? <FocusBody standing={standing} profile={drivers.get(standing.driver.code)} kind={kind} /> : <FocusEmpty />}
     </Panel>
   );
 }

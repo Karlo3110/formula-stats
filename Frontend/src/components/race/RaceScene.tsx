@@ -5,88 +5,85 @@ import { Canvas } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 
 import { setActiveSource } from '@/lib/race/active-source';
+import { Centerline } from '@/lib/race/centerline';
+import { findCorners } from '@/lib/race/corners';
+import { DEFAULT_TRACK_WIDTH, createDefaultCenterline } from '@/lib/race/default-track';
 import { MockSource } from '@/lib/race/mock-source';
+import { derivePitLane } from '@/lib/race/pit-lane';
 import { ReplaySource } from '@/lib/race/replay-source';
-import { createTrackCurve, curveFromPoints } from '@/lib/race/track';
+import { toScenePoint } from '@/lib/race/scene-coords';
 import type { RaceSource } from '@/lib/race/types';
-import type { ReplayDriver } from '@/lib/validation/f1-schemas';
+import type { ReplaySession } from '@/lib/validation/f1-schemas';
 import { useRaceStore } from '@/stores/use-race-store';
 
 import { CarsLayer } from './scene/CarsLayer';
+import { Kerbs } from './scene/Kerbs';
+import { PitLane } from './scene/PitLane';
 import { RigCamera } from './scene/RigCamera';
+import { SceneEnvironment } from './scene/SceneEnvironment';
+import { StartLine } from './scene/StartLine';
 import { Ticker } from './scene/Ticker';
-import { TrackMesh } from './scene/TrackMesh';
+import { TrackSurface } from './scene/TrackSurface';
 
-const SCENE_BACKGROUND = '#000000';
+const MIN_TRACK_POINTS = 8;
+const INITIAL_CAMERA = { position: [0, 190, 260] as [number, number, number], fov: 38, near: 0.05, far: 3000 };
+const ORBIT_TARGET: [number, number, number] = [0, 0, 0];
 
-interface RaceSceneProps {
-  trackPoints: ReadonlyArray<ReadonlyArray<number>> | null;
-  replayDrivers: ReplayDriver[] | null;
-  replayDuration: number | null;
-  replayLightsOut: number | null;
-  trackWidth: number;
-  carScale: number;
+function centerlineOf(replay: ReplaySession | null): Centerline {
+  return replay && replay.track.length >= MIN_TRACK_POINTS
+    ? new Centerline(replay.track.map(toScenePoint), replay.lapLength)
+    : createDefaultCenterline();
 }
 
-export function RaceScene({
-  trackPoints,
-  replayDrivers,
-  replayDuration,
-  replayLightsOut,
-  trackWidth,
-  carScale,
-}: RaceSceneProps): JSX.Element {
-  const curve = useMemo(
-    () => (trackPoints ? curveFromPoints(trackPoints) : createTrackCurve()),
-    [trackPoints],
-  );
+function sourceOf(replay: ReplaySession | null, centerline: Centerline): RaceSource {
+  return replay && replay.drivers.length > 0 ? new ReplaySource(replay, centerline) : new MockSource(centerline);
+}
 
-  const source = useMemo<RaceSource>(
-    () =>
-      replayDrivers && replayDrivers.length > 0
-        ? new ReplaySource(replayDrivers, replayDuration ?? 1, replayLightsOut ?? 0)
-        : new MockSource(curve),
-    [replayDrivers, replayDuration, replayLightsOut, curve],
+/** The 3D circuit with every car, driven by the replay (or a stand-in race). */
+export function RaceScene({ replay }: { replay: ReplaySession | null }): JSX.Element {
+  const centerline = useMemo(() => centerlineOf(replay), [replay]);
+  const trackWidth = replay?.trackWidth ?? DEFAULT_TRACK_WIDTH;
+  const source = useMemo(() => sourceOf(replay, centerline), [replay, centerline]);
+  const corners = useMemo(() => findCorners(centerline, trackWidth), [centerline, trackWidth]);
+  const pitLanes = useMemo(
+    () => (replay ? derivePitLane(replay.drivers, replay.lapLength, trackWidth) : []),
+    [replay, trackWidth],
   );
+  const clearSelection = useRaceStore((state) => state.clearSelection);
+  const cameraMode = useRaceStore((state) => state.cameraMode);
 
   useEffect(() => {
     setActiveSource(source);
     return () => setActiveSource(null);
   }, [source]);
 
-  const clearSelection = useRaceStore((state) => state.clearSelection);
-  const cameraMode = useRaceStore((state) => state.cameraMode);
-
   return (
     <Canvas
-      camera={{ position: [0, 155, 235], fov: 38, near: 0.1, far: 1400 }}
+      camera={INITIAL_CAMERA}
       dpr={[1, 1.75]}
-      gl={{ antialias: true, powerPreference: 'high-performance' }}
+      gl={{ antialias: true, powerPreference: 'high-performance', logarithmicDepthBuffer: true }}
       onPointerMissed={() => clearSelection()}
     >
-      <color attach="background" args={[SCENE_BACKGROUND]} />
-      <fog attach="fog" args={[SCENE_BACKGROUND, 340, 1200]} />
-
-      <ambientLight intensity={0.85} />
-      <directionalLight position={[60, 120, 40]} intensity={1.3} />
-      <hemisphereLight args={['#3a3f42', '#000000', 0.5]} />
-
+      <SceneEnvironment centerline={centerline} />
       <Ticker source={source} />
-      <TrackMesh curve={curve} width={trackWidth} />
-      <CarsLayer source={source} carScale={carScale} />
+      <TrackSurface centerline={centerline} trackWidth={trackWidth} />
+      <PitLane centerline={centerline} lanes={pitLanes} trackWidth={trackWidth} />
+      <Kerbs centerline={centerline} corners={corners} trackWidth={trackWidth} />
+      <StartLine centerline={centerline} trackWidth={trackWidth} />
+      <CarsLayer source={source} trackWidth={trackWidth} />
 
       {cameraMode === 'orbit' ? (
         <OrbitControls
           makeDefault
           enableDamping
           dampingFactor={0.1}
-          minDistance={25}
-          maxDistance={520}
-          maxPolarAngle={Math.PI * 0.49}
-          target={[0, 0, 0]}
+          minDistance={trackWidth * 2}
+          maxDistance={700}
+          maxPolarAngle={Math.PI * 0.47}
+          target={ORBIT_TARGET}
         />
       ) : (
-        <RigCamera source={source} curve={curve} trackWidth={trackWidth} />
+        <RigCamera source={source} centerline={centerline} corners={corners} trackWidth={trackWidth} mode={cameraMode} />
       )}
     </Canvas>
   );

@@ -15,9 +15,9 @@ export function HistoryExplainer(): JSX.Element {
       </p>
       <p>
         Each result links straight into the{' '}
-        <Link href="/race">race center</Link>, where you can replay the start
-        of that race in 3D from official telemetry and follow any driver
-        through the opening corners. On sprint weekends the Sprint has its own
+        <Link href="/race">race center</Link>, where you can replay the whole
+        weekend in 3D from official telemetry and follow any driver lap by
+        lap. On sprint weekends the Sprint has its own
         classification and replay.
       </p>
       <p>

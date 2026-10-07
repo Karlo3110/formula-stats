@@ -10,7 +10,7 @@ import { buildPageMetadata } from '@/lib/seo/page-metadata';
 export const metadata: Metadata = buildPageMetadata({
   title: 'Race Center',
   description:
-    'Replay Formula 1 Grand Prix starts in 3D from real telemetry — pick any race from the archive, follow a driver and scrub through the opening lap.',
+    'Replay whole Formula 1 sessions in 3D from real telemetry — pick any practice, qualifying, sprint or race since 2021 and follow any driver lap by lap.',
   path: '/race',
 });
 

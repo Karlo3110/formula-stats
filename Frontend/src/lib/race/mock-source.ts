@@ -1,21 +1,19 @@
-import * as THREE from 'three';
-
+import type { Centerline } from './centerline';
 import { RACE_DRIVERS, raceEngine } from './race-engine';
-import type {
-  DriverPose,
-  DriverStanding,
-  RaceSource,
-  RaceTiming,
-  StandingDriver,
+import {
+  CarStatus,
+  type DriverPose,
+  type DriverStanding,
+  type RaceSource,
+  type RaceTiming,
+  type StandingDriver,
 } from './types';
 
-/** Wraps the synthetic race engine; used as a fallback when no official replay. */
+/** Wraps the synthetic race engine; shown behind loading and empty states. */
 export class MockSource implements RaceSource {
   readonly drivers: StandingDriver[];
-  private readonly point = new THREE.Vector3();
-  private readonly tangent = new THREE.Vector3();
 
-  constructor(private readonly curve: THREE.CatmullRomCurve3) {
+  constructor(private readonly centerline: Centerline) {
     this.drivers = RACE_DRIVERS.map((d) => ({
       id: d.id,
       code: d.code,
@@ -34,15 +32,13 @@ export class MockSource implements RaceSource {
   }
 
   pose(driverId: string): DriverPose | null {
-    const t = raceEngine.trackT(driverId);
-    this.curve.getPointAt(t, this.point);
-    this.curve.getTangentAt(t, this.tangent);
+    const placement = this.centerline.placeAtFraction(raceEngine.trackT(driverId));
     return {
-      x: this.point.x,
-      y: this.point.y,
-      z: this.point.z,
-      headingY: Math.atan2(this.tangent.x, this.tangent.z),
-      onTrack: true,
+      x: placement.x,
+      y: placement.y,
+      z: placement.z,
+      headingY: Math.atan2(placement.tangentX, placement.tangentZ),
+      status: CarStatus.Running,
     };
   }
 

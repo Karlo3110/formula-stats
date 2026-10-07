@@ -1,162 +1,126 @@
-import type { ReplayDriver } from '@/lib/validation/f1-schemas';
+import type { ReplayDriver, ReplaySession } from '@/lib/validation/f1-schemas';
 
+import type { Centerline } from './centerline';
 import { clampClock } from './playback';
-
-import type {
-  DriverPose,
-  DriverStanding,
-  RaceSource,
-  RaceTiming,
-  StandingDriver,
-} from './types';
+import {
+  carStatusOf,
+  currentLap,
+  lapSummary,
+  lerpAt,
+  nullableLerpAt,
+  sampleCursor,
+  type SampleCursor,
+} from './replay-sampling';
+import type { DriverPose, DriverStanding, RaceSource, RaceTiming, StandingDriver } from './types';
 
 const FALLBACK_COLORS = ['#3671c6', '#e8002d', '#ff8000', '#27a8d2', '#229971'];
 
-// Sample layout: [t, x, y, elevation, speedKmh, position, progressMetres, onTrack]
-const X = 1;
-const Y = 2;
-const ELEVATION = 3;
-const SPEED = 4;
-const POSITION = 5;
-const PROGRESS = 6;
-const ON_TRACK = 7;
-
 interface ReplayCar {
   driver: StandingDriver;
-  samples: number[][];
-  maxProgress: number;
+  columns: ReplayDriver;
 }
 
-/** Plays all drivers on one shared race clock from official telemetry.
- *  Order and gaps come from the position/progress computed server-side.
- *  The clock runs from 0 to the window duration and holds at the end. */
+function toStandingDriver(columns: ReplayDriver, index: number): StandingDriver {
+  return {
+    id: columns.code,
+    code: columns.code,
+    name: columns.code,
+    team: columns.team,
+    color: columns.color ?? FALLBACK_COLORS[index % FALLBACK_COLORS.length] ?? '#9fb6b9',
+  };
+}
+
+/**
+ * Plays a whole session from official telemetry on one shared clock. Cars are
+ * placed by their distance along the circuit centre-line plus a lateral
+ * offset, both map-matched on the server against the same centre-line the
+ * scene draws, so they always drive on the road.
+ */
 export class ReplaySource implements RaceSource {
   readonly drivers: StandingDriver[];
   private readonly cars: ReplayCar[];
   private readonly byId: Map<string, ReplayCar>;
-  private readonly duration: number;
-  private readonly lightsOut: number;
+  private readonly sampleCount: number;
   private elapsed = 0;
 
   constructor(
-    replayDrivers: ReplayDriver[],
-    durationSeconds: number,
-    lightsOutSeconds: number,
+    private readonly session: ReplaySession,
+    private readonly centerline: Centerline,
   ) {
-    this.duration = durationSeconds > 0 ? durationSeconds : 1;
-    this.lightsOut = lightsOutSeconds;
-    this.cars = replayDrivers.map((d, index) => {
-      const last = d.samples[d.samples.length - 1];
-      return {
-        driver: {
-          id: d.code,
-          code: d.code,
-          name: d.code,
-          team: d.team,
-          color: d.color ?? FALLBACK_COLORS[index % FALLBACK_COLORS.length] ?? '#9fb6b9',
-        },
-        samples: d.samples,
-        maxProgress: last?.[PROGRESS] ?? 0,
-      };
-    });
+    this.cars = session.drivers.map((columns, index) => ({ driver: toStandingDriver(columns, index), columns }));
     this.drivers = this.cars.map((car) => car.driver);
     this.byId = new Map(this.cars.map((car) => [car.driver.id, car]));
+    const lengths = session.drivers.map((d) => d.progress.length);
+    this.sampleCount = lengths.length > 0 ? Math.min(...lengths) : 0;
   }
 
   tick(dt: number): void {
-    this.elapsed = clampClock(this.elapsed + dt, this.duration);
+    this.elapsed = clampClock(this.elapsed + dt, this.session.durationSeconds);
   }
 
   seek(seconds: number): void {
-    this.elapsed = clampClock(seconds, this.duration);
+    this.elapsed = clampClock(seconds, this.session.durationSeconds);
   }
 
   pose(driverId: string): DriverPose | null {
     const car = this.byId.get(driverId);
     if (!car) return null;
-    const { a, b, frac } = this.locate(car);
-    const ax = a?.[X] ?? 0;
-    const ay = a?.[Y] ?? 0;
-    const bx = b?.[X] ?? ax;
-    const by = b?.[Y] ?? ay;
-    const aElev = a?.[ELEVATION] ?? 0;
-    const bElev = b?.[ELEVATION] ?? aElev;
+    const cursor = this.cursor();
+    const { columns } = car;
+    const distance = this.centerline.fromProgress(lerpAt(columns.progress, cursor));
+    const placement = this.centerline.place(distance, lerpAt(columns.lateral, cursor));
     return {
-      x: ax + (bx - ax) * frac,
-      y: aElev + (bElev - aElev) * frac,
-      z: ay + (by - ay) * frac,
-      headingY: Math.atan2(bx - ax, by - ay),
-      onTrack: (a?.[ON_TRACK] ?? 1) > 0.5,
+      x: placement.x,
+      y: placement.y,
+      z: placement.z,
+      headingY: Math.atan2(placement.tangentX, placement.tangentZ),
+      status: carStatusOf(columns.status[cursor.index]),
     };
   }
 
   standings(): DriverStanding[] {
-    const rows = this.cars.map((car) => ({
-      car,
-      position: this.current(car, POSITION),
-      progress: this.field(car, PROGRESS),
-    }));
-    rows.sort((p, q) => p.position - q.position);
-
-    const leaderProgress = rows[0]?.progress ?? 0;
-    const leaderCar = rows[0]?.car;
-    const avgSpeedMps =
-      leaderCar && leaderCar.maxProgress > 0
-        ? leaderCar.maxProgress / this.duration
-        : 1;
-
-    return rows.map((row) => ({
-      driver: row.car.driver,
-      position: row.position,
-      gapSeconds:
-        avgSpeedMps > 0 ? Math.max(0, (leaderProgress - row.progress) / avgSpeedMps) : 0,
-      speedKmh: Math.round(this.field(row.car, SPEED)),
-      trackT: row.car.maxProgress > 0 ? row.progress / row.car.maxProgress : 0,
-      onTrack: this.current(row.car, ON_TRACK) > 0.5,
-    }));
+    const cursor = this.cursor();
+    return this.cars
+      .map((car) => this.standingOf(car, cursor))
+      .sort((a, b) => a.position - b.position);
   }
 
   timing(): RaceTiming {
+    const { session } = this;
     return {
-      clock: this.clock(),
-      lightsOut: this.lightsOut,
-      durationSeconds: this.duration,
-      ended: this.elapsed >= this.duration,
+      clock: this.elapsed,
+      lightsOut: session.lightsOutSeconds,
+      durationSeconds: session.durationSeconds,
+      ended: this.elapsed >= session.durationSeconds,
+      sessionKind: session.sessionKind,
+      lap: session.sessionKind === 'race' ? this.leaderLap() : null,
+      totalLaps: session.totalLaps,
     };
   }
 
-  private clock(): number {
-    return this.elapsed;
-  }
-
-  private locate(car: ReplayCar): {
-    a: number[] | undefined;
-    b: number[] | undefined;
-    index: number;
-    frac: number;
-  } {
-    const n = car.samples.length;
-    const p = (this.clock() / this.duration) * (n - 1);
-    const index = Math.min(Math.floor(p), n - 1);
+  private standingOf(car: ReplayCar, cursor: SampleCursor): DriverStanding {
+    const { columns } = car;
+    const laps = lapSummary(columns.laps, this.elapsed);
     return {
-      a: car.samples[index],
-      b: car.samples[Math.min(index + 1, n - 1)],
-      index,
-      frac: p - Math.floor(p),
+      driver: car.driver,
+      position: columns.position[cursor.index] ?? this.cars.length,
+      gapSeconds: nullableLerpAt(columns.gap, cursor),
+      speedKmh: Math.round(lerpAt(columns.speed, cursor)),
+      lap: currentLap(laps.completed, this.session.totalLaps),
+      lastLapSeconds: laps.lastLapSeconds,
+      bestLapSeconds: laps.bestLapSeconds,
+      status: carStatusOf(columns.status[cursor.index]),
     };
   }
 
-  /** Interpolated sample field at the current clock. */
-  private field(car: ReplayCar, fieldIndex: number): number {
-    const { a, b, frac } = this.locate(car);
-    const av = a?.[fieldIndex] ?? 0;
-    const bv = b?.[fieldIndex] ?? av;
-    return av + (bv - av) * frac;
+  private leaderLap(): number {
+    const index = this.cursor().index;
+    const leader = this.cars.find((car) => car.columns.position[index] === 1) ?? this.cars[0];
+    const completed = leader ? lapSummary(leader.columns.laps, this.elapsed).completed : 0;
+    return currentLap(completed, this.session.totalLaps);
   }
 
-  /** Discrete sample field at the current clock (no interpolation). */
-  private current(car: ReplayCar, fieldIndex: number): number {
-    const { a, index } = this.locate(car);
-    return a?.[fieldIndex] ?? index + 1;
+  private cursor(): SampleCursor {
+    return sampleCursor(this.elapsed, this.session.sampleInterval, this.sampleCount);
   }
 }

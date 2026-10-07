@@ -27,7 +27,8 @@ describe('projectTrack', () => {
       [0, 0, 20],
     ];
 
-    expect(projectTrack(wide, 100, 0)?.project(0, 0)).toEqual({ x: 0, y: 25 });
+    // Scene z is negated circuit north, so the northern edge (z = -20) is the top.
+    expect(projectTrack(wide, 100, 0)?.project(0, -20)).toEqual({ x: 0, y: 25 });
   });
 
   it('reads legacy [x, y] points without elevation', () => {
@@ -36,8 +37,9 @@ describe('projectTrack', () => {
     expect(projectTrack(legacy, 100, 10)?.path).toBe(projectTrack(SQUARE, 100, 10)?.path);
   });
 
-  it('exposes the start/finish point (first outline point)', () => {
-    expect(projectTrack(SQUARE, 100, 10)?.start).toEqual({ x: 10, y: 10 });
+  it('exposes the start/finish point (first outline point), north up', () => {
+    // [-10, 0, -10] is the south-west corner of the circuit: bottom-left.
+    expect(projectTrack(SQUARE, 100, 10)?.start).toEqual({ x: 10, y: 90 });
   });
 
   it('closes the path', () => {

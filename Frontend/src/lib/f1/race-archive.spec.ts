@@ -7,9 +7,12 @@ import {
   SessionCode,
   buildArchive,
   completedRounds,
+  defaultSession,
   finishedSessions,
   hasSession,
   parseSessionCode,
+  replayableRounds,
+  weekendSessions,
 } from './race-archive';
 
 const NOW = new Date('2026-10-06T12:00:00Z');
@@ -68,6 +71,53 @@ describe('finishedSessions', () => {
   });
 });
 
+describe('finishedSessions on a full weekend', () => {
+  const weekend: WeekendEvent = {
+    roundNumber: 9,
+    country: 'Country',
+    location: 'Location',
+    eventName: 'Grand Prix 9',
+    sessions: [
+      { name: 'Race', startUtc: iso(20) },
+      { name: 'Practice 1', startUtc: iso(-48) },
+      { name: 'Qualifying', startUtc: iso(-6) },
+      { name: 'Practice 2', startUtc: iso(-44) },
+      { name: 'Practice 3', startUtc: iso(-10) },
+    ],
+  };
+
+  it('lists finished practice and qualifying sessions in running order', () => {
+    expect(finishedSessions(weekend, NOW)).toEqual([
+      SessionCode.Practice1,
+      SessionCode.Practice2,
+      SessionCode.Practice3,
+      SessionCode.Qualifying,
+    ]);
+  });
+
+  it('lists every scheduled session, finished or not', () => {
+    expect(weekendSessions(weekend, NOW).map((entry) => `${entry.code}:${entry.status}`)).toEqual([
+      'FP1:done',
+      'FP2:done',
+      'FP3:done',
+      'Q:done',
+      'R:upcoming',
+    ]);
+  });
+
+  it('defaults to the race, else the latest finished session', () => {
+    expect([
+      defaultSession(finishedSessions(weekend, NOW)),
+      defaultSession([SessionCode.Qualifying, SessionCode.Race]),
+      defaultSession([]),
+    ]).toEqual([SessionCode.Qualifying, SessionCode.Race, SessionCode.Race]);
+  });
+
+  it('counts a weekend in progress as replayable', () => {
+    expect(replayableRounds(createSchedule([weekend, createEvent(10, iso(200))]), NOW).map((e) => e.roundNumber)).toEqual([9]);
+  });
+});
+
 describe('hasSession', () => {
   it('detects a sprint weekend from the schedule', () => {
     expect([
@@ -78,11 +128,24 @@ describe('hasSession', () => {
 });
 
 describe('parseSessionCode', () => {
-  it('defaults unknown or missing identifiers to the race', () => {
-    expect([parseSessionCode(undefined), parseSessionCode('FP1'), parseSessionCode('S')]).toEqual([
-      SessionCode.Race,
-      SessionCode.Race,
+  it('accepts every FastF1 session identifier', () => {
+    expect(['FP1', 'FP2', 'FP3', 'SS', 'SQ', 'Q', 'S', 'R'].map(parseSessionCode)).toEqual([
+      SessionCode.Practice1,
+      SessionCode.Practice2,
+      SessionCode.Practice3,
+      SessionCode.SprintShootout,
+      SessionCode.SprintQualifying,
+      SessionCode.Qualifying,
       SessionCode.Sprint,
+      SessionCode.Race,
+    ]);
+  });
+
+  it('defaults unknown or missing identifiers to the race', () => {
+    expect([parseSessionCode(undefined), parseSessionCode('fp1'), parseSessionCode('X')]).toEqual([
+      SessionCode.Race,
+      SessionCode.Race,
+      SessionCode.Race,
     ]);
   });
 });
