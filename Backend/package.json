@@ -16,7 +16,7 @@
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
-    "start:railway": "prisma migrate deploy && node dist/main",
+    "start:railway": "prisma migrate deploy && node --max-old-space-size=256 dist/main",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "dotenv -e env/.env -- prisma migrate dev",
     "prisma:deploy": "dotenv -e env/.env -- prisma migrate deploy",
