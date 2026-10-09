@@ -9,6 +9,10 @@ const nextConfig: NextConfig = {
     root: path.resolve(__dirname),
   },
   images: {
+    // Headshots and flags are already sized by their CDNs; serving them directly
+    // avoids paying for an image optimization per source image and size.
+    // Hosts are still allow-listed by safeImageUrl().
+    unoptimized: true,
     remotePatterns: IMAGE_HOSTS.map((hostname) => ({ protocol: 'https', hostname, pathname: '/**' })),
   },
 };
