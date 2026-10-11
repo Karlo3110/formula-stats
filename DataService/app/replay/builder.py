@@ -6,7 +6,7 @@ from typing import Any
 import numpy as np
 
 from app.models import ReplayDriver, ReplaySession
-from app.replay.matching import match_track
+from app.replay.matching import anchor_to_laps, match_track
 from app.replay.outline import Outline, build_outline
 from app.replay.sources import (
     DriverLaps,
@@ -88,6 +88,7 @@ def _build_car(
     wx, wy = outline.to_world(np.interp(times, stream.times, stream.x), np.interp(times, stream.times, stream.y))
     max_step = MAX_SPEED_MPS * outline.scale * 10 * window.interval
     progress, lateral = match_track(outline, wx, wy, max_step, track_width)
+    progress = anchor_to_laps(progress, times, laps.ends, laps.numbers, outline.lap_length)
     retired_at, finished_at = _race_end(loaded, number, laps, kind)
     status = status_track(times, pit_windows(laps.pit_in, laps.pit_out), off_track_at(stream, times), retired_at)
     return CarTrack(

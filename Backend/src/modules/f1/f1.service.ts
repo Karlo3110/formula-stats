@@ -45,8 +45,9 @@ const REPLAY_TTL_SECONDS = 604_800;
 // v3/v8: track + car samples now carry Z elevation and an on-track flag.
 // v9: replay now carries race-control messages (flags / radio feed).
 // v4/v10: spline outline; whole-session, map-matched columnar replays.
+// v11: progress anchored to official lap counts (grids across the line).
 const TRACK_MAP_VERSION = 'v4';
-const REPLAY_VERSION = 'v10';
+const REPLAY_VERSION = 'v11';
 
 /**
  * Serves F1 data through three tiers so clients never hit FastF1 directly:

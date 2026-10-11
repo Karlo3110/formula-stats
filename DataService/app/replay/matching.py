@@ -89,3 +89,22 @@ def match_track(
         s, lateral[k] = _project(outline, j, px, py)
         progress[k] = lap * outline.lap_length + s
     return progress, lateral
+
+
+def anchor_to_laps(
+    progress: np.ndarray, times: np.ndarray, lap_ends: np.ndarray, lap_numbers: np.ndarray, lap_length: float
+) -> np.ndarray:
+    """Shift progress by whole laps so it agrees with official lap counting.
+
+    Matching starts each car on lap 0 wherever it first appears, but a grid
+    straddling the timing line (or a garage just past it) puts cars a lap
+    apart from the first sample. When a car completes lap n its progress
+    must be about n laps, so the median disagreement across its laps is the
+    whole-lap offset to remove.
+    """
+    valid = np.isfinite(lap_ends) & np.isfinite(lap_numbers) & (lap_ends >= times[0]) & (lap_ends <= times[-1])
+    if not valid.any():
+        return progress
+    laps_at_end = np.interp(lap_ends[valid], times, progress) / lap_length
+    offset = int(np.round(np.median(np.round(laps_at_end) - lap_numbers[valid])))
+    return progress - offset * lap_length

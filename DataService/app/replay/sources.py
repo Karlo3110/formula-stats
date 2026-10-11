@@ -35,6 +35,8 @@ class DriverLaps:
     ends: np.ndarray
     # Lap time in seconds; NaN for laps without a valid time (deleted, in/out).
     times: np.ndarray
+    # Official lap number of each row (1 = the lap from the start or pit exit).
+    numbers: np.ndarray
     pit_in: list[float]
     pit_out: list[float]
 
@@ -91,6 +93,7 @@ def driver_laps(laps: Any, number: str) -> DriverLaps:
         starts=_seconds(own["LapStartTime"]),
         ends=_seconds(own["Time"]),
         times=np.where(deleted, np.nan, lap_times),
+        numbers=own["LapNumber"].to_numpy(dtype=float),
         pit_in=[t for t in map(_optional_seconds, own["PitInTime"]) if t is not None],
         pit_out=[t for t in map(_optional_seconds, own["PitOutTime"]) if t is not None],
     )

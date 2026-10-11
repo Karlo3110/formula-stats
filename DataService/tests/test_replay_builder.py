@@ -87,3 +87,18 @@ def test_qualifying_orders_by_best_lap() -> None:
     assert replay is not None and replay.sessionKind == "qualifying" and replay.lightsOutSeconds is None
     fastest = min(replay.drivers, key=lambda d: min(t for _, t in d.laps if t is not None))
     assert fastest.position[-1] == 1 and fastest.gap[-1] == 0.0
+
+
+class TestGridAcrossTheTimingLine:
+    """Singapore-style grid: the front rows start past the timing line."""
+
+    def test_back_of_the_grid_is_not_credited_with_an_extra_lap(self) -> None:
+        # Shift so cars 1-2 start past the line and cars 3-6 behind it.
+        session = make_race(drivers=6, laps=3, grid_shift_raw=2500.0)
+        replay = build_replay(session, 2026, 17, "S", session.fastest_lap)
+        assert replay is not None
+        mid_race = len(replay.drivers[0].position) // 2
+
+        order = sorted(replay.drivers, key=lambda d: d.position[mid_race])
+
+        assert [d.number for d in order] == session.drivers

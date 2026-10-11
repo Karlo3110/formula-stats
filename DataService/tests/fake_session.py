@@ -61,7 +61,8 @@ def _speed(distance: np.ndarray, length: float, pace: float) -> np.ndarray:
     return pace * (62.0 + 22.0 * np.cos(4 * 2 * np.pi * distance / length))
 
 
-def make_race(drivers: int = 6, laps: int = 3, name: str = "Race") -> FakeSession:
+def make_race(drivers: int = 6, laps: int = 3, name: str = "Race", grid_shift_raw: float = 0.0) -> FakeSession:
+    """`grid_shift_raw` moves the grid forward, e.g. so its front rows sit past the timing line."""
     x, y, s, z = track_polyline()
     length = s[-1]
     dt = 1.0 / SAMPLE_HZ
@@ -72,7 +73,7 @@ def make_race(drivers: int = 6, laps: int = 3, name: str = "Race") -> FakeSessio
     pos_data, car_data, lap_rows, result_rows, info = {}, {}, [], [], {}
     for index, number in enumerate(numbers):
         pace = 1.0 - 0.004 * index
-        distance = -(80.0 + 80.0 * index) * 10  # grid slot behind the line (raw)
+        distance = grid_shift_raw - (80.0 + 80.0 * index) * 10  # grid slot (raw)
         lap_start, completed, pit_until = LIGHTS_OUT, 0, None
         xs, ys, zs, speeds, laps_out = [], [], [], [], []
         retired = False
