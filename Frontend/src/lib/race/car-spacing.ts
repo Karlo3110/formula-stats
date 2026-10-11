@@ -2,9 +2,24 @@ import type { CarFootprint } from './car-dimensions';
 
 /** A running car's place on the road: distance along the centre-line and offset from it. */
 export interface RoadSlot {
+  /** Stable car identity, so a pair keeps its sides across frames. */
+  id: number;
   distance: number;
   lateral: number;
 }
+
+/** +1 when the second car of a pair runs to the left of the first. */
+export type PairSide = 1 | -1;
+
+/** Decides which side of each other two alongside cars run on. */
+export interface SideChooser {
+  sideOf: (first: RoadSlot, second: RoadSlot, separation: number) => PairSide;
+}
+
+/** Side from the cars' current lateral order (stateless). */
+export const CURRENT_SIDE: SideChooser = {
+  sideOf: (_first, _second, separation) => (separation < 0 ? -1 : 1),
+};
 
 export interface SpacingRoad {
   car: CarFootprint;
@@ -38,14 +53,12 @@ function clamp(value: number, limit: number): number {
   return Math.min(limit, Math.max(-limit, value));
 }
 
-function pushApart(laterals: number[], i: number, j: number, required: number, limit: number): void {
+function pushApart(laterals: number[], i: number, j: number, required: number, limit: number, side: PairSide): void {
   const a = laterals[i] ?? 0;
   const b = laterals[j] ?? 0;
-  const separation = b - a;
-  if (Math.abs(separation) >= required) return;
-  // Keep each car on the side it is already on; a dead heat splits by order.
-  const side = separation === 0 ? 1 : Math.sign(separation);
-  const missing = required - Math.abs(separation);
+  const separation = side * (b - a);
+  if (separation >= required) return;
+  const missing = required - separation;
   // A car already against the edge cannot move; the other takes the push.
   const aRoom = limit + side * a;
   const bRoom = limit - side * b;
@@ -58,9 +71,13 @@ function pushApart(laterals: number[], i: number, j: number, required: number, l
  * Lateral offsets that keep cars from driving through each other. Position
  * telemetry is 2D and noisy, so two cars fighting wheel to wheel often share
  * one spot; when cars overlap nose-to-tail they are moved apart sideways to at
- * least a car's width, staying on the side of each other they were on.
+ * least a car's width, on the side of each other `sides` chooses.
  */
-export function separateAlongside(slots: ReadonlyArray<RoadSlot>, road: SpacingRoad): number[] {
+export function separateAlongside(
+  slots: ReadonlyArray<RoadSlot>,
+  road: SpacingRoad,
+  sides: SideChooser = CURRENT_SIDE,
+): number[] {
   const laterals = slots.map((slot) => slot.lateral);
   const limit = Math.max(0, road.halfWidth - road.car.width / 2);
   for (let iteration = 0; iteration < ITERATIONS; iteration += 1) {
@@ -70,7 +87,9 @@ export function separateAlongside(slots: ReadonlyArray<RoadSlot>, road: SpacingR
         const b = slots[j];
         if (!a || !b) continue;
         const weight = alongsideWeight(a, b, road);
-        if (weight > 0) pushApart(laterals, i, j, road.car.width * SIDE_CLEARANCE * weight, limit);
+        if (weight === 0) continue;
+        const side = sides.sideOf(a, b, (laterals[j] ?? 0) - (laterals[i] ?? 0));
+        pushApart(laterals, i, j, road.car.width * SIDE_CLEARANCE * weight, limit, side);
       }
     }
   }

@@ -1,4 +1,5 @@
 import { separateAlongside, type SpacingRoad } from './car-spacing';
+import { StickySides } from './sticky-sides';
 
 export interface LayoutEntry {
   distance: number;
@@ -7,12 +8,14 @@ export interface LayoutEntry {
   isRunning: boolean;
 }
 
-// Replay seconds for a car to ease most of the way to its spaced line.
-const EASE_SECONDS = 0.35;
+// Replay seconds for a car to ease most of the way to its spaced line: slow
+// enough to read as a car changing line, not a jump.
+const EASE_SECONDS = 0.6;
 
 /** Each car's lateral offset after spacing, eased over time so cars never jump. */
 export class RoadLayout {
   private laterals: number[] = [];
+  private readonly sides = new StickySides();
 
   constructor(private readonly road: SpacingRoad) {}
 
@@ -32,10 +35,13 @@ export class RoadLayout {
 
   private targetsOf(entries: ReadonlyArray<LayoutEntry>): number[] {
     const running = entries.flatMap((entry, index) => (entry.isRunning ? [index] : []));
+    this.sides.beginFrame();
     const spaced = separateAlongside(
-      running.map((index) => entries[index] ?? { distance: 0, lateral: 0 }),
+      running.map((index) => ({ id: index, distance: entries[index]?.distance ?? 0, lateral: entries[index]?.lateral ?? 0 })),
       this.road,
+      this.sides,
     );
+    this.sides.endFrame();
     const targets = entries.map((entry) => entry.lateral);
     running.forEach((index, k) => {
       targets[index] = spaced[k] ?? targets[index] ?? 0;

@@ -12,12 +12,12 @@ function separation(slots: RoadSlot[]): number {
 
 describe('separateAlongside', () => {
   it('moves two cars sharing one spot side by side', () => {
-    expect(separation([{ distance: 100, lateral: 0 }, { distance: 100.5, lateral: 0 }])).toBeCloseTo(REQUIRED);
+    expect(separation([{ id: 1, distance: 100, lateral: 0 }, { id: 2, distance: 100.5, lateral: 0 }])).toBeCloseTo(REQUIRED);
   });
 
   it('keeps each car on the side it was already on', () => {
     const [inside, outside] = separateAlongside(
-      [{ distance: 100, lateral: -0.1 }, { distance: 101, lateral: 0.1 }],
+      [{ id: 3, distance: 100, lateral: -0.1 }, { id: 4, distance: 101, lateral: 0.1 }],
       ROAD,
     );
 
@@ -25,15 +25,15 @@ describe('separateAlongside', () => {
   });
 
   it('leaves a car clearly ahead in its own line', () => {
-    expect(separateAlongside([{ distance: 100, lateral: 0 }, { distance: 110, lateral: 0 }], ROAD)).toEqual([0, 0]);
+    expect(separateAlongside([{ id: 5, distance: 100, lateral: 0 }, { id: 6, distance: 110, lateral: 0 }], ROAD)).toEqual([0, 0]);
   });
 
   it('treats cars either side of the start/finish line as alongside', () => {
-    expect(separation([{ distance: 999.5, lateral: 0 }, { distance: 0.5, lateral: 0 }])).toBeCloseTo(REQUIRED);
+    expect(separation([{ id: 7, distance: 999.5, lateral: 0 }, { id: 8, distance: 0.5, lateral: 0 }])).toBeCloseTo(REQUIRED);
   });
 
   it('keeps both cars on the road, pushing the one with room', () => {
-    const laterals = separateAlongside([{ distance: 100, lateral: 2.5 }, { distance: 100, lateral: 2.5 }], ROAD);
+    const laterals = separateAlongside([{ id: 9, distance: 100, lateral: 2.5 }, { id: 10, distance: 100, lateral: 2.5 }], ROAD);
 
     expect([Math.max(...laterals.map(Math.abs)) <= 2.5, Math.abs((laterals[1] ?? 0) - (laterals[0] ?? 0))]).toEqual([
       true,
