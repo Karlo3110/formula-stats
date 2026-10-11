@@ -6,12 +6,14 @@ from typing import Any
 import numpy as np
 
 from app.models import ReplayDriver, ReplaySession
-from app.replay.matching import anchor_to_laps, match_track
+from app.replay.matching import anchor_to_laps, match_track, smooth_track
+from app.replay.official import merge_gaps, merge_positions, step_sample
 from app.replay.outline import Outline, build_outline
 from app.replay.sources import (
     DriverLaps,
     driver_laps,
     off_track_at,
+    official_timing,
     position_stream,
     race_control_messages,
     race_start_time,
@@ -88,6 +90,7 @@ def _build_car(
     wx, wy = outline.to_world(np.interp(times, stream.times, stream.x), np.interp(times, stream.times, stream.y))
     max_step = MAX_SPEED_MPS * outline.scale * 10 * window.interval
     progress, lateral = match_track(outline, wx, wy, max_step, track_width)
+    progress, lateral = smooth_track(progress, lateral, window.interval)
     progress = anchor_to_laps(progress, times, laps.ends, laps.numbers, outline.lap_length)
     retired_at, finished_at = _race_end(loaded, number, laps, kind)
     status = status_track(times, pit_windows(laps.pit_in, laps.pit_out), off_track_at(stream, times), retired_at)
@@ -102,9 +105,10 @@ def _build_car(
     )
 
 
-def _order_and_gaps(
+def _computed_order_and_gaps(
     cars: list[CarTrack], window: ReplayWindow, kind: SessionKind, lap_length: float
 ) -> tuple[np.ndarray, np.ndarray]:
+    """Order and gaps derived from the cars' own tracks (fallback for the official feed)."""
     times = window.sample_times()
     if kind == "race":
         progress = np.vstack([car.progress for car in cars])
@@ -116,6 +120,27 @@ def _order_and_gaps(
         return race_positions(keys), np.where(statuses == OUT, np.nan, gaps)
     best = np.vstack([best_lap_so_far(car.laps.ends, car.laps.times, times) for car in cars])
     return best_lap_order(best)
+
+
+def _order_and_gaps(
+    loaded: Any, cars: list[CarTrack], window: ReplayWindow, kind: SessionKind, lap_length: float
+) -> tuple[np.ndarray, np.ndarray]:
+    """Official live-timing order and gaps, filled in from the computed ones where missing."""
+    computed_positions, computed_gaps = _computed_order_and_gaps(cars, window, kind, lap_length)
+    timing = official_timing(loaded)
+    if not timing:
+        return computed_positions, computed_gaps
+    times = window.sample_times()
+    official_positions = np.full(computed_positions.shape, np.nan)
+    official_gaps = np.full(computed_gaps.shape, np.nan)
+    for i, car in enumerate(cars):
+        if (stream := timing.get(car.number)) is not None:
+            official_positions[i] = step_sample(stream.times, stream.positions, times)
+            official_gaps[i] = step_sample(stream.times, stream.gaps, times)
+    positions = merge_positions(official_positions, computed_positions)
+    statuses = np.vstack([car.status for car in cars])
+    gaps = merge_gaps(official_gaps, computed_gaps, positions)
+    return positions, np.where(statuses == OUT, np.nan, gaps)
 
 
 def _nullable(values: np.ndarray, decimals: int) -> list[float | None]:
@@ -168,7 +193,7 @@ def build_replay(loaded: Any, season: int, round_number: int, session: str, fast
     cars = [car for number in loaded.drivers if (car := _build_car(loaded, number, outline, window, kind, track_width))]
     if not cars:
         return None
-    positions, gaps = _order_and_gaps(cars, window, kind, outline.lap_length)
+    positions, gaps = _order_and_gaps(loaded, cars, window, kind, outline.lap_length)
     total_laps = getattr(loaded, "total_laps", None) if kind == "race" else None
     return ReplaySession(
         season=season,

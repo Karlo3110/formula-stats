@@ -102,3 +102,31 @@ class TestGridAcrossTheTimingLine:
         order = sorted(replay.drivers, key=lambda d: d.position[mid_race])
 
         assert [d.number for d in order] == session.drivers
+
+
+class TestOfficialTimingFeed:
+    """The live-timing position/gap stream overrides the order derived from GPS."""
+
+    def test_running_order_and_gaps_follow_the_official_feed(self, monkeypatch) -> None:
+        from app.replay import builder
+        from app.replay.sources import OfficialTiming
+
+        session = make_race(drivers=3, laps=2)
+        reversed_numbers = list(reversed(session.drivers))
+        feed = {
+            number: OfficialTiming(
+                times=np.array([0.0]),
+                positions=np.array([float(place)]),
+                gaps=np.array([0.0 if place == 1 else place * 1.5]),
+            )
+            for place, number in enumerate(reversed_numbers, start=1)
+        }
+        monkeypatch.setattr(builder, "official_timing", lambda _loaded: feed)
+
+        replay = build_replay(session, 2026, 17, "R", session.fastest_lap)
+        assert replay is not None
+        mid = len(replay.drivers[0].position) // 2
+        order = sorted(replay.drivers, key=lambda d: d.position[mid])
+
+        assert [d.number for d in order] == reversed_numbers
+        assert [d.gap[mid] for d in order] == [0.0, 3.0, 4.5]

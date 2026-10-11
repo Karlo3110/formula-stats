@@ -108,3 +108,24 @@ def anchor_to_laps(
     laps_at_end = np.interp(lap_ends[valid], times, progress) / lap_length
     offset = int(np.round(np.median(np.round(laps_at_end) - lap_numbers[valid])))
     return progress - offset * lap_length
+
+
+# Smoothing spans, seconds: GPS jitter is ~1 m at 4 Hz, a racing line changes slowly.
+PROGRESS_SMOOTHING_SECONDS = 2.0
+LATERAL_SMOOTHING_SECONDS = 4.0
+
+
+def _moving_average(values: np.ndarray, span: int) -> np.ndarray:
+    if span < 2 or values.size < span:
+        return values
+    half = span // 2
+    padded = np.pad(values, (half, span - 1 - half), mode="edge")
+    return np.convolve(padded, np.ones(span) / span, mode="valid")
+
+
+def smooth_track(progress: np.ndarray, lateral: np.ndarray, interval: float) -> tuple[np.ndarray, np.ndarray]:
+    """Remove GPS jitter so cars do not shuffle back and forth or weave."""
+    return (
+        _moving_average(progress, round(PROGRESS_SMOOTHING_SECONDS / interval) | 1),
+        _moving_average(lateral, round(LATERAL_SMOOTHING_SECONDS / interval) | 1),
+    )

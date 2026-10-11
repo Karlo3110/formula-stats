@@ -11,6 +11,7 @@ from typing import Any
 import numpy as np
 
 from app.models import ReplayMessage
+from app.replay.official import parse_gap
 
 logger = logging.getLogger(__name__)
 
@@ -97,6 +98,38 @@ def driver_laps(laps: Any, number: str) -> DriverLaps:
         pit_in=[t for t in map(_optional_seconds, own["PitInTime"]) if t is not None],
         pit_out=[t for t in map(_optional_seconds, own["PitOutTime"]) if t is not None],
     )
+
+
+@dataclass(frozen=True)
+class OfficialTiming:
+    """One car's live-timing updates: position and gap to the leader (NaN when not sent)."""
+
+    times: np.ndarray
+    positions: np.ndarray
+    gaps: np.ndarray
+
+
+def official_timing(loaded: Any) -> dict[str, OfficialTiming]:
+    """The live timing position/gap stream per driver number; empty when unavailable.
+
+    FastF1 already downloaded (and cached) this stream while loading the
+    session's laps, so reading it again is cheap.
+    """
+    try:
+        import fastf1.api
+
+        _, stream = fastf1.api.timing_data(loaded.api_path)
+    except Exception as exc:  # noqa: BLE001 - best effort: the replay falls back to computed order
+        logger.warning("Official timing stream unavailable: %s", exc)
+        return {}
+    timing = {}
+    for number, rows in stream.sort_values("Time").groupby("Driver"):
+        timing[str(number)] = OfficialTiming(
+            times=_seconds(rows["Time"]),
+            positions=rows["Position"].to_numpy(dtype=float),
+            gaps=np.array([parse_gap(value) for value in rows["GapToLeader"]]),
+        )
+    return timing
 
 
 def race_start_time(laps: Any) -> float | None:
