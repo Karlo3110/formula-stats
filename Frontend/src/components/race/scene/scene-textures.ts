@@ -51,7 +51,7 @@ export function createGrassTexture(): THREE.Texture | null {
   if (!ctx) return null;
   const stripe = GRASS_SIZE / GRASS_STRIPES;
   for (let i = 0; i < GRASS_STRIPES; i += 1) {
-    ctx.fillStyle = i % 2 === 0 ? '#2f4f2a' : '#355730';
+    ctx.fillStyle = i % 2 === 0 ? '#32532c' : '#35572f';
     ctx.fillRect(0, i * stripe, GRASS_SIZE, stripe);
   }
   for (let i = 0; i < GRASS_BLADES; i += 1) {

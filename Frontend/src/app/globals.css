@@ -42,6 +42,33 @@
     color: var(--color-foreground);
     font-family: var(--font-sans);
   }
+
+  /* Thin, dark scrollbars that blend with the panels instead of the
+     browser's default white gutter. */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-border) transparent;
+  }
+
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track,
+  ::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    border: 2px solid transparent;
+    border-radius: 9999px;
+    background: var(--color-border) padding-box;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-muted) padding-box;
+  }
 }
 
 /* Overlay entrance motion for the immersive race UI. */

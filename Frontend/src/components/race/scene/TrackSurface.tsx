@@ -5,8 +5,7 @@ import type { Centerline } from '@/lib/race/centerline';
 import { buildRibbon, loopSpine } from '@/lib/race/ribbon';
 import { groundHeight } from '@/lib/race/scene-coords';
 
-import { GRASS_TINT } from './SceneEnvironment';
-import { createAsphaltTexture, createGrassTexture } from './scene-textures';
+import { createAsphaltTexture } from './scene-textures';
 
 interface TrackSurfaceProps {
   centerline: Centerline;
@@ -14,16 +13,14 @@ interface TrackSurfaceProps {
 }
 
 // Widths in track widths; lifts in world units so each layer sits on the one below.
-const VERGE = 3.2;
 const RUN_OFF = 0.6;
 const EDGE_LINE = 0.06;
-const LIFT = { verge: -0.03, runOff: -0.015, road: 0, line: 0.004 } as const;
+const LIFT = { runOff: -0.015, road: 0, line: 0.004 } as const;
 const ASPHALT_TEXTURE_LENGTH = 2;
-const GRASS_TEXTURE_LENGTH = 20;
 
 interface SurfaceLayers {
-  leftVerge: THREE.BufferGeometry;
-  rightVerge: THREE.BufferGeometry;
+  leftSkirt: THREE.BufferGeometry;
+  rightSkirt: THREE.BufferGeometry;
   runOff: THREE.BufferGeometry;
   road: THREE.BufferGeometry;
   leftLine: THREE.BufferGeometry;
@@ -35,19 +32,19 @@ function buildLayers(centerline: Centerline, trackWidth: number): SurfaceLayers 
   const half = trackWidth / 2;
   const band = (edge: number, lift: number): THREE.BufferGeometry =>
     buildRibbon(centerline, spine, { inner: -edge, outer: edge, lift });
-  // Grass embankments slope from the run-off down to the ground plane, so a
-  // circuit with real elevation never floats above the grass.
-  const verge = (side: 1 | -1): THREE.BufferGeometry =>
+  // A vertical skirt from the run-off edge down to the ground, so a circuit
+  // with real elevation never floats; on flat sections it has no height.
+  const edge = half + trackWidth * RUN_OFF;
+  const skirt = (side: 1 | -1): THREE.BufferGeometry =>
     buildRibbon(centerline, spine, {
-      inner: side * (half + trackWidth * RUN_OFF),
-      outer: side * (half + trackWidth * VERGE),
-      lift: LIFT.verge,
+      inner: side * edge,
+      outer: side * edge,
+      lift: LIFT.runOff,
       outerHeight: groundHeight(centerline.points),
-      textureLength: GRASS_TEXTURE_LENGTH,
     });
   return {
-    leftVerge: verge(1),
-    rightVerge: verge(-1),
+    leftSkirt: skirt(1),
+    rightSkirt: skirt(-1),
     runOff: band(half + trackWidth * RUN_OFF, LIFT.runOff),
     road: buildRibbon(centerline, spine, {
       inner: -half,
@@ -60,19 +57,18 @@ function buildLayers(centerline: Centerline, trackWidth: number): SurfaceLayers 
   };
 }
 
-/** Tarmac, white edge lines, run-off and grass embankments draped over the circuit. */
+/** Tarmac, white edge lines and run-off draped over the circuit, on the grass. */
 export function TrackSurface({ centerline, trackWidth }: TrackSurfaceProps): JSX.Element {
   const layers = useMemo(() => buildLayers(centerline, trackWidth), [centerline, trackWidth]);
   const asphalt = useMemo(() => createAsphaltTexture(), []);
-  const grass = useMemo(() => createGrassTexture(), []);
 
   useEffect(() => () => Object.values(layers).forEach((geometry) => geometry.dispose()), [layers]);
 
   return (
     <group>
-      {[layers.leftVerge, layers.rightVerge].map((geometry) => (
+      {[layers.leftSkirt, layers.rightSkirt].map((geometry) => (
         <mesh key={geometry.uuid} geometry={geometry}>
-          <meshStandardMaterial color={GRASS_TINT} map={grass} roughness={1} side={THREE.DoubleSide} />
+          <meshStandardMaterial color="#3b4036" roughness={1} side={THREE.DoubleSide} />
         </mesh>
       ))}
       <mesh geometry={layers.runOff}>

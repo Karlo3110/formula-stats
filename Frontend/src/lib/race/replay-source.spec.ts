@@ -48,7 +48,13 @@ function createSession(overrides: Partial<ReplaySession> = {}): ReplaySession {
     lapLength: SQUARE.length,
     track: [],
     drivers: [
-      createDriver({ code: 'BBB', position: [2, 2, 2, 2, 2], gap: [null, 1.5, 2, 2.5, 3], status: [0, 0, 1, 1, 2] }),
+      createDriver({
+        code: 'BBB',
+        progress: [-50, 50, 150, 250, 350],
+        position: [2, 2, 2, 2, 2],
+        gap: [null, 1.5, 2, 2.5, 3],
+        status: [0, 0, 1, 1, 2],
+      }),
       createDriver({ code: 'AAA', laps: [[3.5, 88.2]] }),
     ],
     messages: [],
@@ -74,6 +80,14 @@ describe('ReplaySource', () => {
     const pose = sourceAt(1.5).pose('AAA');
 
     expect([pose?.x, pose?.z]).toEqual([100, -50]);
+  });
+
+  it('spreads two cars sharing one spot side by side instead of overlapping', () => {
+    const session = createSession({ drivers: [createDriver({ code: 'AAA' }), createDriver({ code: 'BBB' })] });
+    const source = sourceAt(1.5, session);
+    const [a, b] = [source.pose('AAA'), source.pose('BBB')];
+
+    expect(Math.hypot((a?.x ?? 0) - (b?.x ?? 0), (a?.z ?? 0) - (b?.z ?? 0))).toBeGreaterThan(0.3);
   });
 
   it('orders the tower by the server position and interpolates gaps', () => {

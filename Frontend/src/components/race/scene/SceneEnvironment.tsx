@@ -7,9 +7,9 @@ import { createGrassTexture } from './scene-textures';
 
 const SKY = '#0e1418';
 const GROUND_SIZE = 3000;
-// One texture repeat per ~20 world units keeps the mowing stripes readable.
-const GRASS_REPEAT = GROUND_SIZE / 20;
-export const GRASS_TINT = '#8fae84';
+// One texture repeat per ~45 world units: broad, soft mowing stripes.
+const GRASS_REPEAT = GROUND_SIZE / 45;
+const GRASS_TINT = '#8fae84';
 
 /** Evening-race lighting, sky and the grass the circuit sits in. */
 export function SceneEnvironment({ centerline }: { centerline: Centerline }): JSX.Element {

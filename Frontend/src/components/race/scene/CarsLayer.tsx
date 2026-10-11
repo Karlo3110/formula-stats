@@ -3,6 +3,7 @@ import { Html } from '@react-three/drei';
 import { useFrame, type ThreeEvent } from '@react-three/fiber';
 import * as THREE from 'three';
 
+import { carScale } from '@/lib/race/car-dimensions';
 import { CarStatus, type RaceSource } from '@/lib/race/types';
 import { useRaceStore } from '@/stores/use-race-store';
 
@@ -13,8 +14,6 @@ interface CarsLayerProps {
   trackWidth: number;
 }
 
-// A car is ~0.4 track widths long; 0.1 track widths per model unit is true scale.
-const CAR_SCALE_PER_TRACK_WIDTH = 0.1;
 const CAR_LIFT = 0.01;
 // Heading eases so the polyline's segment-to-segment kinks never show.
 const HEADING_EASE = 0.35;
@@ -36,7 +35,7 @@ export function CarsLayer({ source, trackWidth }: CarsLayerProps): JSX.Element {
   const groups = useRef<Array<THREE.Group | null>>([]);
   const selectedDriverId = useRaceStore((state) => state.selectedDriverId);
   const selectDriver = useRaceStore((state) => state.selectDriver);
-  const scale = trackWidth * CAR_SCALE_PER_TRACK_WIDTH;
+  const scale = carScale(trackWidth);
 
   useFrame(() => {
     source.drivers.forEach((driver, index) => {

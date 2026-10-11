@@ -1,5 +1,6 @@
 import type { ReplayDriver, ReplaySession } from '@/lib/validation/f1-schemas';
 
+import { carFootprint } from './car-dimensions';
 import type { Centerline } from './centerline';
 import { clampClock } from './playback';
 import {
@@ -11,11 +12,13 @@ import {
   sampleCursor,
   type SampleCursor,
 } from './replay-sampling';
-import type { DriverPose, DriverStanding, RaceSource, RaceTiming, StandingDriver } from './types';
+import { RoadLayout, type LayoutEntry } from './road-layout';
+import { CarStatus, type DriverPose, type DriverStanding, type RaceSource, type RaceTiming, type StandingDriver } from './types';
 
 const FALLBACK_COLORS = ['#3671c6', '#e8002d', '#ff8000', '#27a8d2', '#229971'];
 
 interface ReplayCar {
+  index: number;
   driver: StandingDriver;
   columns: ReplayDriver;
 }
@@ -34,32 +37,42 @@ function toStandingDriver(columns: ReplayDriver, index: number): StandingDriver 
  * Plays a whole session from official telemetry on one shared clock. Cars are
  * placed by their distance along the circuit centre-line plus a lateral
  * offset, both map-matched on the server against the same centre-line the
- * scene draws, so they always drive on the road.
+ * scene draws, so they always drive on the road. Cars fighting side by side
+ * are spaced apart so they never drive through each other.
  */
 export class ReplaySource implements RaceSource {
   readonly drivers: StandingDriver[];
   private readonly cars: ReplayCar[];
   private readonly byId: Map<string, ReplayCar>;
   private readonly sampleCount: number;
+  private readonly layout: RoadLayout;
   private elapsed = 0;
 
   constructor(
     private readonly session: ReplaySession,
     private readonly centerline: Centerline,
   ) {
-    this.cars = session.drivers.map((columns, index) => ({ driver: toStandingDriver(columns, index), columns }));
+    this.cars = session.drivers.map((columns, index) => ({ index, driver: toStandingDriver(columns, index), columns }));
     this.drivers = this.cars.map((car) => car.driver);
     this.byId = new Map(this.cars.map((car) => [car.driver.id, car]));
     const lengths = session.drivers.map((d) => d.progress.length);
     this.sampleCount = lengths.length > 0 ? Math.min(...lengths) : 0;
+    this.layout = new RoadLayout({
+      car: carFootprint(session.trackWidth),
+      halfWidth: session.trackWidth / 2,
+      lapLength: centerline.length,
+    });
+    this.layout.update(this.layoutEntries(), null);
   }
 
   tick(dt: number): void {
     this.elapsed = clampClock(this.elapsed + dt, this.session.durationSeconds);
+    this.layout.update(this.layoutEntries(), dt);
   }
 
   seek(seconds: number): void {
     this.elapsed = clampClock(seconds, this.session.durationSeconds);
+    this.layout.update(this.layoutEntries(), null);
   }
 
   pose(driverId: string): DriverPose | null {
@@ -68,7 +81,7 @@ export class ReplaySource implements RaceSource {
     const cursor = this.cursor();
     const { columns } = car;
     const distance = this.centerline.fromProgress(lerpAt(columns.progress, cursor));
-    const placement = this.centerline.place(distance, lerpAt(columns.lateral, cursor));
+    const placement = this.centerline.place(distance, this.layout.lateral(car.index));
     return {
       x: placement.x,
       y: placement.y,
@@ -118,6 +131,15 @@ export class ReplaySource implements RaceSource {
     const leader = this.cars.find((car) => car.columns.position[index] === 1) ?? this.cars[0];
     const completed = leader ? lapSummary(leader.columns.laps, this.elapsed).completed : 0;
     return currentLap(completed, this.session.totalLaps);
+  }
+
+  private layoutEntries(): LayoutEntry[] {
+    const cursor = this.cursor();
+    return this.cars.map(({ columns }) => ({
+      distance: this.centerline.fromProgress(lerpAt(columns.progress, cursor)),
+      lateral: lerpAt(columns.lateral, cursor),
+      isRunning: carStatusOf(columns.status[cursor.index]) === CarStatus.Running,
+    }));
   }
 
   private cursor(): SampleCursor {
