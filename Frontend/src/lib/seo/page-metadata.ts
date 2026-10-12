@@ -2,6 +2,15 @@ import type { Metadata } from 'next';
 
 const SITE_NAME = 'Formula Stats';
 
+// The site-wide social card (app/opengraph-image.tsx). A page that sets its own
+// openGraph replaces the inherited one, so the image is attached explicitly.
+const SOCIAL_IMAGE = {
+  url: '/opengraph-image',
+  width: 1200,
+  height: 630,
+  alt: 'Formula Stats — F1 telemetry, standings & 3D race replays',
+} as const;
+
 interface PageMetadataInput {
   /** Short page title; the root layout template appends "· Formula Stats". */
   title: string;
@@ -31,11 +40,13 @@ export function buildPageMetadata({
       title: socialTitle,
       description,
       url: path,
+      images: [SOCIAL_IMAGE],
     },
     twitter: {
       card: 'summary_large_image',
       title: socialTitle,
       description,
+      images: [SOCIAL_IMAGE.url],
     },
   };
 }
