@@ -3,6 +3,7 @@ import type { JSX, ReactNode } from 'react';
 import { Bebas_Neue, Inter, JetBrains_Mono } from 'next/font/google';
 
 import { AdSenseScript } from '@/components/ads/AdSenseScript';
+import { GoogleAnalytics } from '@/components/analytics/GoogleAnalytics';
 import { CookieConsent } from '@/components/ads/CookieConsent';
 import { StructuredData } from '@/components/seo/StructuredData';
 import { AuthInitializer } from '@/providers/auth-initializer';
@@ -100,6 +101,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         <StructuredData />
         <AdSenseScript />
+        <GoogleAnalytics />
         <QueryProvider>
           <AuthInitializer>{children}</AuthInitializer>
         </QueryProvider>

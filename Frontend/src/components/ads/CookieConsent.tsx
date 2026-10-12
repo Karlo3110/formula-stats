@@ -4,10 +4,7 @@ import Link from 'next/link';
 import { useEffect, useState, type JSX } from 'react';
 
 import { Button } from '@/components/ui/Button';
-
-const CONSENT_STORAGE_KEY = 'fs-cookie-consent';
-
-type ConsentChoice = 'accepted' | 'declined';
+import { CONSENT_STORAGE_KEY, applyAnalyticsConsent, type ConsentChoice } from '@/lib/analytics/consent';
 
 /**
  * Lightweight cookie/consent notice shown on first visit. It records the
@@ -35,6 +32,7 @@ export function CookieConsent(): JSX.Element | null {
     } catch {
       // Ignore storage failures — the notice simply reappears next visit.
     }
+    applyAnalyticsConsent(choice);
     setIsVisible(false);
   }
 

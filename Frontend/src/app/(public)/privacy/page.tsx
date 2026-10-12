@@ -58,6 +58,25 @@ export default function PrivacyPage(): JSX.Element {
       </section>
 
       <section>
+        <h2>Analytics</h2>
+        <p>
+          We use Google Analytics to understand which pages are visited and how
+          the site performs. Analytics cookies are only set after you accept
+          the cookie notice; until then Google Analytics runs without cookies
+          and receives no identifiers from us. You can also opt out entirely
+          with the{' '}
+          <a
+            href="https://tools.google.com/dlpage/gaoptout"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Google Analytics opt-out add-on
+          </a>
+          .
+        </p>
+      </section>
+
+      <section>
         <h2>Advertising and third-party cookies</h2>
         <p>
           We use Google AdSense to display advertisements. Third-party vendors,

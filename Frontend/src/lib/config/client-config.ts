@@ -24,6 +24,12 @@ const ClientEnvSchema = z.object({
     emptyToUndefined,
     z.string().min(1).optional(),
   ),
+  // Optional: Google Analytics 4 measurement id, e.g. "G-ABC123XYZ". Analytics
+  // loads only where it is set (production).
+  NEXT_PUBLIC_GA_MEASUREMENT_ID: z.preprocess(
+    emptyToUndefined,
+    z.string().regex(/^G-[A-Z0-9]+$/, 'must look like G-XXXXXXX').optional(),
+  ),
 });
 
 // Reference each var by its full name so Next.js can statically inline it.
@@ -31,6 +37,7 @@ const parsed = ClientEnvSchema.safeParse({
   NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
   NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
   NEXT_PUBLIC_ADSENSE_CLIENT: process.env.NEXT_PUBLIC_ADSENSE_CLIENT,
+  NEXT_PUBLIC_GA_MEASUREMENT_ID: process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID,
 });
 
 if (!parsed.success) {
@@ -48,4 +55,5 @@ export const clientConfig = {
   adsenseClient,
   // The bare publisher id ("pub-…", no "ca-" prefix) required by ads.txt.
   adsensePublisherId: adsenseClient ? adsenseClient.replace(/^ca-/, '') : null,
+  gaMeasurementId: parsed.data.NEXT_PUBLIC_GA_MEASUREMENT_ID ?? null,
 } as const;
