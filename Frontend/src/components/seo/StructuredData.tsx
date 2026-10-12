@@ -24,6 +24,12 @@ export function StructuredData(): JSX.Element {
         name: SITE_NAME,
         url: siteUrl,
         description: SITE_DESCRIPTION,
+        logo: {
+          '@type': 'ImageObject',
+          url: `${siteUrl}/icons/icon-512.png`,
+          width: 512,
+          height: 512,
+        },
       },
       {
         '@type': 'WebSite',

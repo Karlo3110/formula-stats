@@ -1,12 +1,21 @@
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { ImageResponse } from 'next/og';
 
 // Static Open Graph / Twitter card image, generated at build time and reused
-// across every route. Self-contained (no asset files) so social previews look
-// professional out of the box.
+// across every route. The brand mark is the same SVG as the favicon.
 export const alt =
   'Formula Stats — F1 telemetry, standings & 3D race replays';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
+
+const MARK_SIZE = 96;
+const TAGLINE = 'Follow every Grand Prix and explore driver and team standings.';
+
+function brandMarkDataUri(): string {
+  const svg = readFileSync(join(process.cwd(), 'src/app/icon.svg'), 'utf8');
+  return `data:image/svg+xml;base64,${Buffer.from(svg).toString('base64')}`;
+}
 
 export default function OpengraphImage(): ImageResponse {
   return new ImageResponse(
@@ -25,19 +34,19 @@ export default function OpengraphImage(): ImageResponse {
           fontFamily: 'sans-serif',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-          <div
-            style={{ width: 12, height: 56, borderRadius: 999, background: '#2f7bf6' }}
-          />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 28 }}>
+          <img src={brandMarkDataUri()} width={MARK_SIZE} height={MARK_SIZE} alt="" />
           <div
             style={{
-              fontSize: 30,
-              letterSpacing: 8,
+              display: 'flex',
+              fontSize: 40,
+              fontWeight: 800,
+              letterSpacing: 6,
               textTransform: 'uppercase',
-              color: '#9fb4c8',
+              color: '#f3f6fb',
             }}
           >
-            Formula Stats
+            Formula<span style={{ color: '#3b7cf5', marginLeft: 14 }}>Stats</span>
           </div>
         </div>
 
@@ -53,10 +62,7 @@ export default function OpengraphImage(): ImageResponse {
           F1 telemetry, standings & 3D race replays
         </div>
 
-        <div style={{ marginTop: 28, fontSize: 30, color: '#9fb4c8', maxWidth: 880 }}>
-          Follow every Grand Prix, explore driver and constructor standings, and
-          learn how the sport works.
-        </div>
+        <div style={{ marginTop: 28, fontSize: 30, color: '#9fb4c8' }}>{TAGLINE}</div>
       </div>
     ),
     size,

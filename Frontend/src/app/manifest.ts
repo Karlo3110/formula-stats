@@ -12,15 +12,14 @@ export default function manifest(): MetadataRoute.Manifest {
       'Formula 1 telemetry, championship standings, driver stats, and 3D race replays. Learn the sport and follow every Grand Prix.',
     start_url: '/',
     display: 'standalone',
-    background_color: '#0a0e0f',
-    theme_color: '#0a0e0f',
+    background_color: '#0d121c',
+    theme_color: '#0d121c',
     categories: ['sports', 'education', 'entertainment'],
     icons: [
-      {
-        src: '/favicon.ico',
-        sizes: 'any',
-        type: 'image/x-icon',
-      },
+      { src: '/icon.svg', sizes: 'any', type: 'image/svg+xml' },
+      { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
+      { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' },
+      { src: '/icons/icon-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
     ],
   };
 }
