@@ -2,15 +2,13 @@ import { Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Redis } from 'ioredis';
 
+import { decodeCacheValue, encodeCacheValue } from './cache-codec';
 import { CacheService } from './cache.service';
 
 const SCAN_BATCH_SIZE = 200;
 
 @Injectable()
-export class RedisCacheService
-  extends CacheService
-  implements OnModuleDestroy
-{
+export class RedisCacheService extends CacheService implements OnModuleDestroy {
   private readonly logger = new Logger(RedisCacheService.name);
   private readonly client: Redis;
 
@@ -26,15 +24,16 @@ export class RedisCacheService
   }
 
   async get<T>(key: string): Promise<T | null> {
-    const raw = await this.client.get(key);
+    const raw = await this.client.getBuffer(key);
     if (!raw) {
       return null;
     }
-    return JSON.parse(raw) as T;
+    return decodeCacheValue<T>(raw);
   }
 
   async set<T>(key: string, value: T, ttlSeconds: number): Promise<void> {
-    await this.client.set(key, JSON.stringify(value), 'EX', ttlSeconds);
+    const encoded = await encodeCacheValue(value);
+    await this.client.set(key, encoded, 'EX', ttlSeconds);
   }
 
   async delete(key: string): Promise<void> {
