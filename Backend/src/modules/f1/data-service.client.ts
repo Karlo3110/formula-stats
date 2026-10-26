@@ -24,6 +24,7 @@ import {
   type TrackMapPayload,
   type WeekendSchedulePayload,
 } from './f1.schemas';
+import { fetchWithWakeRetry } from './fetch-with-wake-retry';
 
 const INTERNAL_KEY_HEADER = 'X-Internal-Key';
 
@@ -112,7 +113,7 @@ export class DataServiceClient {
     const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
     try {
-      const response = await fetch(`${baseUrl}${path}`, {
+      const response = await fetchWithWakeRetry(`${baseUrl}${path}`, {
         headers: this.buildHeaders(),
         signal: controller.signal,
       });
