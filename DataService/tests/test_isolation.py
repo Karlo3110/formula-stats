@@ -3,7 +3,7 @@ import os
 import pytest
 
 from app.fastf1_client import SessionDataUnavailableError
-from app.isolation import run_isolated
+from app.isolation import run_isolated, run_isolated_json
 from tests import isolation_jobs
 
 
@@ -17,3 +17,12 @@ class TestRunIsolated:
     def test_reraises_typed_errors_so_routers_can_map_them(self) -> None:
         with pytest.raises(SessionDataUnavailableError, match="not published"):
             run_isolated(isolation_jobs.unavailable, "not published")
+
+
+class TestRunIsolatedJson:
+    def test_returns_the_model_encoded_as_json(self) -> None:
+        assert run_isolated_json(isolation_jobs.health, "ok") == b'{"status":"ok"}'
+
+    def test_reraises_typed_errors_so_routers_can_map_them(self) -> None:
+        with pytest.raises(SessionDataUnavailableError, match="not published"):
+            run_isolated_json(isolation_jobs.unavailable, "not published")

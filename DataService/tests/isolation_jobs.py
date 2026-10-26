@@ -3,6 +3,7 @@
 import os
 
 from app.fastf1_client import SessionDataUnavailableError
+from app.models import HealthStatus
 
 
 def process_id() -> int:
@@ -15,3 +16,7 @@ def add(a: int, b: int) -> int:
 
 def unavailable(message: str) -> None:
     raise SessionDataUnavailableError(message)
+
+
+def health(status: str) -> HealthStatus:
+    return HealthStatus(status=status)

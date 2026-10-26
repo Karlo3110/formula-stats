@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import Response
 
 from app.fastf1_client import (
     SessionDataUnavailableError,
@@ -9,7 +10,7 @@ from app.fastf1_client import (
     get_standings,
     get_track_map,
 )
-from app.isolation import run_isolated
+from app.isolation import run_isolated, run_isolated_json
 from app.models import (
     ReplaySession,
     SeasonDrivers,
@@ -24,6 +25,7 @@ from app.security import require_internal_key
 
 # Every handler runs its FastF1 work in a short-lived child process (see
 # app.isolation) so a session load never leaves the server holding its memory.
+# Handlers return the JSON the child encoded; response_model documents its shape.
 router = APIRouter(
     prefix="/api/v1",
     tags=["f1"],
@@ -37,35 +39,35 @@ def list_events(season: int) -> SeasonSchedule:
 
 
 @router.get("/seasons/{season}/schedule", response_model=WeekendSchedule)
-def schedule(season: int) -> WeekendSchedule:
-    return run_isolated(get_schedule, season)
+def schedule(season: int) -> Response:
+    return _json(run_isolated_json(get_schedule, season))
 
 
 @router.get("/seasons/{season}/standings", response_model=SeasonStandings)
-def standings(season: int) -> SeasonStandings:
-    return run_isolated(get_standings, season)
+def standings(season: int) -> Response:
+    return _json(run_isolated_json(get_standings, season))
 
 
 @router.get("/seasons/{season}/drivers", response_model=SeasonDrivers)
-def season_drivers(season: int) -> SeasonDrivers:
-    return run_isolated(get_season_drivers, season)
+def season_drivers(season: int) -> Response:
+    return _json(run_isolated_json(get_season_drivers, season))
 
 
 @router.get(
     "/seasons/{season}/rounds/{round_number}/sessions/{session}/results",
     response_model=SessionResults,
 )
-def session_results(season: int, round_number: int, session: str) -> SessionResults:
-    return run_isolated(get_session_results, season, round_number, session)
+def session_results(season: int, round_number: int, session: str) -> Response:
+    return _json(run_isolated_json(get_session_results, season, round_number, session))
 
 
 @router.get(
     "/seasons/{season}/rounds/{round_number}/sessions/{session}/track-map",
     response_model=TrackMap,
 )
-def track_map(season: int, round_number: int, session: str) -> TrackMap:
+def track_map(season: int, round_number: int, session: str) -> Response:
     try:
-        return run_isolated(get_track_map, season, round_number, session)
+        return _json(run_isolated_json(get_track_map, season, round_number, session))
     except SessionDataUnavailableError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
 
@@ -74,8 +76,12 @@ def track_map(season: int, round_number: int, session: str) -> TrackMap:
     "/seasons/{season}/rounds/{round_number}/sessions/{session}/replay",
     response_model=ReplaySession,
 )
-def replay(season: int, round_number: int, session: str) -> ReplaySession:
+def replay(season: int, round_number: int, session: str) -> Response:
     try:
-        return run_isolated(get_replay, season, round_number, session)
+        return _json(run_isolated_json(get_replay, season, round_number, session))
     except SessionDataUnavailableError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+
+def _json(body: bytes) -> Response:
+    return Response(content=body, media_type="application/json")

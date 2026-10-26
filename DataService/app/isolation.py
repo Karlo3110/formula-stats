@@ -5,6 +5,10 @@ freed memory back to the OS), so a long-lived server sits near 1 GB for good
 once it has built a single replay. Each job instead gets a freshly spawned
 process that exits when the job is done, returning all of that memory. The
 server process itself never imports FastF1 and stays small while idle.
+
+Large results (a whole-session replay is millions of numbers) are serialized
+to JSON inside the child too: unpickling them into Python objects in the
+server, then encoding them again, would leave the server holding that heap.
 """
 
 import multiprocessing
@@ -12,6 +16,8 @@ import threading
 from collections.abc import Callable
 from concurrent.futures import ProcessPoolExecutor
 from typing import ParamSpec, TypeVar
+
+from pydantic import BaseModel
 
 P = ParamSpec("P")
 R = TypeVar("R")
@@ -28,3 +34,12 @@ def run_isolated(job: Callable[P, R], *args: P.args, **kwargs: P.kwargs) -> R:
     """Run `job` in its own process and return its result (or re-raise its error)."""
     with _job_slots, ProcessPoolExecutor(max_workers=1, mp_context=_spawn) as pool:
         return pool.submit(job, *args, **kwargs).result()
+
+
+def _dump_json(job: Callable[P, BaseModel], *args: P.args, **kwargs: P.kwargs) -> bytes:
+    return job(*args, **kwargs).model_dump_json().encode()
+
+
+def run_isolated_json(job: Callable[P, BaseModel], *args: P.args, **kwargs: P.kwargs) -> bytes:
+    """Run `job` in its own process and return its result already encoded as JSON."""
+    return run_isolated(_dump_json, job, *args, **kwargs)
