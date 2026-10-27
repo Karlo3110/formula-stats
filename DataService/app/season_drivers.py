@@ -6,6 +6,7 @@ earlier races if the newest one has not been published yet.
 """
 
 import logging
+from collections.abc import Iterable
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
@@ -48,20 +49,41 @@ def _finished_rounds_newest_first(season: int) -> list[int]:
     return sorted(finished, reverse=True)
 
 
-def get_season_drivers(season: int) -> SeasonDrivers:
-    ensure_cache()
+def _has_headshots(candidate: SeasonDrivers) -> bool:
+    return any(driver.headshot_url for driver in candidate.drivers)
+
+
+def pick_driver_list(candidates: Iterable[SeasonDrivers]) -> SeasonDrivers | None:
+    """The newest driver list that carries headshots, else the newest one at all.
+
+    A race whose live-timing driver list could not be loaded still has Ergast
+    results, but without headshots or team colours; an older race may have them.
+    Candidates are consumed lazily, so loading stops at the first complete list.
+    """
+    fallback: SeasonDrivers | None = None
+    for candidate in candidates:
+        if _has_headshots(candidate):
+            return candidate
+        fallback = fallback or candidate
+    return fallback
+
+
+def _load_race_drivers(season: int, round_number: int) -> SeasonDrivers | None:
     import fastf1
 
-    for round_number in _finished_rounds_newest_first(season)[:MAX_RACES_TRIED]:
-        try:
-            loaded = fastf1.get_session(season, round_number, RACE_SESSION_NAME)
-            loaded.load(laps=False, telemetry=False, weather=False, messages=False)
-            drivers = map_driver_profiles(row for _, row in loaded.results.iterrows())
-        except Exception:
-            # Best effort: an unpublished race falls through to the previous one.
-            logger.warning("Driver list unavailable for %s round %s", season, round_number, exc_info=True)
-            continue
-        if drivers:
-            return SeasonDrivers(season=season, round_number=round_number, drivers=drivers)
+    try:
+        loaded = fastf1.get_session(season, round_number, RACE_SESSION_NAME)
+        loaded.load(laps=False, telemetry=False, weather=False, messages=False)
+        drivers = map_driver_profiles(row for _, row in loaded.results.iterrows())
+    except Exception:
+        # Best effort: an unpublished race falls through to the previous one.
+        logger.warning("Driver list unavailable for %s round %s", season, round_number, exc_info=True)
+        return None
+    return SeasonDrivers(season=season, round_number=round_number, drivers=drivers) if drivers else None
 
-    return SeasonDrivers(season=season, round_number=None, drivers=[])
+
+def get_season_drivers(season: int) -> SeasonDrivers:
+    ensure_cache()
+    rounds = _finished_rounds_newest_first(season)[:MAX_RACES_TRIED]
+    candidates = (loaded for number in rounds if (loaded := _load_race_drivers(season, number)))
+    return pick_driver_list(candidates) or SeasonDrivers(season=season, round_number=None, drivers=[])

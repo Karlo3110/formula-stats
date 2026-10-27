@@ -1,3 +1,5 @@
+import logging
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
@@ -7,6 +9,13 @@ from app.models import HealthStatus
 from app.routers import f1
 
 settings = get_settings()
+logger = logging.getLogger(__name__)
+
+if not settings.has_f1_account:
+    logger.warning(
+        "F1_USERNAME and F1_PASSWORD are not set. F1 live timing requires a signed-in "
+        "F1 TV account, so driver headshots and uncached session replays are unavailable."
+    )
 
 app = FastAPI(title="Formula Stats Data Service", version="1.0.0")
 

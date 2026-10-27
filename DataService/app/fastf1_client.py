@@ -12,6 +12,7 @@ import os
 from typing import TYPE_CHECKING
 
 from app.config import get_settings
+from app.f1_account import provide_f1_account
 from app.models import (
     ConstructorStandingRow,
     DriverStandingRow,
@@ -39,7 +40,9 @@ def ensure_cache() -> None:
         return
     import fastf1
 
-    cache_dir = get_settings().fastf1_cache_dir
+    settings = get_settings()
+    provide_f1_account(settings)
+    cache_dir = settings.fastf1_cache_dir
     os.makedirs(cache_dir, exist_ok=True)
     fastf1.Cache.enable_cache(cache_dir)
     _cache_enabled = True
